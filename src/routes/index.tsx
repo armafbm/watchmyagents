@@ -1,26 +1,50 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Nav } from "@/components/site/Nav";
+import { Hero } from "@/components/site/Hero";
+import { Problem } from "@/components/site/Problem";
+import { Plugins } from "@/components/site/Plugins";
+import { Loop } from "@/components/site/Loop";
+import { Dashboard } from "@/components/site/Dashboard";
+import { UseCases } from "@/components/site/UseCases";
+import { Privacy } from "@/components/site/Privacy";
+import { CTA, Footer } from "@/components/site/CTA";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "WatchMyAgents — Cybersecurity for AI Agents" },
+      {
+        name: "description",
+        content:
+          "Detect abnormal behavior, prevent compromise and enforce adaptive per-agent security policies for AI agents in production.",
+      },
+      { property: "og:title", content: "WatchMyAgents — Cybersecurity for AI Agents" },
+      {
+        property: "og:description",
+        content:
+          "Watch observes. Shield enforces. A live feedback loop that hardens every AI agent in production.",
+      },
+      { property: "og:type", content: "website" },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen">
+      <Nav />
+      <main>
+        <Hero />
+        <Problem />
+        <Plugins />
+        <Loop />
+        <Dashboard />
+        <UseCases />
+        <Privacy />
+        <CTA />
+      </main>
+      <Footer />
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
