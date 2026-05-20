@@ -4,8 +4,9 @@ export function Nav() {
   const links = [
     { href: "#problem", label: "Threats" },
     { href: "#watch", label: "Watch" },
+    { href: "#guardian", label: "Guardian AI" },
     { href: "#shield", label: "Shield" },
-    { href: "#loop", label: "Feedback Loop" },
+    { href: "#loop", label: "Loop" },
     { href: "#dashboard", label: "Dashboard" },
   ];
   return (
