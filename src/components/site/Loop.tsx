@@ -1,4 +1,4 @@
-import { Eye, ShieldCheck, ArrowRight } from "lucide-react";
+import { Eye, ShieldCheck, BrainCircuit, ArrowRight } from "lucide-react";
 
 export function Loop() {
   return (
@@ -11,34 +11,34 @@ export function Loop() {
             Security that <span className="text-gradient">learns</span>, agent by agent.
           </h2>
           <p className="text-muted-foreground text-lg">
-            Watch observes in production. Shield evolves its rules. Each agent ends up with an
-            individualized, continuously-tuned protection profile.
+            Watch observes in production. Guardian AI thinks, scores and suggests.
+            Shield enforces. Watch measures the effect — and the loop tunes itself.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-6">
+        <div className="grid lg:grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-6">
           <LoopNode
             color="primary"
             Icon={Eye}
-            label="Watch"
+            label="Layer 01 · Watch"
             title="Observe"
-            items={["Logs", "Model calls", "Tool calls", "Sensitive actions"]}
+            items={["Model & tool calls", "Data access & exports", "Sensitive actions", "Security signals"]}
           />
           <Arrow />
           <LoopNode
             color="accent"
-            Icon={ArrowRight}
-            label="Suggest"
-            title="Detect & propose"
-            items={["Anomalies", "Bad practices", "Suggested rules", "Simulations"]}
+            Icon={BrainCircuit}
+            label="Layer 02 · Guardian AI"
+            title="Think & suggest"
+            items={["Correlation & scoring", "Hygiene & risk reports", "Rule suggestions", "Impact simulation"]}
           />
           <Arrow />
           <LoopNode
             color="primary"
             Icon={ShieldCheck}
-            label="Shield"
+            label="Layer 03 · Shield"
             title="Enforce"
-            items={["Adaptive policy", "Per-agent scope", "Human approval", "Audit + rollback"]}
+            items={["Per-agent policy", "Draft → Approved → Enforced", "Human-in-the-loop", "Audit & rollback"]}
           />
         </div>
 
@@ -46,7 +46,7 @@ export function Loop() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-sm">
             <span className="h-2 w-2 rounded-full bg-success animate-blink" />
             <span className="text-muted-foreground font-mono text-xs uppercase tracking-widest">
-              loop.run() → risk decreases over time
+              loop.run() → collective intelligence, risk decreases over time
             </span>
           </div>
         </div>
