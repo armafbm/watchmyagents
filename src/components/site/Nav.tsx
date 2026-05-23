@@ -3,6 +3,7 @@ import logo from "@/assets/wma-logo.png";
 export function Nav() {
   const links = [
     { href: "#problem", label: "Threats" },
+    { href: "#install", label: "Install" },
     { href: "#watch", label: "Watch" },
     { href: "#guardian", label: "Guardian AI" },
     { href: "#shield", label: "Shield" },
