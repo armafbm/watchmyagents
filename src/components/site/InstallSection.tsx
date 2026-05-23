@@ -148,11 +148,13 @@ export function InstallSection() {
   const renderLineContent = (line: Line, index: number) => {
     const isTypingLine = index === cursorLine && !isComplete && isPlaying;
     const visibleChars = isTypingLine ? charIndex : line.text.length;
-    const visibleText = line.text.slice(1, visibleChars);
+    const visibleText = line.text.slice(0, visibleChars);
 
     return (
       <span>
-        {line.type === "command" && "$ "}
+        {line.type === "command" && (
+          <span className="text-primary mr-2">$</span>
+        )}
         {visibleText}
         {isTypingLine && (
           <span
