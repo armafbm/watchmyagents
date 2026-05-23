@@ -67,7 +67,7 @@ export function Nav() {
             href="/auth/signup"
             className="text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
           >
-            Request Access
+            Sign up
           </a>
         </div>
       </nav>
