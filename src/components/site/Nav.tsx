@@ -56,12 +56,20 @@ export function Nav() {
             </a>
           </li>
         </ul>
-        <a
-          href="#cta"
-          className="text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
-        >
-          Request Access
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="/auth/signin"
+            className="hidden sm:inline text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Sign in
+          </a>
+          <a
+            href="/auth/signup"
+            className="text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+          >
+            Request Access
+          </a>
+        </div>
       </nav>
     </header>
   );
