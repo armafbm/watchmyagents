@@ -1,15 +1,22 @@
 import logo from "@/assets/wma-logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 export function Nav() {
-  const links = [
+  const whatIsItLinks = [
     { href: "#problem", label: "Threats" },
-    { href: "#install", label: "Install" },
     { href: "#watch", label: "Watch" },
     { href: "#guardian", label: "Guardian AI" },
     { href: "#shield", label: "Shield" },
     { href: "#loop", label: "Loop" },
     { href: "#dashboard", label: "Dashboard" },
   ];
+
   return (
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/50">
       <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -20,11 +27,34 @@ export function Nav() {
           </span>
         </a>
         <ul className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
-          {links.map((l) => (
-            <li key={l.href}>
-              <a href={l.href} className="hover:text-primary transition-colors">{l.label}</a>
-            </li>
-          ))}
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer outline-none">
+                What is it?
+                <ChevronDown className="w-3.5 h-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="bg-popover/95 backdrop-blur-xl border-border/50"
+              >
+                {whatIsItLinks.map((l) => (
+                  <DropdownMenuItem key={l.href} asChild>
+                    <a
+                      href={l.href}
+                      className="hover:text-primary cursor-pointer"
+                    >
+                      {l.label}
+                    </a>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+          <li>
+            <a href="#install" className="hover:text-primary transition-colors">
+              Install
+            </a>
+          </li>
         </ul>
         <a
           href="#cta"
