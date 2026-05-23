@@ -14,7 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedDashboardWatchRouteImport } from './routes/_authenticated/dashboard.watch'
 import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_authenticated/dashboard.shield'
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
@@ -44,39 +44,39 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   path: '/auth/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardWatchRoute =
   AuthenticatedDashboardWatchRouteImport.update({
-    id: '/watch',
-    path: '/watch',
-    getParentRoute: () => AuthenticatedDashboardRoute,
+    id: '/dashboard/watch',
+    path: '/dashboard/watch',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedDashboardShieldRoute =
   AuthenticatedDashboardShieldRouteImport.update({
-    id: '/shield',
-    path: '/shield',
-    getParentRoute: () => AuthenticatedDashboardRoute,
+    id: '/dashboard/shield',
+    path: '/dashboard/shield',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedDashboardReportsRoute =
   AuthenticatedDashboardReportsRouteImport.update({
-    id: '/reports',
-    path: '/reports',
-    getParentRoute: () => AuthenticatedDashboardRoute,
+    id: '/dashboard/reports',
+    path: '/dashboard/reports',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedDashboardGuardianRoute =
   AuthenticatedDashboardGuardianRouteImport.update({
-    id: '/guardian',
-    path: '/guardian',
-    getParentRoute: () => AuthenticatedDashboardRoute,
+    id: '/dashboard/guardian',
+    path: '/dashboard/guardian',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -84,10 +84,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -95,12 +95,12 @@ export interface FileRoutesByTo {
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -108,12 +108,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/_authenticated/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/_authenticated/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/auth/reset-password'
     | '/auth/signin'
     | '/auth/signup'
@@ -121,10 +121,10 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
     | '/auth/reset-password'
     | '/auth/signin'
     | '/auth/signup'
@@ -132,11 +132,11 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/_authenticated/dashboard'
     | '/auth/reset-password'
     | '/auth/signin'
     | '/auth/signup'
@@ -144,6 +144,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/reports'
     | '/_authenticated/dashboard/shield'
     | '/_authenticated/dashboard/watch'
+    | '/_authenticated/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -191,70 +192,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
       path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard/watch': {
       id: '/_authenticated/dashboard/watch'
-      path: '/watch'
+      path: '/dashboard/watch'
       fullPath: '/dashboard/watch'
       preLoaderRoute: typeof AuthenticatedDashboardWatchRouteImport
-      parentRoute: typeof AuthenticatedDashboardRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard/shield': {
       id: '/_authenticated/dashboard/shield'
-      path: '/shield'
+      path: '/dashboard/shield'
       fullPath: '/dashboard/shield'
       preLoaderRoute: typeof AuthenticatedDashboardShieldRouteImport
-      parentRoute: typeof AuthenticatedDashboardRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard/reports': {
       id: '/_authenticated/dashboard/reports'
-      path: '/reports'
+      path: '/dashboard/reports'
       fullPath: '/dashboard/reports'
       preLoaderRoute: typeof AuthenticatedDashboardReportsRouteImport
-      parentRoute: typeof AuthenticatedDashboardRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard/guardian': {
       id: '/_authenticated/dashboard/guardian'
-      path: '/guardian'
+      path: '/dashboard/guardian'
       fullPath: '/dashboard/guardian'
       preLoaderRoute: typeof AuthenticatedDashboardGuardianRouteImport
-      parentRoute: typeof AuthenticatedDashboardRoute
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
-interface AuthenticatedDashboardRouteChildren {
+interface AuthenticatedRouteChildren {
   AuthenticatedDashboardGuardianRoute: typeof AuthenticatedDashboardGuardianRoute
   AuthenticatedDashboardReportsRoute: typeof AuthenticatedDashboardReportsRoute
   AuthenticatedDashboardShieldRoute: typeof AuthenticatedDashboardShieldRoute
   AuthenticatedDashboardWatchRoute: typeof AuthenticatedDashboardWatchRoute
-}
-
-const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
-  {
-    AuthenticatedDashboardGuardianRoute: AuthenticatedDashboardGuardianRoute,
-    AuthenticatedDashboardReportsRoute: AuthenticatedDashboardReportsRoute,
-    AuthenticatedDashboardShieldRoute: AuthenticatedDashboardShieldRoute,
-    AuthenticatedDashboardWatchRoute: AuthenticatedDashboardWatchRoute,
-  }
-
-const AuthenticatedDashboardRouteWithChildren =
-  AuthenticatedDashboardRoute._addFileChildren(
-    AuthenticatedDashboardRouteChildren,
-  )
-
-interface AuthenticatedRouteChildren {
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+  AuthenticatedDashboardGuardianRoute: AuthenticatedDashboardGuardianRoute,
+  AuthenticatedDashboardReportsRoute: AuthenticatedDashboardReportsRoute,
+  AuthenticatedDashboardShieldRoute: AuthenticatedDashboardShieldRoute,
+  AuthenticatedDashboardWatchRoute: AuthenticatedDashboardWatchRoute,
+  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

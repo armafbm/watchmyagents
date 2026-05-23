@@ -15,7 +15,7 @@ import mascot from "@/assets/wma-mascot.png";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Panel, PageHeader, Stat, SevBadge } from "@/components/dashboard/primitives";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
     meta: [
       { title: "Command Center — WatchMyAgents" },
