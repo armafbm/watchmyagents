@@ -20,7 +20,7 @@ export function Logo3D({ className = "" }: { className?: string }) {
           alt="WatchMyAgents guardian mascot"
           loading="lazy"
           decoding="async"
-          className="w-[78%] h-[78%] object-contain drop-shadow-[0_20px_40px_rgba(80,140,255,0.35)] animate-float-slow"
+          className="w-[78%] h-[78%] object-contain drop-shadow-[0_20px_40px_rgba(80,140,255,0.35)] animate-float"
         />
       </div>
     </div>
