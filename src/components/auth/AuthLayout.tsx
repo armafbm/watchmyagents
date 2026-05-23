@@ -14,21 +14,20 @@ export function AuthLayout({
   footer?: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Ambient grid bg */}
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       <div
-        className="fixed inset-0 -z-10 opacity-[0.04] pointer-events-none"
+        className="absolute inset-0 -z-10 opacity-[0.05] pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)",
+            "linear-gradient(to right, oklch(0.97 0.01 240) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.97 0.01 240) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />
       <div
-        className="fixed inset-0 -z-10 pointer-events-none"
+        className="absolute inset-0 -z-10 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 50% 0%, hsl(var(--primary) / 0.12), transparent 70%)",
+            "radial-gradient(ellipse 60% 50% at 50% 0%, oklch(0.78 0.18 220 / 0.15), transparent 70%)",
         }}
       />
 
