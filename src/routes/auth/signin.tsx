@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -34,7 +34,6 @@ export const Route = createFileRoute("/auth/signin")({
 });
 
 function SigninPage() {
-  const navigate = useNavigate();
   const search = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
