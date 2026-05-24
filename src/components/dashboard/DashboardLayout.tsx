@@ -13,6 +13,8 @@ import {
   ChevronDown,
   ChevronRight,
   LogOut,
+  Swords,
+  KeyRound,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -28,13 +30,15 @@ type NavItem = {
 };
 
 const commandChildren: NavItem[] = [
-  { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
+  { to: "/dashboard/reports", label: "Central Intelligence", icon: FileText },
+  { to: "#", label: "API Keys & Integrations", icon: KeyRound, soon: true },
+  { to: "#", label: "Compliance & Conformity", icon: ScrollText, soon: true },
   { to: "#", label: "Threat Intel", icon: Radar, soon: true },
-  { to: "#", label: "Compliance", icon: ScrollText, soon: true },
 ];
 const operations: NavItem[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: Eye },
-  { to: "/dashboard/shield", label: "Shield · Defense", icon: Shield, badge: 1 },
+  { to: "/dashboard/shield", label: "Shield · Policies", icon: Shield, badge: 1 },
+  { to: "/dashboard/legions", label: "Legions · Fleets", icon: Swords },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: Brain },
 ];
 
