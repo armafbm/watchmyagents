@@ -59,18 +59,21 @@ function SigninPage() {
 
   const handleGoogle = async () => {
     setOauthLoading(true);
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth/callback`,
-    });
-    if (res.error) {
+    try {
+      const result = await openGooglePopup();
+      if (result === "success") {
+        // Session was written to localStorage inside the popup.
+        // Make sure the browser client picks it up before navigating.
+        await supabase.auth.getSession();
+        toast.success("Welcome back");
+        navigate({ href: "/dashboard", replace: true });
+      }
+      // "closed" without success → user dismissed the popup, do nothing.
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+    } finally {
       setOauthLoading(false);
-      toast.error("Google sign-in failed");
-      return;
     }
-    if (!res.redirected) {
-      navigate({ href: search.redirect, replace: true });
-    }
-    // If redirected, browser is navigating to Google — nothing more to do.
   };
 
   return (
