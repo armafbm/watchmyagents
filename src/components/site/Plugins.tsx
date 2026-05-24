@@ -1,5 +1,6 @@
-import { Eye, ShieldCheck, BrainCircuit, Radar, Bell, FileBarChart, Lock, Workflow, Ban, GitBranch, Sparkles, LineChart } from "lucide-react";
+import { Radar, Bell, FileBarChart, Lock, Workflow, Ban, GitBranch, Sparkles, LineChart } from "lucide-react";
 import knightWatch from "@/assets/wma-knight-watch.png";
+import { LayerIcon } from "@/components/site/LayerIcons";
 
 export function Plugins() {
   return (
@@ -29,8 +30,8 @@ export function Plugins() {
             <div className="absolute inset-0 grid-bg opacity-20" />
             <div className="relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-12 w-12 rounded-lg bg-primary/15 flex items-center justify-center glow-cyan">
-                  <Eye className="h-6 w-6 text-primary" />
+                <div className="h-14 w-14 rounded-lg bg-primary/15 flex items-center justify-center glow-cyan p-1.5">
+                  <LayerIcon layer="watch" className="h-10 w-10" alt="Watch" />
                 </div>
                 <div>
                   <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Layer 01</div>
@@ -69,8 +70,8 @@ export function Plugins() {
             <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
             <div className="relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-12 w-12 rounded-lg bg-accent/20 flex items-center justify-center glow-violet">
-                  <BrainCircuit className="h-6 w-6 text-accent-foreground" />
+                <div className="h-14 w-14 rounded-lg bg-accent/20 flex items-center justify-center glow-violet p-1.5">
+                  <LayerIcon layer="guardian" className="h-10 w-10" alt="Guardian AI" />
                 </div>
                 <div>
                   <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Layer 02 · Brain</div>
@@ -108,8 +109,8 @@ export function Plugins() {
             <div className="absolute inset-0 grid-bg opacity-20" />
             <div className="relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-12 w-12 rounded-lg bg-primary/15 flex items-center justify-center glow-cyan">
-                  <ShieldCheck className="h-6 w-6 text-primary" />
+                <div className="h-14 w-14 rounded-lg bg-primary/15 flex items-center justify-center glow-cyan p-1.5">
+                  <LayerIcon layer="shield" className="h-10 w-10" alt="Shield" />
                 </div>
                 <div>
                   <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Layer 03</div>

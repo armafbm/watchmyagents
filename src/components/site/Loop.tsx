@@ -1,5 +1,6 @@
-import { Eye, ShieldCheck, BrainCircuit, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import legions from "@/assets/wma-legions.png";
+import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
 export function Loop() {
   return (
