@@ -5,9 +5,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { Link } from "@tanstack/react-router";
+import { ChevronDown, Shield, User } from "lucide-react";
 
 export function Nav() {
+  const { user } = useAuth();
+
   const whatIsItLinks = [
     { href: "#problem", label: "Threats" },
     { href: "#watch", label: "Watch" },
@@ -62,18 +66,30 @@ export function Nav() {
           </li>
         </ul>
         <div className="flex items-center gap-3">
-          <a
-            href="/auth/signin"
-            className="hidden sm:inline text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Sign in
-          </a>
-          <a
-            href="/auth/signup"
-            className="text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
-          >
-            Sign up
-          </a>
+          {user ? (
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+            >
+              <Shield className="h-3.5 w-3.5" />
+              My Fortress
+            </Link>
+          ) : (
+            <>
+              <a
+                href="/auth/signin"
+                className="hidden sm:inline text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Sign in
+              </a>
+              <a
+                href="/auth/signup"
+                className="text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+              >
+                Sign up
+              </a>
+            </>
+          )}
         </div>
       </nav>
     </header>
