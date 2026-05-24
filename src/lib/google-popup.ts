@@ -1,52 +1,27 @@
-// Opens Google OAuth inside a centered popup window (same tab stays put).
-// Resolves once the popup writes the Supabase session to shared localStorage
-// and posts a success message back. Rejects on error or popup-blocked.
+// Full-page Google OAuth redirect (popup-free, no race conditions).
+// We persist the post-login destination in sessionStorage so /auth/callback
+// can route the user back where they came from after Google returns.
 
-export type GooglePopupResult = "success" | "closed";
+import { lovable } from "@/integrations/lovable/index";
 
-export function openGooglePopup(): Promise<GooglePopupResult> {
-  return new Promise((resolve, reject) => {
-    const w = 480;
-    const h = 680;
-    const left = Math.max(0, window.screenX + (window.outerWidth - w) / 2);
-    const top = Math.max(0, window.screenY + (window.outerHeight - h) / 2);
+export const AUTH_REDIRECT_KEY = "wma:postLoginRedirect";
 
-    const popup = window.open(
-      `${window.location.origin}/auth/google-popup`,
-      "wma-google-auth",
-      `width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`,
-    );
+export async function startGoogleSignIn(postLoginRedirect: string = "/dashboard") {
+  try {
+    sessionStorage.setItem(AUTH_REDIRECT_KEY, postLoginRedirect);
+  } catch {
+    // ignore — non-blocking
+  }
 
-    if (!popup) {
-      reject(new Error("Popup blocked. Please allow popups for this site."));
-      return;
-    }
-
-    const cleanup = () => {
-      window.removeEventListener("message", onMessage);
-      clearInterval(closedPoll);
-    };
-
-    const onMessage = (ev: MessageEvent) => {
-      if (ev.origin !== window.location.origin) return;
-      const data = ev.data as { type?: string; message?: string } | undefined;
-      if (!data?.type) return;
-      if (data.type === "WMA_AUTH_SUCCESS") {
-        cleanup();
-        resolve("success");
-      } else if (data.type === "WMA_AUTH_ERROR") {
-        cleanup();
-        reject(new Error(data.message ?? "Google sign-in failed"));
-      }
-    };
-
-    const closedPoll = setInterval(() => {
-      if (popup.closed) {
-        cleanup();
-        resolve("closed");
-      }
-    }, 400);
-
-    window.addEventListener("message", onMessage);
+  const result = await lovable.auth.signInWithOAuth("google", {
+    redirect_uri: `${window.location.origin}/auth/callback`,
   });
+
+  if (result.error) {
+    throw new Error(result.error.message ?? "Google sign-in failed");
+  }
+  // If `redirected` the browser is already navigating away — nothing else to do.
+  // Otherwise (rare: tokens returned inline) the callback page will pick up
+  // the session via onAuthStateChange.
+  return result;
 }

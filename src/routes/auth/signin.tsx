@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getSafeAuthRedirect } from "@/lib/auth-redirect";
-import { openGooglePopup } from "@/lib/google-popup";
+import { startGoogleSignIn } from "@/lib/google-popup";
 
 export const Route = createFileRoute("/auth/signin")({
   validateSearch: (search) => ({
@@ -34,7 +34,6 @@ export const Route = createFileRoute("/auth/signin")({
 });
 
 function SigninPage() {
-  const navigate = useNavigate();
   const search = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,32 +46,30 @@ function SigninPage() {
     e.preventDefault();
     if (!email || !password) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
+    // Make sure the session is fully hydrated before navigating, otherwise
+    // the protected route guard can race and bounce us back to /auth/signin.
+    if (!data.session) {
+      await supabase.auth.getSession();
+    }
     toast.success("Welcome back");
-    navigate({ href: search.redirect, replace: true });
+    // Hard navigation guarantees the auth context + router reset cleanly.
+    window.location.assign(search.redirect || "/dashboard");
   };
 
   const handleGoogle = async () => {
     setOauthLoading(true);
     try {
-      const result = await openGooglePopup();
-      if (result === "success") {
-        // Session was written to localStorage inside the popup.
-        // Make sure the browser client picks it up before navigating.
-        await supabase.auth.getSession();
-        toast.success("Welcome back");
-        navigate({ href: "/dashboard", replace: true });
-      }
-      // "closed" without success → user dismissed the popup, do nothing.
+      await startGoogleSignIn(search.redirect || "/dashboard");
+      // The browser is now navigating away to Google — keep the spinner on.
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
-    } finally {
       setOauthLoading(false);
+      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
     }
   };
 
