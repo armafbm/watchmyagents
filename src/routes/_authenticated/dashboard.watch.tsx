@@ -21,6 +21,7 @@ function WatchPage() {
     <DashboardLayout breadcrumb="Watch · Monitoring">
       <PageHeader
         kicker="Watch"
+        layer="watch"
         title="Telemetry for every agent action."
         subtitle="Traces, tool calls, prompts and outputs — captured, indexed, and scanned in realtime."
       />

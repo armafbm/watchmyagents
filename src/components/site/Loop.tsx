@@ -1,5 +1,6 @@
-import { Eye, ShieldCheck, BrainCircuit, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import legions from "@/assets/wma-legions.png";
+import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
 export function Loop() {
   return (
@@ -29,7 +30,7 @@ export function Loop() {
         <div className="grid lg:grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-6">
           <LoopNode
             color="primary"
-            Icon={Eye}
+            layer="watch"
             label="Layer 01 · Watch"
             title="Observe"
             items={["Model & tool calls", "Data access & exports", "Sensitive actions", "Security signals"]}
@@ -37,7 +38,7 @@ export function Loop() {
           <Arrow />
           <LoopNode
             color="accent"
-            Icon={BrainCircuit}
+            layer="guardian"
             label="Layer 02 · Guardian AI"
             title="Think & suggest"
             items={["Correlation & scoring", "Hygiene & risk reports", "Rule suggestions", "Impact simulation"]}
@@ -45,7 +46,7 @@ export function Loop() {
           <Arrow />
           <LoopNode
             color="primary"
-            Icon={ShieldCheck}
+            layer="shield"
             label="Layer 03 · Shield"
             title="Enforce"
             items={["Per-agent policy", "Draft → Approved → Enforced", "Human-in-the-loop", "Audit & rollback"]}
@@ -74,15 +75,15 @@ function Arrow() {
 }
 
 function LoopNode({
-  Icon, label, title, items, color,
-}: { Icon: any; label: string; title: string; items: string[]; color: "primary" | "accent" }) {
+  layer, label, title, items, color,
+}: { layer: LayerKey; label: string; title: string; items: string[]; color: "primary" | "accent" }) {
   return (
     <div className="border-gradient rounded-2xl p-6 relative overflow-hidden scanline">
       <div className={`absolute -top-16 -right-16 h-40 w-40 rounded-full blur-2xl ${color === "primary" ? "bg-primary/20" : "bg-accent/20"}`} />
       <div className="relative">
         <div className="flex items-center gap-3 mb-4">
-          <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${color === "primary" ? "bg-primary/15 text-primary" : "bg-accent/20 text-accent-foreground"}`}>
-            <Icon className="h-5 w-5" />
+          <div className={`h-12 w-12 rounded-lg flex items-center justify-center p-1 ${color === "primary" ? "bg-primary/15" : "bg-accent/20"}`}>
+            <LayerIcon layer={layer} className="h-10 w-10" alt={title} />
           </div>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>

@@ -8,15 +8,16 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, Shield, User } from "lucide-react";
+import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
 export function Nav() {
   const { user } = useAuth();
 
-  const whatIsItLinks = [
+  const whatIsItLinks: { href: string; label: string; layer?: LayerKey }[] = [
     { href: "#problem", label: "Threats" },
-    { href: "#watch", label: "Watch" },
-    { href: "#guardian", label: "Guardian AI" },
-    { href: "#shield", label: "Shield" },
+    { href: "#watch", label: "Watch", layer: "watch" },
+    { href: "#guardian", label: "Guardian AI", layer: "guardian" },
+    { href: "#shield", label: "Shield", layer: "shield" },
     { href: "#loop", label: "Loop" },
     { href: "#dashboard", label: "Dashboard" },
   ];
@@ -45,8 +46,9 @@ export function Nav() {
                   <DropdownMenuItem key={l.href} asChild>
                     <a
                       href={l.href}
-                      className="hover:text-primary cursor-pointer"
+                      className="hover:text-primary cursor-pointer flex items-center gap-2"
                     >
+                      {l.layer && <LayerIcon layer={l.layer} className="h-5 w-5" />}
                       {l.label}
                     </a>
                   </DropdownMenuItem>

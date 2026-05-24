@@ -32,6 +32,7 @@ function GuardianPage() {
     <DashboardLayout breadcrumb="Guardian AI">
       <PageHeader
         kicker="Guardian"
+        layer="guardian"
         title="Your 24/7 security copilot."
         subtitle="Ask why a signal fired, request a policy draft, or simulate an enforcement before it ships."
       />

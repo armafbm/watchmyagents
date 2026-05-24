@@ -1,9 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Castle,
-  Eye,
   Shield,
-  Brain,
   FileText,
   Radar,
   ScrollText,
@@ -17,9 +15,16 @@ import {
   KeyRound,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import logo from "@/assets/wma-logo.png";
+import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
+
+const makeLayerIcon = (layer: LayerKey): ComponentType<{ className?: string }> =>
+  ({ className }) => <LayerIcon layer={layer} className={className ?? "h-4 w-4"} />;
+const WatchAvatar = makeLayerIcon("watch");
+const GuardianAvatar = makeLayerIcon("guardian");
+const ShieldAvatar = makeLayerIcon("shield");
 
 type NavItem = {
   to: string;
@@ -36,10 +41,10 @@ const commandChildren: NavItem[] = [
   { to: "#", label: "Threat Intel", icon: Radar, soon: true },
 ];
 const operations: NavItem[] = [
-  { to: "/dashboard/watch", label: "Watch · Monitoring", icon: Eye },
-  { to: "/dashboard/shield", label: "Shield · Policies", icon: Shield, badge: 1 },
+  { to: "/dashboard/watch", label: "Watch · Monitoring", icon: WatchAvatar as unknown as LucideIcon },
+  { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon, badge: 1 },
   { to: "/dashboard/legions", label: "Legions · Fleets", icon: Swords },
-  { to: "/dashboard/guardian", label: "Guardian AI", icon: Brain },
+  { to: "/dashboard/guardian", label: "Guardian AI", icon: GuardianAvatar as unknown as LucideIcon },
 ];
 
 
