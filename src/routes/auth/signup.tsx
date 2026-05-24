@@ -4,7 +4,7 @@ import { Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { openGooglePopup } from "@/lib/google-popup";
 import { AuthLayout, Divider, GoogleButton } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
