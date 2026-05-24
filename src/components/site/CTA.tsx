@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 export function CTA() {
   return (
     <section id="cta" className="relative py-28">
@@ -25,7 +27,7 @@ export function CTA() {
           </button>
         </form>
         <p className="text-xs text-muted-foreground mt-6 font-mono">
-          Or email <span className="text-primary">contact@watchmyagents.ai</span>
+          Or email <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">minedor@watchmyagents.com</a>
         </p>
       </div>
     </section>
@@ -40,9 +42,9 @@ export function Footer() {
           © {new Date().getFullYear()} WatchMyAgents · Cybersecurity for AI Agents
         </div>
         <div className="flex gap-6 font-mono text-xs uppercase tracking-widest">
-          <a href="#watch" className="hover:text-primary">Watch</a>
-          <a href="#shield" className="hover:text-primary">Shield</a>
-          <a href="#cta" className="hover:text-primary">Contact</a>
+          <Link to="/privacy" className="hover:text-primary">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-primary">Terms of Service</Link>
+          <a href="mailto:minedor@watchmyagents.com" className="hover:text-primary">Contact</a>
         </div>
       </div>
     </footer>
