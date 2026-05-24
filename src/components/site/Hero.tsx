@@ -1,4 +1,4 @@
-import { Logo3D } from "./Logo3D";
+import knight from "@/assets/wma-knight.png";
 
 export function Hero() {
   return (
