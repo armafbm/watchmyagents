@@ -76,7 +76,7 @@ export function DashboardLayout({
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
           <NavGroup label="Fortress" items={opsNav} current={path} />
           <NavGroup label="Operations" items={operations} current={path} />
-          <NavGroup label="Intelligence" items={intelligence} current={path} />
+          
         </nav>
 
         <div className="border-t border-border/40 p-4">
