@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const Route = createFileRoute("/auth/signin")({
+  validateSearch: (search) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : "/dashboard",
+  }),
+  beforeLoad: async ({ search }) => {
+    if (typeof window === "undefined") return;
+
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      throw redirect({ href: search.redirect, replace: true });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Sign in — WatchMyAgents" },
@@ -23,6 +34,7 @@ export const Route = createFileRoute("/auth/signin")({
 
 function SigninPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
@@ -41,7 +53,7 @@ function SigninPage() {
       return;
     }
     toast.success("Welcome back");
-    navigate({ to: "/dashboard" });
+    navigate({ href: search.redirect, replace: true });
   };
 
   const handleGoogle = async () => {
@@ -55,7 +67,7 @@ function SigninPage() {
       return;
     }
     if (!res.redirected) {
-      navigate({ to: "/dashboard" });
+      navigate({ href: search.redirect, replace: true });
     }
     // If redirected, browser is navigating to Google — nothing more to do.
   };
