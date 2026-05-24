@@ -91,6 +91,16 @@ export function FractalLoop() {
           </div>
         </div>
 
+        </div>
+
+        {/* Three layers detail */}
+        <div className="mb-20">
+          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
+            01b — The three layers in detail
+          </div>
+          <LayerCards />
+        </div>
+
         {/* Fractal levels */}
         <div className="mb-20">
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
