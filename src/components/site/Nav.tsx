@@ -51,6 +51,11 @@ export function Nav() {
             </DropdownMenu>
           </li>
           <li>
+            <a href="#fractal" className="hover:text-primary transition-colors">
+              Technology
+            </a>
+          </li>
+          <li>
             <a href="#install" className="hover:text-primary transition-colors">
               Install
             </a>
