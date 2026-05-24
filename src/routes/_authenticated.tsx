@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { getSafeAuthRedirect } from "@/lib/auth-redirect";
 
 const AUTH_RESTORE_ATTEMPTS = 12;
 const AUTH_RESTORE_DELAY_MS = 150;
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/_authenticated")({
     if (!user) {
       throw redirect({
         to: "/auth/signin",
-        search: { redirect: location.href },
+        search: { redirect: getSafeAuthRedirect(location.href) },
       });
     }
   },
