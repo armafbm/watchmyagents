@@ -48,15 +48,16 @@ export function FractalLoop() {
             runs at every hierarchical level — metrics flow up, policies flow down.
           </p>
         </div>
-
-
-
+        <div className="-mx-6 mb-20">
+          <Plugins />
+        </div>
 
         {/* Fractal levels */}
         <div className="mb-20">
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            01 — Four fractal levels
+            02 — Four fractal levels
           </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {levels.map((l) => (
               <div
