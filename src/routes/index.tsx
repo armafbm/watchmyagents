@@ -41,6 +41,7 @@ function Index() {
         <Problem />
         <FractalLoop />
         <InstallSection />
+        <Plugins />
         <Loop />
         <Dashboard />
         <UseCases />
