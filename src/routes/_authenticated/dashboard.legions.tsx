@@ -83,7 +83,7 @@ function LegionsPage() {
                   <td className="p-3 font-mono text-xs text-muted-foreground">{f.model}</td>
                   <td className="p-3 text-right font-mono">{f.tasks24h.toLocaleString()}</td>
                   <td className="p-3 text-right font-mono">{f.successRate}</td>
-                  <td className="p-3 text-center"><SevBadge level={f.status} /></td>
+                  <td className="p-3 text-center"><SevBadge sev={f.status} /></td>
                   <td className="p-3 text-right">
                     <button className="h-7 w-7 grid place-items-center rounded-md hover:bg-secondary/60 text-muted-foreground">
                       <MoreHorizontal className="h-4 w-4" />
