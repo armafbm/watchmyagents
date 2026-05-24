@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardWatchRouteImport } from './routes/_authenticated/dashboard.watch'
 import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_authenticated/dashboard.shield'
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
+import { Route as AuthenticatedDashboardLegionsRouteImport } from './routes/_authenticated/dashboard.legions'
 import { Route as AuthenticatedDashboardGuardianRouteImport } from './routes/_authenticated/dashboard.guardian'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -86,6 +87,12 @@ const AuthenticatedDashboardReportsRoute =
     path: '/reports',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardLegionsRoute =
+  AuthenticatedDashboardLegionsRouteImport.update({
+    id: '/legions',
+    path: '/legions',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardGuardianRoute =
   AuthenticatedDashboardGuardianRouteImport.update({
     id: '/guardian',
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
+  '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
@@ -115,6 +123,7 @@ export interface FileRoutesByTo {
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
+  '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
@@ -131,6 +140,7 @@ export interface FileRoutesById {
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
   '/_authenticated/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
+  '/_authenticated/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/_authenticated/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/_authenticated/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/auth/signin'
     | '/auth/signup'
     | '/dashboard/guardian'
+    | '/dashboard/legions'
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/auth/signin'
     | '/auth/signup'
     | '/dashboard/guardian'
+    | '/dashboard/legions'
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth/signin'
     | '/auth/signup'
     | '/_authenticated/dashboard/guardian'
+    | '/_authenticated/dashboard/legions'
     | '/_authenticated/dashboard/reports'
     | '/_authenticated/dashboard/shield'
     | '/_authenticated/dashboard/watch'
@@ -277,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/legions': {
+      id: '/_authenticated/dashboard/legions'
+      path: '/legions'
+      fullPath: '/dashboard/legions'
+      preLoaderRoute: typeof AuthenticatedDashboardLegionsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/guardian': {
       id: '/_authenticated/dashboard/guardian'
       path: '/guardian'
@@ -289,6 +309,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardGuardianRoute: typeof AuthenticatedDashboardGuardianRoute
+  AuthenticatedDashboardLegionsRoute: typeof AuthenticatedDashboardLegionsRoute
   AuthenticatedDashboardReportsRoute: typeof AuthenticatedDashboardReportsRoute
   AuthenticatedDashboardShieldRoute: typeof AuthenticatedDashboardShieldRoute
   AuthenticatedDashboardWatchRoute: typeof AuthenticatedDashboardWatchRoute
@@ -298,6 +319,7 @@ interface AuthenticatedDashboardRouteChildren {
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardGuardianRoute: AuthenticatedDashboardGuardianRoute,
+    AuthenticatedDashboardLegionsRoute: AuthenticatedDashboardLegionsRoute,
     AuthenticatedDashboardReportsRoute: AuthenticatedDashboardReportsRoute,
     AuthenticatedDashboardShieldRoute: AuthenticatedDashboardShieldRoute,
     AuthenticatedDashboardWatchRoute: AuthenticatedDashboardWatchRoute,
