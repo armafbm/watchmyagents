@@ -1,19 +1,5 @@
 import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
-import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
-type CycleStep = {
-  label: string;
-  desc: string;
-  layer?: LayerKey;
-  icon?: typeof RefreshCw;
-};
-
-const cycle: CycleStep[] = [
-  { layer: "watch", label: "Watch", desc: "Observes logs, traces, drift, token burn, latency." },
-  { layer: "guardian", label: "Guardian", desc: "Analyzes risk, reports findings, suggests policies." },
-  { layer: "shield", label: "Shield", desc: "Enforces rate limits, sandboxing, isolation, auto-remediation." },
-  { icon: RefreshCw, label: "Re-Watch", desc: "Measures policy efficacy and feeds Guardian back." },
-];
 
 const levels = [
   {
@@ -61,39 +47,13 @@ export function FractalLoop() {
           </p>
         </div>
 
-        {/* WGS Cycle */}
-        <div className="mb-20">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            01 — The WGS Cycle
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {cycle.map((s, i) => (
-              <div
-                key={s.label}
-                className="border-gradient rounded-xl p-6 relative overflow-hidden group hover:translate-y-[-4px] transition-transform"
-              >
-                <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl group-hover:bg-primary/20 transition" />
-                <div className="relative">
-                  <div className="font-mono text-xs text-muted-foreground mb-3">
-                    STEP 0{i + 1}
-                  </div>
-                  {s.layer ? (
-                    <LayerIcon layer={s.layer} className="h-10 w-10 mb-4" alt={s.label} />
-                  ) : s.icon ? (
-                    <s.icon className="h-7 w-7 text-primary mb-4" />
-                  ) : null}
-                  <h3 className="font-display text-lg font-bold mb-2">{s.label}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
+
 
         {/* Fractal levels */}
         <div className="mb-20">
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            02 — Four fractal levels
+            01 — Four fractal levels
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {levels.map((l) => (
@@ -118,7 +78,7 @@ export function FractalLoop() {
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <div>
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-              03 — Bidirectional data flow
+              02 — Bidirectional data flow
             </div>
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               Metrics flow up. Policies flow down.
