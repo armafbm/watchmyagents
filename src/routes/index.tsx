@@ -5,7 +5,7 @@ import { Problem } from "@/components/site/Problem";
 import { InstallSection } from "@/components/site/InstallSection";
 import { FractalLoop } from "@/components/site/FractalLoop";
 import { Plugins } from "@/components/site/Plugins";
-import { Loop } from "@/components/site/Loop";
+
 import { Dashboard } from "@/components/site/Dashboard";
 import { UseCases } from "@/components/site/UseCases";
 import { Privacy } from "@/components/site/Privacy";
@@ -42,7 +42,7 @@ function Index() {
         <FractalLoop />
         <InstallSection />
         <Plugins />
-        <Loop />
+        
         <Dashboard />
         <UseCases />
         <Privacy />

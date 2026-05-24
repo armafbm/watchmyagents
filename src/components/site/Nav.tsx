@@ -18,8 +18,7 @@ export function Nav() {
     { href: "#watch", label: "Watch", layer: "watch" },
     { href: "#guardian", label: "Guardian AI", layer: "guardian" },
     { href: "#shield", label: "Shield", layer: "shield" },
-    { href: "#loop", label: "Loop" },
-    { href: "#dashboard", label: "Dashboard" },
+    { href: "#dashboard", label: "Fortress" },
   ];
 
   return (
