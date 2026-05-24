@@ -1,11 +1,12 @@
 import { Eye, ShieldCheck, BrainCircuit, ArrowRight } from "lucide-react";
+import legions from "@/assets/wma-legions.png";
 
 export function Loop() {
   return (
     <section id="loop" className="relative py-28 overflow-hidden">
       <div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// The feedback loop</div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Security that <span className="text-gradient">learns</span>, agent by agent.
@@ -15,6 +16,15 @@ export function Loop() {
             Shield enforces. Watch measures the effect — and the loop tunes itself.
           </p>
         </div>
+
+        <div className="flex justify-center mb-12">
+          <img
+            src={legions}
+            alt="WatchMyAgents legions — Customer Services, HR, Marketing, Dev Team"
+            className="w-full max-w-2xl h-auto object-contain animate-float"
+          />
+        </div>
+
 
         <div className="grid lg:grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-6">
           <LoopNode
