@@ -1,5 +1,6 @@
 import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
+import { LayerCards } from "@/components/site/LayerCards";
 
 type CycleStep = {
   label: string;
@@ -88,6 +89,16 @@ export function FractalLoop() {
               </div>
             ))}
           </div>
+        </div>
+
+
+
+        {/* Three layers detail */}
+        <div className="mb-20">
+          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
+            01b — The three layers in detail
+          </div>
+          <LayerCards />
         </div>
 
         {/* Fractal levels */}
