@@ -314,7 +314,7 @@ export function InstallSection() {
                         line.type === "command"
                           ? BLUE_ACCENT
                           : line.type === "comment"
-                          ? "#5b7characters".slice(0, 7) || "#64748b"
+                          ? "#64748b"
                           : "#dbeafe",
                     }}
                   >
