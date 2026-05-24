@@ -52,12 +52,13 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="relative h-[28rem] lg:h-[34rem] flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-pulse-ring" />
+        <div className="relative h-[32rem] lg:h-[40rem] flex items-center justify-center">
+          <div className="absolute inset-8 rounded-full bg-primary/25 blur-3xl" />
+          <div className="absolute inset-16 rounded-full bg-accent/20 blur-2xl animate-pulse" />
           <img
             src={knight}
             alt="WatchMyAgents sentinel knight mascot"
-            className="relative h-full w-full object-contain animate-float drop-shadow-[0_0_40px_oklch(0.78_0.18_220/0.55)]"
+            className="relative h-full w-auto max-w-full object-contain animate-float drop-shadow-[0_0_60px_oklch(0.78_0.18_220/0.6)]"
           />
         </div>
       </div>
