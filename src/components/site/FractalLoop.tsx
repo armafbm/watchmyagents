@@ -55,17 +55,20 @@ export function FractalLoop() {
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Recursive <span className="text-gradient">Fractal Security Loop</span>™
           </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
+          <p className="text-muted-foreground text-lg leading-relaxed mb-3">
             A self-similar, recursive threat intelligence architecture. The same{" "}
             <span className="text-foreground font-semibold">Watch → Guardian → Shield</span> cycle
             runs at every hierarchical level — metrics flow up, policies flow down.
           </p>
+          <p className="font-mono text-xs uppercase tracking-widest text-primary/80">
+            Inspired by the ISO 27 001 norm
+          </p>
         </div>
 
-        {/* WGS Cycle - three layers */}
+        {/* WGS */}
         <div className="mb-20">
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            01 — The WGS Cycle
+            01 — WGS
           </div>
           <LayerCards />
         </div>

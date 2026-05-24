@@ -16,12 +16,15 @@ export function Hero() {
             Your <span className="text-gradient">AI agents</span>.<br />
             Under protection.
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mb-8">
+          <p className="text-lg text-muted-foreground max-w-xl mb-4">
             WatchMyAgents is a runtime security infrastructure for autonomous AI agents.
             Three layers — <span className="text-primary">Watch</span>,{" "}
             <span className="text-primary">Guardian AI</span> and{" "}
             <span className="text-primary">Shield</span> — connected by a live feedback loop
             that turns observability into adaptive enforcement, agent by agent.
+          </p>
+          <p className="text-lg font-display font-bold text-foreground mb-8">
+            Ready to protect your <span className="text-gradient">IT FORTRESS</span> ?
           </p>
           <div className="flex flex-wrap gap-4">
             <a
