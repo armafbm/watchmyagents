@@ -2,35 +2,44 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { getSafeAuthRedirect } from "@/lib/auth-redirect";
 
-const AUTH_RESTORE_ATTEMPTS = 12;
-const AUTH_RESTORE_DELAY_MS = 150;
+const RESTORE_ATTEMPTS = 20;
+const RESTORE_DELAY_MS = 100;
 
 function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((r) => setTimeout(r, ms));
 }
 
-async function getRestoredUser() {
-  for (let i = 0; i < AUTH_RESTORE_ATTEMPTS; i++) {
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      await wait(AUTH_RESTORE_DELAY_MS);
-      continue;
-    }
+function isSessionValid(session: { access_token: string; expires_at?: number } | null) {
+  if (!session?.access_token) return false;
+  if (!session.expires_at) return true;
+  // expires_at is unix seconds; add 30s buffer
+  return session.expires_at * 1000 > Date.now() + 30_000;
+}
 
-    const { data, error } = await supabase.auth.getUser();
-    if (!error && data.user) return data.user;
-    await wait(AUTH_RESTORE_DELAY_MS);
+async function hasPersistedSession() {
+  // First pass: check synchronously what we already have
+  const { data } = await supabase.auth.getSession();
+  if (isSessionValid(data.session)) return true;
+
+  // If storage isn't hydrated yet (first paint after OAuth), poll briefly
+  for (let i = 0; i < RESTORE_ATTEMPTS; i++) {
+    await wait(RESTORE_DELAY_MS);
+    const { data: again } = await supabase.auth.getSession();
+    if (isSessionValid(again.session)) return true;
   }
-
-  return null;
+  return false;
 }
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") return;
 
-    const user = await getRestoredUser();
-    if (!user) {
+    // Trust the locally persisted session — Supabase auto-refreshes the token
+    // in the background. We do NOT call getUser() here: that re-hits the
+    // network on every navigation and a single hiccup bounces the user back
+    // to /auth/signin. RLS on the server is the real backstop.
+    const ok = await hasPersistedSession();
+    if (!ok) {
       throw redirect({
         to: "/auth/signin",
         search: { redirect: getSafeAuthRedirect(location.href) },
