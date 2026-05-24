@@ -81,10 +81,10 @@ export function DashboardLayout({
         </Link>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
-          <NavGroup label="Fortress" items={opsNav} current={path} />
+          <CommandNav current={path} children={commandChildren} />
           <NavGroup label="Operations" items={operations} current={path} />
-          
         </nav>
+
 
         <div className="border-t border-border/40 p-4">
           <div className="rounded-lg border border-border/50 bg-card/40 p-3">
