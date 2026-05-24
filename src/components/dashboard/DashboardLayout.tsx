@@ -34,11 +34,6 @@ const operations: NavItem[] = [
   { to: "/dashboard/shield", label: "Shield · Defense", icon: Shield, badge: 1 },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: Brain },
 ];
-const intelligence: NavItem[] = [
-  { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
-  { to: "#", label: "Threat Intel", icon: Radar, soon: true },
-  { to: "#", label: "Compliance", icon: ScrollText, soon: true },
-];
 
 export function DashboardLayout({
   children,
