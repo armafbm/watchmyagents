@@ -1,4 +1,6 @@
 import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
+import { Plugins } from "@/components/site/Plugins";
+
 
 
 const levels = [
