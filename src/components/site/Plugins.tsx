@@ -23,7 +23,7 @@ export function Plugins() {
           </div>
         </div>
 
-        <LayerCards />
+        <LayerCards withIds={false} />
       </div>
     </section>
   );
