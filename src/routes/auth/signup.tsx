@@ -4,7 +4,7 @@ import { Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { openGooglePopup } from "@/lib/google-popup";
 import { AuthLayout, Divider, GoogleButton } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,16 +92,17 @@ function SignupPage() {
 
   const handleGoogle = async () => {
     setOauthLoading(true);
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth/callback`,
-    });
-    if (res.error) {
+    try {
+      const result = await openGooglePopup();
+      if (result === "success") {
+        await supabase.auth.getSession();
+        toast.success("Welcome to Fortress");
+        navigate({ to: "/dashboard" });
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Google sign-up failed");
+    } finally {
       setOauthLoading(false);
-      toast.error("Google sign-up failed");
-      return;
-    }
-    if (!res.redirected) {
-      navigate({ to: "/dashboard" });
     }
   };
 
