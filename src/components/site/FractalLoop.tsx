@@ -91,7 +91,7 @@ export function FractalLoop() {
           </div>
         </div>
 
-        </div>
+
 
         {/* Three layers detail */}
         <div className="mb-20">
