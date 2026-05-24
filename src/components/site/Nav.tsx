@@ -34,7 +34,7 @@ export function Nav() {
           <li>
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer outline-none">
-                What is it?
+                What the f*** ?
                 <ChevronDown className="w-3.5 h-3.5" />
               </DropdownMenuTrigger>
               <DropdownMenuContent
