@@ -1,11 +1,11 @@
 import { Radar, Bell, FileBarChart, Lock, Workflow, Ban, GitBranch, Sparkles, LineChart } from "lucide-react";
 import { LayerIcon } from "@/components/site/LayerIcons";
 
-export function LayerCards() {
+export function LayerCards({ withIds = true }: { withIds?: boolean } = {}) {
   return (
     <div className="grid lg:grid-cols-3 gap-6">
       {/* WATCH */}
-      <div id="watch" className="border-gradient rounded-2xl p-8 relative overflow-hidden">
+      <div id={withIds ? "watch" : undefined} className="border-gradient rounded-2xl p-8 relative overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-20" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-6">
