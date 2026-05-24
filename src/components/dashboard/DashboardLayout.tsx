@@ -4,14 +4,18 @@ import {
   Eye,
   Shield,
   Brain,
+  FileText,
+  Radar,
+  ScrollText,
   Search,
   Bell,
   Settings,
   ChevronDown,
+  ChevronRight,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import logo from "@/assets/wma-logo.png";
 
@@ -23,14 +27,17 @@ type NavItem = {
   soon?: boolean;
 };
 
-const opsNav: NavItem[] = [
-  { to: "/dashboard", label: "Command Center", icon: Castle },
+const commandChildren: NavItem[] = [
+  { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
+  { to: "#", label: "Threat Intel", icon: Radar, soon: true },
+  { to: "#", label: "Compliance", icon: ScrollText, soon: true },
 ];
 const operations: NavItem[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: Eye },
   { to: "/dashboard/shield", label: "Shield · Defense", icon: Shield, badge: 1 },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: Brain },
 ];
+
 
 export function DashboardLayout({
   children,
@@ -74,10 +81,10 @@ export function DashboardLayout({
         </Link>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
-          <NavGroup label="Fortress" items={opsNav} current={path} />
+          <CommandNav current={path} children={commandChildren} />
           <NavGroup label="Operations" items={operations} current={path} />
-          
         </nav>
+
 
         <div className="border-t border-border/40 p-4">
           <div className="rounded-lg border border-border/50 bg-card/40 p-3">
@@ -220,6 +227,88 @@ function NavGroup({
             </li>
           );
         })}
+      </ul>
+    </div>
+  );
+}
+
+function CommandNav({ current, children }: { current: string; children: NavItem[] }) {
+  const isCommandActive = current === "/dashboard";
+  const childActive = children.some((c) => !c.soon && current === c.to);
+  const [open, setOpen] = useState(isCommandActive || childActive);
+
+  useEffect(() => {
+    if (isCommandActive || childActive) setOpen(true);
+  }, [isCommandActive, childActive]);
+
+  return (
+    <div>
+      <div className="px-3 mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
+        Fortress
+      </div>
+      <ul className="space-y-1">
+        <li>
+          <div className="flex items-stretch gap-1">
+            <Link to="/dashboard" className="flex-1">
+              <span
+                className={`group relative flex items-center gap-3 px-3 py-2 rounded-md text-sm transition ${
+                  isCommandActive
+                    ? "bg-primary/10 text-foreground border border-primary/30"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/40 border border-transparent"
+                }`}
+              >
+                {isCommandActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r bg-primary" />
+                )}
+                <Castle className={`h-4 w-4 ${isCommandActive ? "text-primary" : ""}`} />
+                <span className="flex-1 truncate">Command Center</span>
+              </span>
+            </Link>
+            <button
+              onClick={() => setOpen((v) => !v)}
+              aria-label={open ? "Collapse" : "Expand"}
+              aria-expanded={open}
+              className="px-2 rounded-md border border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition"
+            >
+              {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+
+          <div
+            className={`grid transition-all duration-300 ease-out ${
+              open ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <ul className="overflow-hidden ml-3 pl-3 border-l border-border/40 space-y-1">
+              {children.map((item) => {
+                const active = !item.soon && current === item.to;
+                const Icon = item.icon;
+                const inner = (
+                  <span
+                    className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition ${
+                      active
+                        ? "bg-primary/10 text-foreground border border-primary/30"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/40 border border-transparent"
+                    } ${item.soon ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <Icon className={`h-3.5 w-3.5 ${active ? "text-primary" : ""}`} />
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {item.soon && (
+                      <span className="font-mono text-[9px] tracking-widest text-muted-foreground/60">
+                        SOON
+                      </span>
+                    )}
+                  </span>
+                );
+                return (
+                  <li key={item.label} className="pt-1 first:pt-1">
+                    {item.soon ? inner : <Link to={item.to}>{inner}</Link>}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </li>
       </ul>
     </div>
   );
