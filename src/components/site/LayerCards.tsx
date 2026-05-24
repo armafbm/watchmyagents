@@ -43,7 +43,7 @@ export function LayerCards({ withIds = true }: { withIds?: boolean } = {}) {
       </div>
 
       {/* GUARDIAN AI */}
-      <div id="guardian" className="border-gradient rounded-2xl p-8 relative overflow-hidden">
+      <div id={withIds ? "guardian" : undefined} className="border-gradient rounded-2xl p-8 relative overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-20" />
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
         <div className="relative">
