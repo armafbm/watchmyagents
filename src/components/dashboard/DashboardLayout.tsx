@@ -1,9 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Castle,
-  Eye,
   Shield,
-  Brain,
   FileText,
   Radar,
   ScrollText,
