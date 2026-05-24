@@ -62,41 +62,10 @@ export function FractalLoop() {
           </p>
         </div>
 
-        {/* WGS Cycle */}
+        {/* WGS Cycle - three layers */}
         <div className="mb-20">
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
             01 — The WGS Cycle
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {cycle.map((s, i) => (
-              <div
-                key={s.label}
-                className="border-gradient rounded-xl p-6 relative overflow-hidden group hover:translate-y-[-4px] transition-transform"
-              >
-                <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl group-hover:bg-primary/20 transition" />
-                <div className="relative">
-                  <div className="font-mono text-xs text-muted-foreground mb-3">
-                    STEP 0{i + 1}
-                  </div>
-                  {s.layer ? (
-                    <LayerIcon layer={s.layer} className="h-10 w-10 mb-4" alt={s.label} />
-                  ) : s.icon ? (
-                    <s.icon className="h-7 w-7 text-primary mb-4" />
-                  ) : null}
-                  <h3 className="font-display text-lg font-bold mb-2">{s.label}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-
-
-        {/* Three layers detail */}
-        <div className="mb-20">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            01b — The three layers in detail
           </div>
           <LayerCards />
         </div>
