@@ -4,14 +4,18 @@ import {
   Eye,
   Shield,
   Brain,
+  FileText,
+  Radar,
+  ScrollText,
   Search,
   Bell,
   Settings,
   ChevronDown,
+  ChevronRight,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import logo from "@/assets/wma-logo.png";
 
@@ -23,14 +27,17 @@ type NavItem = {
   soon?: boolean;
 };
 
-const opsNav: NavItem[] = [
-  { to: "/dashboard", label: "Command Center", icon: Castle },
+const commandChildren: NavItem[] = [
+  { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
+  { to: "#", label: "Threat Intel", icon: Radar, soon: true },
+  { to: "#", label: "Compliance", icon: ScrollText, soon: true },
 ];
 const operations: NavItem[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: Eye },
   { to: "/dashboard/shield", label: "Shield · Defense", icon: Shield, badge: 1 },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: Brain },
 ];
+
 
 export function DashboardLayout({
   children,
