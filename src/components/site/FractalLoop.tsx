@@ -77,7 +77,11 @@ export function FractalLoop() {
                   <div className="font-mono text-xs text-muted-foreground mb-3">
                     STEP 0{i + 1}
                   </div>
-                  <s.icon className="h-7 w-7 text-primary mb-4" />
+                  {s.layer ? (
+                    <LayerIcon layer={s.layer} className="h-10 w-10 mb-4" alt={s.label} />
+                  ) : s.icon ? (
+                    <s.icon className="h-7 w-7 text-primary mb-4" />
+                  ) : null}
                   <h3 className="font-display text-lg font-bold mb-2">{s.label}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
                 </div>
