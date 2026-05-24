@@ -82,7 +82,7 @@ export function LayerCards({ withIds = true }: { withIds?: boolean } = {}) {
       </div>
 
       {/* SHIELD */}
-      <div id="shield" className="border-gradient rounded-2xl p-8 relative overflow-hidden">
+      <div id={withIds ? "shield" : undefined} className="border-gradient rounded-2xl p-8 relative overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-20" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-6">
