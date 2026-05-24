@@ -53,7 +53,12 @@ export function Hero() {
         </div>
 
         <div className="relative h-[28rem] lg:h-[34rem] flex items-center justify-center">
-          <Logo3D className="w-full h-full" />
+          <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-pulse-ring" />
+          <img
+            src={knight}
+            alt="WatchMyAgents sentinel knight mascot"
+            className="relative h-full w-full object-contain animate-float drop-shadow-[0_0_40px_oklch(0.78_0.18_220/0.55)]"
+          />
         </div>
       </div>
     </section>
