@@ -20,6 +20,7 @@ function ShieldPage() {
     <DashboardLayout breadcrumb="Shield · Defense">
       <PageHeader
         kicker="Shield"
+        layer="shield"
         title="Enforce, simulate, roll back."
         subtitle="Every policy is auditable. Every change is linked to the Watch signal that triggered it."
         actions={

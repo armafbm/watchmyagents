@@ -1,29 +1,37 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
 export function PageHeader({
   kicker,
   title,
   subtitle,
   actions,
+  layer,
 }: {
   kicker: string;
   title: string;
   subtitle?: string;
   actions?: ReactNode;
+  layer?: LayerKey;
 }) {
   return (
     <div className="flex items-start justify-between gap-6 mb-8">
-      <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-2">
-          // {kicker}
-        </p>
-        <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-2 text-sm text-muted-foreground max-w-2xl">{subtitle}</p>
+      <div className="flex items-start gap-4">
+        {layer && (
+          <LayerIcon layer={layer} className="h-16 w-16 mt-1" alt={kicker} />
         )}
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-2">
+            // {kicker}
+          </p>
+          <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mt-2 text-sm text-muted-foreground max-w-2xl">{subtitle}</p>
+          )}
+        </div>
       </div>
       {actions}
     </div>
