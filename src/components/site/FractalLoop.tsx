@@ -53,7 +53,7 @@ export function FractalLoop() {
         {/* Fractal levels */}
         <div className="mb-20">
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            02 — Four fractal levels
+            01 — Four fractal levels
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {levels.map((l) => (
@@ -78,7 +78,7 @@ export function FractalLoop() {
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <div>
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-              03 — Bidirectional data flow
+              02 — Bidirectional data flow
             </div>
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               Metrics flow up. Policies flow down.
