@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getSafeAuthRedirect } from "@/lib/auth-redirect";
 
 export const Route = createFileRoute("/auth/signin")({
   validateSearch: (search) => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : "/dashboard",
+    redirect: getSafeAuthRedirect(search.redirect),
   }),
   beforeLoad: async ({ search }) => {
     if (typeof window === "undefined") return;
