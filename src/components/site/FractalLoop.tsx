@@ -1,9 +1,17 @@
-import { Eye, Brain, Shield, RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
+import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
+import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
-const cycle = [
-  { icon: Eye, label: "Watch", desc: "Observes logs, traces, drift, token burn, latency." },
-  { icon: Brain, label: "Guardian", desc: "Analyzes risk, reports findings, suggests policies." },
-  { icon: Shield, label: "Shield", desc: "Enforces rate limits, sandboxing, isolation, auto-remediation." },
+type CycleStep = {
+  label: string;
+  desc: string;
+  layer?: LayerKey;
+  icon?: typeof RefreshCw;
+};
+
+const cycle: CycleStep[] = [
+  { layer: "watch", label: "Watch", desc: "Observes logs, traces, drift, token burn, latency." },
+  { layer: "guardian", label: "Guardian", desc: "Analyzes risk, reports findings, suggests policies." },
+  { layer: "shield", label: "Shield", desc: "Enforces rate limits, sandboxing, isolation, auto-remediation." },
   { icon: RefreshCw, label: "Re-Watch", desc: "Measures policy efficacy and feeds Guardian back." },
 ];
 
@@ -69,7 +77,11 @@ export function FractalLoop() {
                   <div className="font-mono text-xs text-muted-foreground mb-3">
                     STEP 0{i + 1}
                   </div>
-                  <s.icon className="h-7 w-7 text-primary mb-4" />
+                  {s.layer ? (
+                    <LayerIcon layer={s.layer} className="h-10 w-10 mb-4" alt={s.label} />
+                  ) : s.icon ? (
+                    <s.icon className="h-7 w-7 text-primary mb-4" />
+                  ) : null}
                   <h3 className="font-display text-lg font-bold mb-2">{s.label}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
                 </div>
