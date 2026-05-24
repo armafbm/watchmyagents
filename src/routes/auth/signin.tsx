@@ -3,13 +3,13 @@ import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { AuthLayout, Divider, GoogleButton } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getSafeAuthRedirect } from "@/lib/auth-redirect";
+import { openGooglePopup } from "@/lib/google-popup";
 
 export const Route = createFileRoute("/auth/signin")({
   validateSearch: (search) => ({
