@@ -4,9 +4,6 @@ import {
   Eye,
   Shield,
   Brain,
-  FileText,
-  Radar,
-  ScrollText,
   Search,
   Bell,
   Settings,
@@ -33,11 +30,6 @@ const operations: NavItem[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: Eye },
   { to: "/dashboard/shield", label: "Shield · Defense", icon: Shield, badge: 1 },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: Brain },
-];
-const intelligence: NavItem[] = [
-  { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
-  { to: "#", label: "Threat Intel", icon: Radar, soon: true },
-  { to: "#", label: "Compliance", icon: ScrollText, soon: true },
 ];
 
 export function DashboardLayout({
@@ -84,7 +76,7 @@ export function DashboardLayout({
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
           <NavGroup label="Fortress" items={opsNav} current={path} />
           <NavGroup label="Operations" items={operations} current={path} />
-          <NavGroup label="Intelligence" items={intelligence} current={path} />
+          
         </nav>
 
         <div className="border-t border-border/40 p-4">

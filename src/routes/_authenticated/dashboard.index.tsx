@@ -5,7 +5,10 @@ import {
   Bot,
   Cpu,
   Eye,
+  FileText,
   GitPullRequest,
+  Radar,
+  ScrollText,
   Shield,
   X,
   Zap,
@@ -214,8 +217,103 @@ function CommandCenter() {
           </Link>
         </Panel>
       </div>
+
+      {/* Intelligence hub */}
+      <div className="mt-6">
+        <div className="flex items-end justify-between mb-3">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-primary">Intelligence</div>
+            <h3 className="font-display text-lg font-bold">Audit, intel & compliance</h3>
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground hidden sm:block">
+            command · briefing room
+          </span>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-4">
+          <IntelCard
+            to="/dashboard/reports"
+            icon={FileText}
+            label="Reports & Audit"
+            desc="Daily, weekly & incident exports. Audit-ready."
+            tag="LIVE"
+            tone="primary"
+          />
+          <IntelCard
+            icon={Radar}
+            label="Threat Intel"
+            desc="Live feeds, IOCs and adversary playbooks."
+            tag="SOON"
+            tone="muted"
+            soon
+          />
+          <IntelCard
+            icon={ScrollText}
+            label="Compliance"
+            desc="SOC2 · ISO27001 · EU AI Act mapping."
+            tag="SOON"
+            tone="muted"
+            soon
+          />
+        </div>
+      </div>
     </DashboardLayout>
   );
+}
+
+function IntelCard({
+  to,
+  icon: Icon,
+  label,
+  desc,
+  tag,
+  tone,
+  soon,
+}: {
+  to?: string;
+  icon: typeof Zap;
+  label: string;
+  desc: string;
+  tag: string;
+  tone: "primary" | "muted";
+  soon?: boolean;
+}) {
+  const inner = (
+    <div
+      className={`group relative h-full rounded-xl border bg-card/40 backdrop-blur p-4 transition ${
+        soon
+          ? "border-border/40 opacity-60 cursor-not-allowed"
+          : "border-border/60 hover:border-primary/60 hover:bg-card/70"
+      }`}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span
+          className="h-9 w-9 grid place-items-center rounded-md border"
+          style={{
+            borderColor: `color-mix(in oklab, var(--${tone === "primary" ? "primary" : "muted-foreground"}) 30%, transparent)`,
+            background: `color-mix(in oklab, var(--${tone === "primary" ? "primary" : "muted-foreground"}) 8%, transparent)`,
+            color: `var(--${tone === "primary" ? "primary" : "muted-foreground"})`,
+          }}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+        <span
+          className={`font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded ${
+            soon ? "text-muted-foreground/70" : "text-success border border-success/30 bg-success/10"
+          }`}
+        >
+          {tag}
+        </span>
+      </div>
+      <div className="font-display text-base font-bold">{label}</div>
+      <div className="text-xs text-muted-foreground mt-1">{desc}</div>
+      {!soon && (
+        <div className="mt-3 font-mono text-[10px] uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition">
+          open →
+        </div>
+      )}
+    </div>
+  );
+  return soon || !to ? inner : <Link to={to}>{inner}</Link>;
 }
 
 function Pill({
