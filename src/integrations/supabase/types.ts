@@ -14,10 +14,500 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          anthropic_agent_id: string
+          created_at: string
+          customer_id: string
+          display_name: string
+          id: string
+          last_seen_at: string | null
+          shield_mode_detected: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          anthropic_agent_id: string
+          created_at?: string
+          customer_id: string
+          display_name: string
+          id?: string
+          last_seen_at?: string | null
+          shield_mode_detected?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          anthropic_agent_id?: string
+          created_at?: string
+          customer_id?: string
+          display_name?: string
+          id?: string
+          last_seen_at?: string | null
+          shield_mode_detected?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      api_keys: {
+        Row: {
+          created_at: string
+          customer_id: string
+          hash: string
+          id: string
+          label: string
+          last_used_at: string | null
+          prefix: string
+          revoked_at: string | null
+          scopes: string[]
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          hash: string
+          id?: string
+          label: string
+          last_used_at?: string | null
+          prefix: string
+          revoked_at?: string | null
+          scopes?: string[]
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          hash?: string
+          id?: string
+          label?: string
+          last_used_at?: string | null
+          prefix?: string
+          revoked_at?: string | null
+          scopes?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          plan: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email: string
+          id: string
+          plan?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          id?: string
+          plan?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      decisions: {
+        Row: {
+          action_type: string | null
+          agent_id: string
+          customer_id: string
+          decided_at: string
+          decided_in_ms: number | null
+          decision: string
+          event_id_hash: string | null
+          id: string
+          input_hash: string | null
+          message: string | null
+          policy_id: string | null
+          session_hash: string | null
+          tool_name: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          agent_id: string
+          customer_id: string
+          decided_at?: string
+          decided_in_ms?: number | null
+          decision: string
+          event_id_hash?: string | null
+          id?: string
+          input_hash?: string | null
+          message?: string | null
+          policy_id?: string | null
+          session_hash?: string | null
+          tool_name?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          agent_id?: string
+          customer_id?: string
+          decided_at?: string
+          decided_in_ms?: number | null
+          decision?: string
+          event_id_hash?: string | null
+          id?: string
+          input_hash?: string | null
+          message?: string | null
+          policy_id?: string | null
+          session_hash?: string | null
+          tool_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decisions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decisions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "loop_overview_v"
+            referencedColumns: ["agent_id"]
+          },
+          {
+            foreignKeyName: "decisions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decisions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "decisions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policies: {
+        Row: {
+          action: string
+          agent_id: string | null
+          created_at: string
+          customer_id: string
+          enabled: boolean
+          id: string
+          match: Json
+          message: string | null
+          name: string
+          priority: number
+          rationale: string | null
+          rule_id: string
+          suggested_by_guardian: boolean
+          suggestion_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          agent_id?: string | null
+          created_at?: string
+          customer_id: string
+          enabled?: boolean
+          id?: string
+          match: Json
+          message?: string | null
+          name: string
+          priority?: number
+          rationale?: string | null
+          rule_id: string
+          suggested_by_guardian?: boolean
+          suggestion_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          agent_id?: string | null
+          created_at?: string
+          customer_id?: string
+          enabled?: boolean
+          id?: string
+          match?: Json
+          message?: string | null
+          name?: string
+          priority?: number
+          rationale?: string | null
+          rule_id?: string
+          suggested_by_guardian?: boolean
+          suggestion_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policies_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policies_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "loop_overview_v"
+            referencedColumns: ["agent_id"]
+          },
+          {
+            foreignKeyName: "policies_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policies_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      signals: {
+        Row: {
+          agent_id: string
+          customer_id: string
+          id: string
+          ingested_at: string
+          payload: Json
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          agent_id: string
+          customer_id: string
+          id?: string
+          ingested_at?: string
+          payload: Json
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          agent_id?: string
+          customer_id?: string
+          id?: string
+          ingested_at?: string
+          payload?: Json
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signals_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signals_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "loop_overview_v"
+            referencedColumns: ["agent_id"]
+          },
+          {
+            foreignKeyName: "signals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      suggestions: {
+        Row: {
+          agent_id: string
+          applied_policy_id: string | null
+          customer_id: string
+          generated_at: string
+          id: string
+          proposed_action: string
+          proposed_match: Json
+          proposed_message: string | null
+          rationale: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          agent_id: string
+          applied_policy_id?: string | null
+          customer_id: string
+          generated_at?: string
+          id?: string
+          proposed_action: string
+          proposed_match: Json
+          proposed_message?: string | null
+          rationale: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          agent_id?: string
+          applied_policy_id?: string | null
+          customer_id?: string
+          generated_at?: string
+          id?: string
+          proposed_action?: string
+          proposed_match?: Json
+          proposed_message?: string | null
+          rationale?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "loop_overview_v"
+            referencedColumns: ["agent_id"]
+          },
+          {
+            foreignKeyName: "suggestions_applied_policy_id_fkey"
+            columns: ["applied_policy_id"]
+            isOneToOne: false
+            referencedRelation: "policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "suggestions_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestions_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      dashboard_today_v: {
+        Row: {
+          actions_24h: number | null
+          agents_active: number | null
+          blocked_24h: number | null
+          customer_id: string | null
+          suggestions_pending: number | null
+          tokens_24h: number | null
+        }
+        Relationships: []
+      }
+      loop_overview_v: {
+        Row: {
+          agent_id: string | null
+          customer_id: string | null
+          decisions_7d: number | null
+          display_name: string | null
+          enforcements_7d: number | null
+          signals_7d: number | null
+          suggestions_7d: number | null
+          suggestions_accepted_7d: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
