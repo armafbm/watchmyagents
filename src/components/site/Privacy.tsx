@@ -2,7 +2,7 @@ import { Lock } from "lucide-react";
 
 export function Privacy() {
   return (
-    <section className="relative py-28">
+    <section className="relative py-14">
       <div className="max-w-5xl mx-auto px-6">
         <div className="border-gradient rounded-3xl p-10 md:p-14 relative overflow-hidden">
           <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />

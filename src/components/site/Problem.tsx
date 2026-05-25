@@ -9,7 +9,7 @@ const threats = [
 
 export function Problem() {
   return (
-    <section id="problem" className="relative py-28">
+    <section id="problem" className="relative py-14">
       <div className="max-w-7xl mx-auto px-6">
         <div className="max-w-3xl mb-16">
           <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// The problem</div>

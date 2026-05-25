@@ -187,7 +187,7 @@ export function InstallSection() {
   const ActiveIcon = activeExplanation.icon;
 
   return (
-    <section id="install" className="relative py-24">
+    <section id="install" className="relative py-14">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-14">
