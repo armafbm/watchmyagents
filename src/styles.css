@@ -153,3 +153,38 @@
   .animate-scan { animation: scan 4s linear infinite; }
   .animate-blink { animation: blink 1.4s ease-in-out infinite; }
 }
+
+/* Neon scrollbars — global */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: color-mix(in oklab, var(--background) 80%, transparent);
+    border-radius: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--primary), var(--success));
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    box-shadow:
+      0 0 6px color-mix(in oklab, var(--primary) 60%, transparent),
+      0 0 12px color-mix(in oklab, var(--success) 35%, transparent);
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--success), var(--primary));
+    background-clip: padding-box;
+    box-shadow:
+      0 0 10px color-mix(in oklab, var(--success) 75%, transparent),
+      0 0 18px color-mix(in oklab, var(--primary) 50%, transparent);
+  }
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
