@@ -13,6 +13,7 @@ import {
   LogOut,
   Swords,
   KeyRound,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
