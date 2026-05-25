@@ -100,6 +100,15 @@ export function DashboardLayout({
           <NavGroup label="Operations" items={operations} current={path} />
         </nav>
 
+        <div className="px-3 pb-3">
+          <Link
+            to="/"
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition"
+          >
+            <Home className="h-3.5 w-3.5" />
+            <span>Back to site</span>
+          </Link>
+        </div>
 
         <div className="border-t border-border/40 p-4">
           <FleetStatusCard />
