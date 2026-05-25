@@ -1,9 +1,18 @@
 import logo from "@/assets/wma-logo.png";
 import watchIcon from "@/assets/wma-icon-watch.png";
+import guardianIcon from "@/assets/wma-icon-guardian.png";
+import shieldIcon from "@/assets/wma-icon-shield.png";
 import fortressIcon from "@/assets/wma-fortress-castle-cutout.png";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
-import { Shield } from "lucide-react";
+import { Shield, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Nav() {
   const { user } = useAuth();
@@ -19,20 +28,49 @@ export function Nav() {
         </a>
         <ul className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
           <li>
-            <a href="#fractal" className="flex items-center gap-2 hover:text-primary transition-colors">
-              <img src={watchIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
-              WGS
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-primary transition-colors outline-none">
+                What the f*** ?
+                <ChevronDown className="h-3.5 w-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-48">
+                <DropdownMenuLabel>Threats</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <a href="#fractal" className="flex items-center gap-2 cursor-pointer">
+                    <img src={watchIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    Watch
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="#guardian" className="flex items-center gap-2 cursor-pointer">
+                    <img src={guardianIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    Guardian AI
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="#shield" className="flex items-center gap-2 cursor-pointer">
+                    <img src={shieldIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    Shield
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuLabel>Fortress</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <a href="#dashboard" className="flex items-center gap-2 cursor-pointer">
+                    <img src={fortressIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    Fortress
+                  </a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+          <li>
+            <a href="#fractal" className="hover:text-primary transition-colors">
+              Technology
             </a>
           </li>
           <li>
-            <a href="#guardian" className="hover:text-primary transition-colors">
-              Guardian AI
-            </a>
-          </li>
-          <li>
-            <a href="#dashboard" className="flex items-center gap-2 hover:text-primary transition-colors">
-              <img src={fortressIcon} alt="" className="h-6 w-6 object-contain icon-neon-glow" />
-              Fortress
+            <a href="#install" className="hover:text-primary transition-colors">
+              Install
             </a>
           </li>
           <li>
