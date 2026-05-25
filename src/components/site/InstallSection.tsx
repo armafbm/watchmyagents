@@ -257,6 +257,29 @@ export function InstallSection() {
                 <div>
                   <h3 className="text-2xl md:text-3xl font-bold mb-2">{activeExplanation.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{activeExplanation.desc}</p>
+
+                  {activeStep === 3 && (
+                    <ul className="mt-5 space-y-3">
+                      {[
+                        { n: 1, title: "Framework API key", desc: "The key your application / framework uses to connect to its main provider (Anthropic, OpenAI, …)." },
+                        { n: 2, title: "Watch My Agent API key", desc: "The key tied to your Watch My Agent account." },
+                        { n: 3, title: "Agent ID from your framework console", desc: "The unique identifier of the agent you created in the framework console." },
+                      ].map((item) => (
+                        <li key={item.n} className="flex gap-3">
+                          <div
+                            className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold"
+                            style={{ background: `${BLUE_ACCENT}20`, color: BLUE_ACCENT }}
+                          >
+                            {item.n}
+                          </div>
+                          <div className="text-sm">
+                            <div className="font-semibold">{item.title}</div>
+                            <div className="text-muted-foreground">{item.desc}</div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
 
