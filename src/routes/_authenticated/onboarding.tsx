@@ -183,7 +183,7 @@ wma-shield --agent-id ${agentRow?.anthropic_agent_id ?? "<agent-id>"}`;
                   {copied === "cmd" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                 </Button>
               </div>
-              <Button onClick={() => navigate({ to: "/today" })} className="w-full">
+              <Button onClick={() => navigate({ to: "/dashboard" })} className="w-full">
                 I've installed it — go to dashboard
               </Button>
             </div>
