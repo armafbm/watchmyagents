@@ -76,7 +76,7 @@ export function Plugins() {
                     key={c.title}
                     className="border border-border/60 rounded-xl p-5 bg-background/40 backdrop-blur-sm hover:border-primary/50 transition-colors"
                   >
-                    <c.icon className="h-5 w-5 text-primary mb-3" />
+                    <c.icon className="h-5 w-5 text-primary mb-3 icon-neon-glow" />
                     <h4 className="font-display font-bold mb-1.5">{c.title}</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
                   </div>

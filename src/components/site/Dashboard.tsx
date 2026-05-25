@@ -41,7 +41,7 @@ export function Dashboard() {
           <div className="border-gradient rounded-2xl p-6 lg:col-span-2 relative overflow-hidden">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-primary" />
+                <Activity className="h-4 w-4 text-primary icon-neon-glow" />
                 <h3 className="font-display font-bold">Live alerts & incidents</h3>
               </div>
               <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">realtime</span>
@@ -83,7 +83,7 @@ export function Dashboard() {
           {/* Suggestion card */}
           <div className="border-gradient rounded-2xl p-6 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-5">
-              <GitPullRequest className="h-4 w-4 text-primary" />
+              <GitPullRequest className="h-4 w-4 text-primary icon-neon-glow" />
               <h3 className="font-display font-bold">Policy suggestion</h3>
             </div>
             <div className="font-mono text-xs text-muted-foreground mb-2">watch → shield</div>
@@ -106,7 +106,7 @@ export function Dashboard() {
           {/* Hygiene */}
           <div className="border-gradient rounded-2xl p-6 lg:col-span-2 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-5">
-              <ShieldAlert className="h-4 w-4 text-primary" />
+              <ShieldAlert className="h-4 w-4 text-primary icon-neon-glow" />
               <h3 className="font-display font-bold">Per-agent hygiene</h3>
             </div>
             <div className="space-y-4">
@@ -137,7 +137,7 @@ export function Dashboard() {
           {/* Roles */}
           <div className="border-gradient rounded-2xl p-6 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-5">
-              <UserCheck className="h-4 w-4 text-primary" />
+              <UserCheck className="h-4 w-4 text-primary icon-neon-glow" />
               <h3 className="font-display font-bold">Roles & validation</h3>
             </div>
             <ul className="space-y-3 text-sm">

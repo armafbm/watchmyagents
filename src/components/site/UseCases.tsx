@@ -21,7 +21,7 @@ export function UseCases() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {cases.map((c) => (
             <div key={c.t} className="rounded-xl border border-border bg-card/50 backdrop-blur p-6 hover:border-primary/60 transition">
-              <c.i className="h-6 w-6 text-primary mb-4" />
+              <c.i className="h-6 w-6 text-primary mb-4 icon-neon-glow" />
               <h3 className="font-display font-bold mb-2">{c.t}</h3>
               <p className="text-sm text-muted-foreground">{c.d}</p>
             </div>
