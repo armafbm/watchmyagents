@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.ingest-signals]
 verify_jwt = false
+
+[functions.get-policies]
+verify_jwt = false
