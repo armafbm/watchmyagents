@@ -25,7 +25,7 @@ export function Dashboard() {
           />
           <div className="max-w-3xl">
             <div className="font-mono text-sm uppercase tracking-[0.3em] text-primary mb-6">// WMA FORTRESS</div>
-            <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-[0.95]">
+            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-[0.95]">
               Your <span className="text-gradient">command center</span>.
             </h2>
             <p className="text-muted-foreground text-xl md:text-2xl leading-relaxed">
