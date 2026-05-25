@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SigninRouteImport } from './routes/signin'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PostLoginRouteImport } from './routes/post-login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
@@ -18,8 +20,14 @@ import { Route as AuthSigninRouteImport } from './routes/auth/signin'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthGooglePopupRouteImport } from './routes/auth/google-popup'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
+import { Route as AuthenticatedSuggestionsRouteImport } from './routes/_authenticated/suggestions'
+import { Route as AuthenticatedPoliciesRouteImport } from './routes/_authenticated/policies'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedLoopRouteImport } from './routes/_authenticated/loop'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as AuthenticatedSettingsKeysRouteImport } from './routes/_authenticated/settings.keys'
 import { Route as AuthenticatedDashboardWatchRouteImport } from './routes/_authenticated/dashboard.watch'
 import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_authenticated/dashboard.shield'
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
@@ -31,9 +39,19 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostLoginRoute = PostLoginRouteImport.update({
+  id: '/post-login',
+  path: '/post-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -70,6 +88,32 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTodayRoute = AuthenticatedTodayRouteImport.update({
+  id: '/today',
+  path: '/today',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSuggestionsRoute =
+  AuthenticatedSuggestionsRouteImport.update({
+    id: '/suggestions',
+    path: '/suggestions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPoliciesRoute = AuthenticatedPoliciesRouteImport.update({
+  id: '/policies',
+  path: '/policies',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedLoopRoute = AuthenticatedLoopRouteImport.update({
+  id: '/loop',
+  path: '/loop',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -80,6 +124,12 @@ const AuthenticatedDashboardIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedSettingsKeysRoute =
+  AuthenticatedSettingsKeysRouteImport.update({
+    id: '/settings/keys',
+    path: '/settings/keys',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedDashboardWatchRoute =
   AuthenticatedDashboardWatchRouteImport.update({
@@ -114,9 +164,16 @@ const AuthenticatedDashboardGuardianRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/post-login': typeof PostLoginRoute
   '/privacy': typeof PrivacyRoute
+  '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/loop': typeof AuthenticatedLoopRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/policies': typeof AuthenticatedPoliciesRoute
+  '/suggestions': typeof AuthenticatedSuggestionsRoute
+  '/today': typeof AuthenticatedTodayRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/google-popup': typeof AuthGooglePopupRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -127,12 +184,20 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/settings/keys': typeof AuthenticatedSettingsKeysRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/post-login': typeof PostLoginRoute
   '/privacy': typeof PrivacyRoute
+  '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
+  '/loop': typeof AuthenticatedLoopRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/policies': typeof AuthenticatedPoliciesRoute
+  '/suggestions': typeof AuthenticatedSuggestionsRoute
+  '/today': typeof AuthenticatedTodayRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/google-popup': typeof AuthGooglePopupRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -143,15 +208,23 @@ export interface FileRoutesByTo {
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/settings/keys': typeof AuthenticatedSettingsKeysRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/post-login': typeof PostLoginRoute
   '/privacy': typeof PrivacyRoute
+  '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/loop': typeof AuthenticatedLoopRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/policies': typeof AuthenticatedPoliciesRoute
+  '/_authenticated/suggestions': typeof AuthenticatedSuggestionsRoute
+  '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/google-popup': typeof AuthGooglePopupRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -162,15 +235,23 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/_authenticated/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/_authenticated/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/_authenticated/settings/keys': typeof AuthenticatedSettingsKeysRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/post-login'
     | '/privacy'
+    | '/signin'
     | '/terms'
     | '/dashboard'
+    | '/loop'
+    | '/onboarding'
+    | '/policies'
+    | '/suggestions'
+    | '/today'
     | '/auth/callback'
     | '/auth/google-popup'
     | '/auth/reset-password'
@@ -181,12 +262,20 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
+    | '/settings/keys'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/post-login'
     | '/privacy'
+    | '/signin'
     | '/terms'
+    | '/loop'
+    | '/onboarding'
+    | '/policies'
+    | '/suggestions'
+    | '/today'
     | '/auth/callback'
     | '/auth/google-popup'
     | '/auth/reset-password'
@@ -197,14 +286,22 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
+    | '/settings/keys'
     | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/post-login'
     | '/privacy'
+    | '/signin'
     | '/terms'
     | '/_authenticated/dashboard'
+    | '/_authenticated/loop'
+    | '/_authenticated/onboarding'
+    | '/_authenticated/policies'
+    | '/_authenticated/suggestions'
+    | '/_authenticated/today'
     | '/auth/callback'
     | '/auth/google-popup'
     | '/auth/reset-password'
@@ -215,13 +312,16 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/reports'
     | '/_authenticated/dashboard/shield'
     | '/_authenticated/dashboard/watch'
+    | '/_authenticated/settings/keys'
     | '/_authenticated/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  PostLoginRoute: typeof PostLoginRoute
   PrivacyRoute: typeof PrivacyRoute
+  SigninRoute: typeof SigninRoute
   TermsRoute: typeof TermsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthGooglePopupRoute: typeof AuthGooglePopupRoute
@@ -239,11 +339,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/post-login': {
+      id: '/post-login'
+      path: '/post-login'
+      fullPath: '/post-login'
+      preLoaderRoute: typeof PostLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -295,6 +409,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/today': {
+      id: '/_authenticated/today'
+      path: '/today'
+      fullPath: '/today'
+      preLoaderRoute: typeof AuthenticatedTodayRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/suggestions': {
+      id: '/_authenticated/suggestions'
+      path: '/suggestions'
+      fullPath: '/suggestions'
+      preLoaderRoute: typeof AuthenticatedSuggestionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/policies': {
+      id: '/_authenticated/policies'
+      path: '/policies'
+      fullPath: '/policies'
+      preLoaderRoute: typeof AuthenticatedPoliciesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/loop': {
+      id: '/_authenticated/loop'
+      path: '/loop'
+      fullPath: '/loop'
+      preLoaderRoute: typeof AuthenticatedLoopRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -308,6 +457,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/settings/keys': {
+      id: '/_authenticated/settings/keys'
+      path: '/settings/keys'
+      fullPath: '/settings/keys'
+      preLoaderRoute: typeof AuthenticatedSettingsKeysRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard/watch': {
       id: '/_authenticated/dashboard/watch'
@@ -373,10 +529,22 @@ const AuthenticatedDashboardRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+  AuthenticatedLoopRoute: typeof AuthenticatedLoopRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPoliciesRoute: typeof AuthenticatedPoliciesRoute
+  AuthenticatedSuggestionsRoute: typeof AuthenticatedSuggestionsRoute
+  AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
+  AuthenticatedSettingsKeysRoute: typeof AuthenticatedSettingsKeysRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+  AuthenticatedLoopRoute: AuthenticatedLoopRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPoliciesRoute: AuthenticatedPoliciesRoute,
+  AuthenticatedSuggestionsRoute: AuthenticatedSuggestionsRoute,
+  AuthenticatedTodayRoute: AuthenticatedTodayRoute,
+  AuthenticatedSettingsKeysRoute: AuthenticatedSettingsKeysRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -386,7 +554,9 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  PostLoginRoute: PostLoginRoute,
   PrivacyRoute: PrivacyRoute,
+  SigninRoute: SigninRoute,
   TermsRoute: TermsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthGooglePopupRoute: AuthGooglePopupRoute,
