@@ -9,5 +9,5 @@ verify_jwt = false
 [functions.get-policies]
 verify_jwt = false
 
-[functions.get-policies]
+[functions.ingest-decisions]
 verify_jwt = false
