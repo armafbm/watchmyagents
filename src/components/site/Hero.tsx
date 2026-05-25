@@ -12,7 +12,7 @@ export function Hero() {
             <span className="h-2 w-2 rounded-full bg-primary animate-blink" />
             Runtime cybersecurity for AI agents
           </div>
-          <h1 className="text-5xl md:text-7xl font-black leading-[0.95] mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-[0.95] mb-6">
             Your <span className="text-gradient">AI agents</span>.<br />
             Under protection.
           </h1>
