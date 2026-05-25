@@ -29,7 +29,7 @@ function PostLogin() {
         .select("id", { count: "exact", head: true });
       if (cancelled) return;
       if ((count ?? 0) === 0) navigate({ to: "/onboarding", replace: true });
-      else navigate({ to: "/today", replace: true });
+      else navigate({ to: "/dashboard", replace: true });
     })();
     return () => {
       cancelled = true;
