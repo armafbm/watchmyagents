@@ -1,5 +1,5 @@
 import { Activity, ShieldAlert, GitPullRequest, UserCheck } from "lucide-react";
-import castleIcon from "@/assets/wma-fortress-castle.png";
+import castleIcon from "@/assets/wma-fortress-castle-v2.png";
 
 const incidents = [
   { sev: "CRITICAL", color: "danger", agent: "agent.support · prod", cat: "Data access", signal: "Suspected exfiltration" },
