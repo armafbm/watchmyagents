@@ -46,12 +46,52 @@ const commandChildren: NavItem[] = [
   { to: "#", label: "Compliance & Conformity", icon: ScrollText, soon: true },
   { to: "#", label: "Threat Intel", icon: Radar, soon: true },
 ];
-const operations: NavItem[] = [
+const baseOperations: Omit<NavItem, "badge">[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: WatchAvatar as unknown as LucideIcon },
-  { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon, badge: 1 },
+  { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon },
   { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: GuardianAvatar as unknown as LucideIcon },
 ];
+
+function useNotificationCounts() {
+  const { user } = useAuth();
+  const [counts, setCounts] = useState({ shield: 0, total: 0 });
+
+  useEffect(() => {
+    if (!user) {
+      setCounts({ shield: 0, total: 0 });
+      return;
+    }
+    let cancelled = false;
+
+    const load = async () => {
+      const { count } = await supabase
+        .from("suggestions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      if (cancelled) return;
+      const shield = count ?? 0;
+      setCounts({ shield, total: shield });
+    };
+
+    load();
+    const channel = supabase
+      .channel("notif-suggestions")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "suggestions" },
+        () => load()
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  return counts;
+}
 
 
 export function DashboardLayout({
@@ -65,6 +105,12 @@ export function DashboardLayout({
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
+  const notif = useNotificationCounts();
+  const operations: NavItem[] = baseOperations.map((item) =>
+    item.to === "/dashboard/shield" && notif.shield > 0
+      ? { ...item, badge: notif.shield }
+      : item
+  );
 
   return (
     <div className="min-h-screen flex bg-background relative overflow-hidden">
@@ -135,7 +181,11 @@ export function DashboardLayout({
               </button>
               <IconBtn>
                 <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-danger animate-blink" />
+                {notif.total > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-danger text-[9px] font-mono font-bold text-danger-foreground grid place-items-center ring-2 ring-background">
+                    {notif.total > 9 ? "9+" : notif.total}
+                  </span>
+                )}
               </IconBtn>
               <IconBtn>
                 <Settings className="h-4 w-4" />
