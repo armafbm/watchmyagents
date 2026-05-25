@@ -55,7 +55,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="relative h-[32rem] lg:h-[40rem] flex items-center justify-center">
+        <div className="relative h-80 sm:h-[28rem] lg:h-[40rem] flex items-center justify-center">
           <img
             src={knight}
             alt="WatchMyAgents sentinel knight mascot"
