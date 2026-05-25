@@ -50,11 +50,6 @@ export function FractalLoop() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-6 relative">
         <div className="flex items-start gap-8 mb-16">
-          <img
-            src={fortressIcon}
-            alt="WMA Fortress shield with all-seeing eye"
-            className="hidden md:block h-32 w-auto object-contain shrink-0 animate-float"
-          />
           <div className="max-w-3xl">
             <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">
               // Our technology
@@ -71,6 +66,11 @@ export function FractalLoop() {
               Inspired by the ISO 27 001 norm
             </p>
           </div>
+          <img
+            src={fortressIcon}
+            alt="WMA Fortress shield with all-seeing eye"
+            className="hidden md:block h-32 w-auto object-contain shrink-0 animate-float"
+          />
         </div>
 
         {/* WGS */}
