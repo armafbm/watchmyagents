@@ -46,12 +46,52 @@ const commandChildren: NavItem[] = [
   { to: "#", label: "Compliance & Conformity", icon: ScrollText, soon: true },
   { to: "#", label: "Threat Intel", icon: Radar, soon: true },
 ];
-const operations: NavItem[] = [
+const baseOperations: Omit<NavItem, "badge">[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: WatchAvatar as unknown as LucideIcon },
-  { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon, badge: 1 },
+  { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon },
   { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: GuardianAvatar as unknown as LucideIcon },
 ];
+
+function useNotificationCounts() {
+  const { user } = useAuth();
+  const [counts, setCounts] = useState({ shield: 0, total: 0 });
+
+  useEffect(() => {
+    if (!user) {
+      setCounts({ shield: 0, total: 0 });
+      return;
+    }
+    let cancelled = false;
+
+    const load = async () => {
+      const { count } = await supabase
+        .from("suggestions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      if (cancelled) return;
+      const shield = count ?? 0;
+      setCounts({ shield, total: shield });
+    };
+
+    load();
+    const channel = supabase
+      .channel("notif-suggestions")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "suggestions" },
+        () => load()
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  return counts;
+}
 
 
 export function DashboardLayout({
