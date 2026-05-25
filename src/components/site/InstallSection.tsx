@@ -283,41 +283,6 @@ export function InstallSection() {
                 </div>
               </div>
 
-              {/* Step roadmap */}
-              <div className="space-y-2 pt-4 border-t border-border/40">
-                {explanations.map((e, i) => {
-                  const n = i + 1;
-                  const isActive = n === activeStep && !isComplete;
-                  const isDone = n < activeStep || isComplete;
-                  return (
-                    <button
-                      key={e.label}
-                      onClick={() => jumpToStep(n)}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left hover:bg-card/60"
-                      style={{
-                        background: isActive ? `${BLUE_ACCENT}12` : "transparent",
-                        border: `1px solid ${isActive ? `${BLUE_ACCENT}55` : "transparent"}`,
-                      }}
-                    >
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold shrink-0"
-                        style={{
-                          background: isDone ? "oklch(0.6 0.18 145 / 0.2)" : `${BLUE_ACCENT}20`,
-                          color: isDone ? "oklch(0.75 0.18 145)" : BLUE_ACCENT,
-                        }}
-                      >
-                        {isDone ? <CheckCircle className="w-4 h-4" /> : n}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                          {e.label}
-                        </div>
-                        <div className="text-sm font-medium truncate">{e.title}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
 
