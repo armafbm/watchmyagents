@@ -324,3 +324,63 @@ function IconBtn({ children }: { children: ReactNode }) {
     </button>
   );
 }
+
+function FleetStatusCard() {
+  const [stats, setStats] = useState<{ total: number; active: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const { data, error } = await supabase
+        .from("agents")
+        .select("id,status");
+      if (cancelled || error || !data) return;
+      const total = data.length;
+      const active = data.filter((a) => a.status === "active").length;
+      setStats({ total, active });
+    };
+    load();
+
+    const channel = supabase
+      .channel("fleet-status-agents")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "agents" },
+        () => load(),
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const total = stats?.total ?? 0;
+  const active = stats?.active ?? 0;
+  const isSecure = total > 0 && active === total;
+  const isEmpty = total === 0;
+  const label = isEmpty ? "NO AGENTS" : isSecure ? "SECURE" : "DEGRADED";
+  const tone = isEmpty
+    ? "text-muted-foreground"
+    : isSecure
+    ? "text-success"
+    : "text-warning";
+
+  return (
+    <div className="rounded-lg border border-border/50 bg-card/40 p-3">
+      <div className="flex items-center gap-2 mb-2">
+        <Shield className={`h-3.5 w-3.5 ${tone}`} />
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Fleet status
+        </span>
+      </div>
+      <div className={`font-display text-sm font-bold ${tone}`}>
+        {stats ? label : "…"}
+      </div>
+      <div className="font-mono text-[10px] text-muted-foreground mt-1">
+        {stats ? `${total} agent${total === 1 ? "" : "s"} · ${active} active` : "loading…"}
+      </div>
+    </div>
+  );
+}
