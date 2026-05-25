@@ -1,1 +1,4 @@
 project_id = "kqddnrrbczrpmhnjdzmp"
+
+[functions.guardian]
+verify_jwt = false
