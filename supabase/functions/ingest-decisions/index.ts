@@ -81,7 +81,7 @@ serve(async (req) => {
     .eq('customer_id', customerId)
     .eq('anthropic_agent_id', d.anthropic_agent_id)
     .maybeSingle();
-  if (agentErr) return json(500, { error: 'agent lookup failed' });
+  if (agentErr) { console.error('[ingest-decisions] agent lookup:', agentErr); return json(500, { error: 'internal error' }); }
   if (!agent) return json(404, { error: `agent "${d.anthropic_agent_id}" not registered yet — POST a signal first` });
   const agentId = (agent as { id: string }).id;
 
