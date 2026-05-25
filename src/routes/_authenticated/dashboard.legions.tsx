@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { supabase } from "@/integrations/supabase/client";
+import legionsHero from "@/assets/wma-legions-hero.png";
 
 export const Route = createFileRoute("/_authenticated/dashboard/legions")({
   head: () => ({
@@ -46,20 +47,29 @@ function LegionsPage() {
 
   return (
     <DashboardLayout breadcrumb="Legions · Agentic Fleet Management">
-      <PageHeader
-        kicker="Legions"
-        title="Watch → Guardian → Shield, per agent."
-        subtitle="A live 7-day view of the recursive security loop running across your fleet."
-        actions={
-          <Link
-            to="/onboarding"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition"
-          >
-            <Plus className="h-4 w-4" />
-            Register agent
-          </Link>
-        }
-      />
+      <div className="flex items-center gap-6 mb-2">
+        <img
+          src={legionsHero}
+          alt="Legions banner"
+          className="h-32 md:h-40 w-auto object-contain shrink-0 drop-shadow-[0_0_30px_oklch(0.78_0.18_220/0.35)] animate-float"
+        />
+        <div className="flex-1 min-w-0">
+          <PageHeader
+            kicker="Legions"
+            title="Watch → Guardian → Shield, per agent."
+            subtitle="A live 7-day view of the recursive security loop running across your fleet."
+            actions={
+              <Link
+                to="/onboarding"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90 transition"
+              >
+                <Plus className="h-4 w-4" />
+                Register agent
+              </Link>
+            }
+          />
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Stat label="Agents enlisted" value={String(totalAgents)} icon={Swords} tone="success" />
