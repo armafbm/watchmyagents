@@ -69,7 +69,7 @@ export function FractalLoop() {
           <img
             src={fortressIcon}
             alt="WMA Fortress shield with all-seeing eye"
-            className="hidden md:block h-32 w-auto object-contain shrink-0 animate-float"
+            className="hidden md:block h-48 w-auto object-contain shrink-0 animate-float"
           />
         </div>
 
