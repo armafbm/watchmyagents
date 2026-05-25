@@ -211,7 +211,7 @@ export function InstallSection() {
             <div className="flex flex-wrap items-center justify-center gap-3">
               {[
                 { name: "Claude Agent", tag: "Anthropic", ready: true, desc: "Native Anthropic SDK — available now." },
-                { name: "LangGraph", tag: "LangChain", ready: true, desc: "The most robust framework for building complex, stateful agents with memory, steps, tools, human-in-the-loop and long workflows. LangGraph is built for reliable agent orchestration." },
+                { name: "LangGraph", tag: "LangChain", ready: false, desc: "The most robust framework for building complex, stateful agents with memory, steps, tools, human-in-the-loop and long workflows. LangGraph is built for reliable agent orchestration." },
                 { name: "OpenAI", tag: "OpenAI", ready: false },
                 { name: "CrewAI", tag: "CrewAI", ready: false },
                 { name: "AutoGen / AG2", tag: "Microsoft", ready: false },
