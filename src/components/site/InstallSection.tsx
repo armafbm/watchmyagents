@@ -9,18 +9,13 @@ interface Line {
 const steps: Line[][] = [
   [
     { text: "npm install -g watchmyagents", type: "command" },
-    { text: "✓ watchmyagents installed globally", type: "output" },
   ],
   [
-    { text: "export WMA_API_KEY=wma_xxx ANTHROPIC_API_KEY=sk-ant-xxx", type: "command" },
-    { text: "# WMA_API_KEY → your Watch My Agent account key", type: "comment" },
-    { text: "# ANTHROPIC_API_KEY → your framework provider key", type: "comment" },
+    { text: "export ANTHROPIC_API_KEY=\"sk-ant-...\"", type: "command" },
+    { text: "export WMA_API_KEY=\"wma_147e3a5d2eae405bb4279e13aeb4e461\"", type: "command" },
   ],
   [
-    { text: "wma-shield --agent-id agent_xxx --policies-source fortress", type: "command" },
-    { text: "✓ Agent connected to WatchMyAgent", type: "output" },
-    { text: "✓ Policies loaded from Fortress", type: "output" },
-    { text: "✓ Real-time monitoring active", type: "output" },
+    { text: "wma-shield --agent-id agent_01XaNB4M88ZvcW8FoQ5GC14A", type: "command" },
   ],
 ];
 
