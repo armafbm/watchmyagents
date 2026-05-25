@@ -42,7 +42,7 @@ export function Plugins() {
             <img
               src={knightWatch}
               alt="WatchMyAgents knight guardian with all-seeing eye shield"
-              className="h-64 lg:h-80 w-auto object-contain animate-float"
+              className="h-48 sm:h-64 lg:h-80 w-auto max-w-full object-contain animate-float"
             />
           </div>
         </div>
