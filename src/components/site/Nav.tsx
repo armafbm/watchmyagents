@@ -1,25 +1,12 @@
 import logo from "@/assets/wma-logo.png";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import watchIcon from "@/assets/wma-icon-watch.png";
+import fortressIcon from "@/assets/wma-fortress-castle-cutout.png";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, Shield, User } from "lucide-react";
-import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
+import { Shield } from "lucide-react";
 
 export function Nav() {
   const { user } = useAuth();
-
-  const whatIsItLinks: { href: string; label: string; layer?: LayerKey }[] = [
-    { href: "#problem", label: "Threats" },
-    { href: "#watch", label: "Watch", layer: "watch" },
-    { href: "#guardian", label: "Guardian AI", layer: "guardian" },
-    { href: "#shield", label: "Shield", layer: "shield" },
-    { href: "#dashboard", label: "Fortress" },
-  ];
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/50">
@@ -32,40 +19,29 @@ export function Nav() {
         </a>
         <ul className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
           <li>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer outline-none">
-                What the f*** ?
-                <ChevronDown className="w-3.5 h-3.5" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="bg-popover/95 backdrop-blur-xl border-border/50"
-              >
-                {whatIsItLinks.map((l) => (
-                  <DropdownMenuItem key={l.href} asChild>
-                    <a
-                      href={l.href}
-                      className="hover:text-primary cursor-pointer flex items-center gap-2"
-                    >
-                      {l.layer && <LayerIcon layer={l.layer} className="h-5 w-5" />}
-                      {l.label}
-                    </a>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </li>
-          <li>
-            <a href="#fractal" className="hover:text-primary transition-colors">
-              Technology
+            <a href="#fractal" className="flex items-center gap-2 hover:text-primary transition-colors">
+              <img src={watchIcon} alt="" className="h-5 w-5 object-contain" />
+              WGS
             </a>
           </li>
           <li>
-            <a href="#install" className="hover:text-primary transition-colors">
-              Install
+            <a href="#guardian" className="hover:text-primary transition-colors">
+              Guardian AI
             </a>
+          </li>
+          <li>
+            <a href="#dashboard" className="flex items-center gap-2 hover:text-primary transition-colors">
+              <img src={fortressIcon} alt="" className="h-6 w-6 object-contain" />
+              Fortress
+            </a>
+          </li>
+          <li>
+            <Link to="/dashboard/legions" className="hover:text-primary transition-colors">
+              Legions
+            </Link>
           </li>
         </ul>
+
         <div className="flex items-center gap-3">
           {user ? (
             <Link
