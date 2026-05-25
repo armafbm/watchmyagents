@@ -111,7 +111,6 @@ export function DashboardLayout({
       ? { ...item, badge: notif.shield }
       : item
   );
-  const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
 
   return (
     <div className="min-h-screen flex bg-background relative overflow-hidden">
