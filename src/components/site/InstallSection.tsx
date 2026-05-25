@@ -202,6 +202,50 @@ export function InstallSection() {
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
             Watch it all in 3 steps. Literally 30 seconds.
           </p>
+
+          {/* Supported frameworks */}
+          <div className="mt-6">
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">
+              Packages available for
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                { name: "Claude Agent", tag: "Anthropic", ready: true, desc: "Native Anthropic SDK — available now." },
+                { name: "LangGraph", tag: "LangChain", ready: true, desc: "The most robust framework for building complex, stateful agents with memory, steps, tools, human-in-the-loop and long workflows. LangGraph is built for reliable agent orchestration." },
+                { name: "OpenAI", tag: "OpenAI", ready: false },
+                { name: "CrewAI", tag: "CrewAI", ready: false },
+                { name: "AutoGen / AG2", tag: "Microsoft", ready: false },
+                { name: "Google ADK / Vertex", tag: "Google", ready: false },
+              ].map((fw) => (
+                <div
+                  key={fw.name}
+                  className="group relative inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-colors"
+                  style={{
+                    borderColor: fw.ready ? `${BLUE_ACCENT}55` : "rgba(255,255,255,0.08)",
+                    background: fw.ready ? `${BLUE_ACCENT}12` : "rgba(255,255,255,0.03)",
+                    color: fw.ready ? BLUE_ACCENT : "rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <span>{fw.name}</span>
+                  {fw.ready && (
+                    <span
+                      className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+                      style={{ background: `${BLUE_ACCENT}25`, color: BLUE_ACCENT }}
+                    >
+                      ready
+                    </span>
+                  )}
+                  {fw.desc && (
+                    <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 rounded-lg border text-xs text-left opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                         style={{ background: "oklch(0.18 0.04 245)", borderColor: `${BLUE_ACCENT}55`, color: "#cfe3ff" }}>
+                      <div className="font-semibold mb-1" style={{ color: BLUE_ACCENT }}>{fw.tag}</div>
+                      {fw.desc}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Split layout */}
