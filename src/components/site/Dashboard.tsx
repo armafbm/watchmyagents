@@ -1,4 +1,5 @@
 import { Activity, ShieldAlert, GitPullRequest, UserCheck } from "lucide-react";
+import fortressIcon from "@/assets/wma-fortress.png";
 
 const incidents = [
   { sev: "CRITICAL", color: "danger", agent: "agent.support · prod", cat: "Data access", signal: "Suspected exfiltration" },
@@ -16,15 +17,22 @@ export function Dashboard() {
   return (
     <section id="dashboard" className="relative py-28">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="max-w-3xl mb-16">
-          <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// WMA FORTRESS</div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Your <span className="text-gradient">command center</span>.
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            Triage, suggest, simulate, approve. Every Shield change is linked back to the
-            Watch signal that triggered it.
-          </p>
+        <div className="flex items-start gap-8 mb-16">
+          <img
+            src={fortressIcon}
+            alt="WMA Fortress shield with all-seeing eye"
+            className="hidden md:block h-32 w-auto object-contain shrink-0 animate-float"
+          />
+          <div className="max-w-3xl">
+            <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// WMA FORTRESS</div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Your <span className="text-gradient">command center</span>.
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Triage, suggest, simulate, approve. Every Shield change is linked back to the
+              Watch signal that triggered it.
+            </p>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-5">
