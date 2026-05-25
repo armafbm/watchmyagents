@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/wma-logo.png";
 import legionsImg from "@/assets/wma-legions.png";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
@@ -100,18 +101,7 @@ export function DashboardLayout({
 
 
         <div className="border-t border-border/40 p-4">
-          <div className="rounded-lg border border-border/50 bg-card/40 p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="h-3.5 w-3.5 text-success" />
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Fleet status
-              </span>
-            </div>
-            <div className="font-display text-sm font-bold text-success">SECURE</div>
-            <div className="font-mono text-[10px] text-muted-foreground mt-1">
-              24 agents · 7 fleets
-            </div>
-          </div>
+          <FleetStatusCard />
         </div>
       </aside>
 
