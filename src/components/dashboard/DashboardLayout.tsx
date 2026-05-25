@@ -181,7 +181,11 @@ export function DashboardLayout({
               </button>
               <IconBtn>
                 <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-danger animate-blink" />
+                {notif.total > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-danger text-[9px] font-mono font-bold text-danger-foreground grid place-items-center ring-2 ring-background">
+                    {notif.total > 9 ? "9+" : notif.total}
+                  </span>
+                )}
               </IconBtn>
               <IconBtn>
                 <Settings className="h-4 w-4" />
