@@ -20,7 +20,7 @@ export function Nav() {
         <ul className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
           <li>
             <a href="#fractal" className="flex items-center gap-2 hover:text-primary transition-colors">
-              <img src={watchIcon} alt="" className="h-5 w-5 object-contain" />
+              <img src={watchIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
               WGS
             </a>
           </li>
@@ -31,7 +31,7 @@ export function Nav() {
           </li>
           <li>
             <a href="#dashboard" className="flex items-center gap-2 hover:text-primary transition-colors">
-              <img src={fortressIcon} alt="" className="h-6 w-6 object-contain" />
+              <img src={fortressIcon} alt="" className="h-6 w-6 object-contain icon-neon-glow" />
               Fortress
             </a>
           </li>
@@ -48,7 +48,7 @@ export function Nav() {
               to="/dashboard"
               className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
             >
-              <Shield className="h-3.5 w-3.5" />
+              <Shield className="h-3.5 w-3.5 icon-neon-glow" />
               My Fortress
             </Link>
           ) : (

@@ -93,7 +93,7 @@ export function FractalLoop() {
                 className="border border-border/60 rounded-xl p-6 bg-card/40 backdrop-blur-sm hover:border-primary/40 transition-colors"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <l.icon className="h-6 w-6 text-primary" />
+                  <l.icon className="h-6 w-6 text-primary icon-neon-glow" />
                   <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                     {l.tag}
                   </span>
@@ -116,21 +116,21 @@ export function FractalLoop() {
             </h3>
             <ul className="space-y-3 text-muted-foreground">
               <li className="flex gap-3">
-                <ArrowUp className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <ArrowUp className="h-5 w-5 text-primary shrink-0 mt-0.5 icon-neon-glow" />
                 <span>
                   <span className="text-foreground font-semibold">Upward:</span> metrics aggregate
                   agent → team → fleet → global.
                 </span>
               </li>
               <li className="flex gap-3">
-                <ArrowDown className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <ArrowDown className="h-5 w-5 text-primary shrink-0 mt-0.5 icon-neon-glow" />
                 <span>
                   <span className="text-foreground font-semibold">Downward:</span> learned policies
                   cascade global → fleet → team → agent.
                 </span>
               </li>
               <li className="flex gap-3">
-                <RefreshCw className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <RefreshCw className="h-5 w-5 text-primary shrink-0 mt-0.5 icon-neon-glow" />
                 <span>
                   <span className="text-foreground font-semibold">Continuous:</span> real-time
                   closed loop at every level — no dead-ends, no manual relay.
