@@ -16,7 +16,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import mascot from "@/assets/wma-mascot.png";
+import mascot from "@/assets/wma-shield-logo.png";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Panel, PageHeader, Stat } from "@/components/dashboard/primitives";
 import { supabase } from "@/integrations/supabase/client";
