@@ -11,7 +11,7 @@ const cases = [
 export function UseCases() {
   return (
     <section className="relative py-14">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-3xl mb-12">
           <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Built for</div>
           <h2 className="text-4xl md:text-5xl font-bold">

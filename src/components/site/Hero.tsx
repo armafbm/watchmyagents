@@ -6,7 +6,7 @@ export function Hero() {
       <div className="absolute inset-0 grid-bg opacity-40" />
       <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
 
-      <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-xs font-mono uppercase tracking-widest text-primary mb-6">
             <span className="h-2 w-2 rounded-full bg-primary animate-blink" />

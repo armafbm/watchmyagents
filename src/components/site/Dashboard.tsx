@@ -16,7 +16,7 @@ const hygiene = [
 export function Dashboard() {
   return (
     <section id="dashboard" className="relative py-20 scroll-mt-24">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 mb-16">
           <img
             src={castleIcon}

@@ -19,7 +19,7 @@ export function Nav() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/50">
-      <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-3">
           <img src={logo} alt="WatchMyAgents" className="h-9 w-9 rounded-md" />
           <span className="font-display font-bold tracking-wider text-sm">

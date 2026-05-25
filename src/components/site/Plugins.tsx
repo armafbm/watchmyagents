@@ -28,7 +28,7 @@ const guardianCapabilities = [
 export function Plugins() {
   return (
     <section className="relative py-28">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-10 items-center mb-20">
           <div className="max-w-3xl">
             <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Three layers, one mission</div>
