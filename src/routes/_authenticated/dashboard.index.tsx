@@ -63,8 +63,11 @@ function CommandCenter() {
 
   useEffect(() => {
     let mounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
     (async () => {
-      const [{ data: t }, { data: d }] = await Promise.all([
+      const [{ data: userRes }, { data: t }, { data: d }] = await Promise.all([
+        supabase.auth.getUser(),
         supabase.from("dashboard_today_v").select("*").maybeSingle(),
         supabase
           .from("decisions")
@@ -75,22 +78,25 @@ function CommandCenter() {
       if (!mounted) return;
       setToday((t as TodayRow | null) ?? { agents_active: 0, tokens_24h: 0, actions_24h: 0, blocked_24h: 0, suggestions_pending: 0 });
       setDecisions((d as Decision[] | null) ?? []);
-    })();
 
-    const channel = supabase
-      .channel("decisions-live")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "decisions" },
-        (payload) => {
-          setDecisions((prev) => [payload.new as Decision, ...prev].slice(0, 8));
-        }
-      )
-      .subscribe();
+      const uid = userRes?.user?.id;
+      if (!uid) return;
+
+      channel = supabase
+        .channel(`user:${uid}`, { config: { private: true } })
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "decisions", filter: `customer_id=eq.${uid}` },
+          (payload) => {
+            setDecisions((prev) => [payload.new as Decision, ...prev].slice(0, 8));
+          }
+        )
+        .subscribe();
+    })();
 
     return () => {
       mounted = false;
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 
