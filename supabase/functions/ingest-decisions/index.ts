@@ -109,7 +109,7 @@ serve(async (req) => {
       decided_at: d.decided_at,
       decided_in_ms: d.decided_in_ms,
     }).select('id').single();
-  if (insertErr) return json(500, { error: `decision insert failed: ${insertErr.message}` });
+  if (insertErr) { console.error('[ingest-decisions] insert failed:', insertErr); return json(500, { error: 'internal error — decision could not be recorded' }); }
 
   Promise.all([
     supabase.from('agents').update({ last_seen_at: new Date().toISOString() }).eq('id', agentId),
