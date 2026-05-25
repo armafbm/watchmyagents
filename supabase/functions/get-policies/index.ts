@@ -75,7 +75,7 @@ serve(async (req) => {
   }
 
   const { data: policies, error: policiesErr } = await query;
-  if (policiesErr) return json(500, { error: `policies lookup failed: ${policiesErr.message}` });
+  if (policiesErr) { console.error('[get-policies] policies lookup:', policiesErr); return json(500, { error: 'internal error' }); }
 
   supabase.from('api_keys')
     .update({ last_used_at: new Date().toISOString() })
