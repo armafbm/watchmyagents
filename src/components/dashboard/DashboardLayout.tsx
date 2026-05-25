@@ -18,6 +18,7 @@ import {
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import logo from "@/assets/wma-logo.png";
+import legionsImg from "@/assets/wma-legions.png";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
 const makeLayerIcon = (layer: LayerKey): ComponentType<{ className?: string }> =>
@@ -25,6 +26,9 @@ const makeLayerIcon = (layer: LayerKey): ComponentType<{ className?: string }> =
 const WatchAvatar = makeLayerIcon("watch");
 const GuardianAvatar = makeLayerIcon("guardian");
 const ShieldAvatar = makeLayerIcon("shield");
+const LegionsAvatar: ComponentType<{ className?: string }> = ({ className }) => (
+  <img src={legionsImg} alt="" className={`object-contain shrink-0 ${className ?? "h-4 w-4"}`} />
+);
 
 type NavItem = {
   to: string;
@@ -43,7 +47,7 @@ const commandChildren: NavItem[] = [
 const operations: NavItem[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: WatchAvatar as unknown as LucideIcon },
   { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon, badge: 1 },
-  { to: "/dashboard/legions", label: "Legions · Fleets", icon: Swords },
+  { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: GuardianAvatar as unknown as LucideIcon },
 ];
 
