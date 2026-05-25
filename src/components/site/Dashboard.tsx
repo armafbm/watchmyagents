@@ -31,7 +31,7 @@ export function Dashboard() {
           <img
             src={castleIcon}
             alt="WMA Fortress castle"
-            className="h-48 w-auto object-contain shrink-0 animate-float"
+            className="h-80 w-auto object-contain shrink-0 animate-float"
           />
         </div>
 
