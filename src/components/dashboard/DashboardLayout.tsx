@@ -18,7 +18,7 @@ import {
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/wma-logo.png";
+import logo from "@/assets/fortress-logo.png";
 import legionsImg from "@/assets/wma-legions.png";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
