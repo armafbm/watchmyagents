@@ -48,7 +48,7 @@ export function Plugins() {
         </div>
 
         {/* Guardian AI focus section */}
-        <div className="border-gradient rounded-2xl p-8 md:p-12 relative overflow-hidden">
+        <div id="guardian" className="border-gradient rounded-2xl p-8 md:p-12 relative overflow-hidden scroll-mt-24">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.12),transparent_70%)] pointer-events-none" />
           <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center relative">
             <div className="flex justify-center">
