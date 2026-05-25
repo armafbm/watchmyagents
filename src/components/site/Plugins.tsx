@@ -55,7 +55,7 @@ export function Plugins() {
               <img
                 src={guardianIcon}
                 alt="Guardian AI icon"
-                className="h-80 md:h-[28rem] w-auto object-contain animate-float drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]"
+                className="h-56 sm:h-72 md:h-[28rem] w-auto max-w-full object-contain animate-float drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]"
               />
             </div>
             <div>
