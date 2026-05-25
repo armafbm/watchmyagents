@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 export function CTA() {
   return (
     <section id="cta" className="relative py-14">
-      <div className="max-w-4xl mx-auto px-6 text-center">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
         <div className="font-mono text-xs uppercase tracking-widest text-primary mb-6">// Early access</div>
         <h2 className="text-4xl md:text-6xl font-black leading-tight mb-6">
           Don't wait for your first <span className="text-gradient">agent incident</span>.
@@ -37,7 +37,7 @@ export function CTA() {
 export function Footer() {
   return (
     <footer className="border-t border-border py-10">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
         <div className="font-mono text-xs uppercase tracking-widest">
           © {new Date().getFullYear()} WatchMyAgents · Cybersecurity for AI Agents
         </div>

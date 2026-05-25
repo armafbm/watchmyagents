@@ -6,7 +6,7 @@ export function Loop() {
   return (
     <section id="loop" className="relative py-28 overflow-hidden">
       <div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// The feedback loop</div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">

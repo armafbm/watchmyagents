@@ -28,7 +28,7 @@ const guardianCapabilities = [
 export function Plugins() {
   return (
     <section className="relative py-28">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-10 items-center mb-20">
           <div className="max-w-3xl">
             <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Three layers, one mission</div>
@@ -42,7 +42,7 @@ export function Plugins() {
             <img
               src={knightWatch}
               alt="WatchMyAgents knight guardian with all-seeing eye shield"
-              className="h-64 lg:h-80 w-auto object-contain animate-float"
+              className="h-48 sm:h-64 lg:h-80 w-auto max-w-full object-contain animate-float"
             />
           </div>
         </div>
@@ -55,7 +55,7 @@ export function Plugins() {
               <img
                 src={guardianIcon}
                 alt="Guardian AI icon"
-                className="h-80 md:h-[28rem] w-auto object-contain animate-float drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]"
+                className="h-56 sm:h-72 md:h-[28rem] w-auto max-w-full object-contain animate-float drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]"
               />
             </div>
             <div>

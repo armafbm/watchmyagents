@@ -16,16 +16,16 @@ const hygiene = [
 export function Dashboard() {
   return (
     <section id="dashboard" className="relative py-20 scroll-mt-24">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 mb-16">
           <img
             src={castleIcon}
             alt="WMA Fortress castle"
-            className="h-[28rem] md:h-[36rem] lg:h-[42rem] w-auto object-contain shrink-0 animate-float drop-shadow-[0_0_80px_hsl(var(--primary)/0.4)]"
+            className="h-64 sm:h-80 md:h-[36rem] lg:h-[42rem] w-auto max-w-full object-contain shrink-0 animate-float drop-shadow-[0_0_80px_hsl(var(--primary)/0.4)]"
           />
           <div className="max-w-3xl">
             <div className="font-mono text-sm uppercase tracking-[0.3em] text-primary mb-6">// WMA FORTRESS</div>
-            <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-[0.95]">
+            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-[0.95]">
               Your <span className="text-gradient">command center</span>.
             </h2>
             <p className="text-muted-foreground text-xl md:text-2xl leading-relaxed">
