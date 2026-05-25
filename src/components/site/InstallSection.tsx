@@ -8,27 +8,18 @@ interface Line {
 
 const steps: Line[][] = [
   [
-    { text: "npm install watchmyagent --save", type: "command" },
-    { text: "✓ watchmyagent@1.2.5 installed", type: "output" },
+    { text: "npm install -g watchmyagents", type: "command" },
+    { text: "✓ watchmyagents installed globally", type: "output" },
   ],
   [
-    { text: "export ANTHROPIC_API_KEY=\"sk-ant-xxxxxxxxxxxxx\"", type: "command" },
-    { text: "# Or: export OPENAI_API_KEY=\"sk-xxxxx\"", type: "comment" },
-    { text: "# Or: export LANGCHAIN_API_KEY=\"lc-xxxxx\"", type: "comment" },
+    { text: "export WMA_API_KEY=wma_xxx ANTHROPIC_API_KEY=sk-ant-xxx", type: "command" },
+    { text: "# WMA_API_KEY → your Watch My Agent account key", type: "comment" },
+    { text: "# ANTHROPIC_API_KEY → your framework provider key", type: "comment" },
   ],
   [
-    { text: "cat > agent.js << 'EOF'", type: "command" },
-    { text: "const watchMyAgent = require('watchmyagent');", type: "output" },
-    { text: "", type: "output" },
-    { text: "const agent = watchMyAgent.init({", type: "output" },
-    { text: "  agentId: 'agent_xxxxxxxxxxxxx',", type: "output" },
-    { text: "  apiProvider: 'anthropic'", type: "output" },
-    { text: "});", type: "output" },
-    { text: "", type: "output" },
-    { text: "agent.run({ task: 'Your task here' });", type: "output" },
-    { text: "EOF", type: "command" },
-    { text: "node agent.js", type: "command" },
+    { text: "wma-shield --agent-id agent_xxx --policies-source fortress", type: "command" },
     { text: "✓ Agent connected to WatchMyAgent", type: "output" },
+    { text: "✓ Policies loaded from Fortress", type: "output" },
     { text: "✓ Real-time monitoring active", type: "output" },
   ],
 ];
@@ -266,6 +257,29 @@ export function InstallSection() {
                 <div>
                   <h3 className="text-2xl md:text-3xl font-bold mb-2">{activeExplanation.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{activeExplanation.desc}</p>
+
+                  {activeStep === 3 && (
+                    <ul className="mt-5 space-y-3">
+                      {[
+                        { n: 1, title: "Framework API key", desc: "The key your application / framework uses to connect to its main provider (Anthropic, OpenAI, …)." },
+                        { n: 2, title: "Watch My Agent API key", desc: "The key tied to your Watch My Agent account." },
+                        { n: 3, title: "Agent ID from your framework console", desc: "The unique identifier of the agent you created in the framework console." },
+                      ].map((item) => (
+                        <li key={item.n} className="flex gap-3">
+                          <div
+                            className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold"
+                            style={{ background: `${BLUE_ACCENT}20`, color: BLUE_ACCENT }}
+                          >
+                            {item.n}
+                          </div>
+                          <div className="text-sm">
+                            <div className="font-semibold">{item.title}</div>
+                            <div className="text-muted-foreground">{item.desc}</div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
 
