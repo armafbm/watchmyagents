@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, Activity, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Eye, Activity, Plus, X, ChevronRight, Radio } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat, SevBadge } from "@/components/dashboard/primitives";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +23,9 @@ type SignalRow = {
   id: string;
   ingested_at: string;
   agent_id: string;
-  payload: { kind?: string; summary?: string; severity?: string } | null;
+  window_start?: string | null;
+  window_end?: string | null;
+  payload: Record<string, unknown> | null;
 };
 
 function relativeTime(iso: string | null) {
@@ -45,10 +47,43 @@ function severityFor(a: Agent): "OK" | "WARN" | "CRIT" | "INFO" {
   return "OK";
 }
 
+function severityOfSignal(p: Record<string, unknown> | null): "OK" | "WARN" | "CRIT" | "INFO" {
+  if (!p) return "INFO";
+  const sev = String((p as { severity?: unknown }).severity ?? "").toLowerCase();
+  if (sev === "crit" || sev === "critical") return "CRIT";
+  if (sev === "warn" || sev === "warning" || sev === "high") return "WARN";
+  if (sev === "info") return "INFO";
+  return "OK";
+}
+
+function kindOf(p: Record<string, unknown> | null): string {
+  if (!p) return "signal";
+  const k = (p as { kind?: unknown; type?: unknown }).kind ?? (p as { type?: unknown }).type;
+  return typeof k === "string" ? k : "signal";
+}
+
+function summaryOf(p: Record<string, unknown> | null): string {
+  if (!p) return "";
+  const s = (p as { summary?: unknown; message?: unknown }).summary ?? (p as { message?: unknown }).message;
+  if (typeof s === "string") return s;
+  // derive from counts
+  const counts = (p as { counts?: Record<string, number> }).counts;
+  if (counts && typeof counts === "object") {
+    const top = Object.entries(counts)
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .slice(0, 3)
+      .map(([k, v]) => `${k}:${v}`)
+      .join(" · ");
+    return top || "telemetry burst";
+  }
+  return "";
+}
+
 function WatchPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [signals, setSignals] = useState<SignalRow[]>([]);
   const [signalCountByAgent, setSignalCountByAgent] = useState<Record<string, number>>({});
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -56,7 +91,7 @@ function WatchPage() {
         supabase.from("agents").select("*").order("created_at", { ascending: false }),
         supabase
           .from("signals")
-          .select("id,ingested_at,agent_id,payload")
+          .select("id,ingested_at,agent_id,window_start,window_end,payload")
           .order("ingested_at", { ascending: false })
           .limit(50),
       ]);
@@ -73,6 +108,7 @@ function WatchPage() {
   }, []);
 
   const onlineCount = agents.filter((a) => severityFor(a) === "OK").length;
+  const agentName = (id: string) => agents.find((a) => a.id === id)?.display_name ?? "—";
 
   return (
     <DashboardLayout breadcrumb="Watch · Monitoring">
@@ -120,11 +156,16 @@ function WatchPage() {
                   <th className="text-right p-3 font-mono">Signals (recent)</th>
                   <th className="text-left p-3 font-mono">Severity</th>
                   <th className="text-left p-3 font-mono">Last seen</th>
+                  <th className="p-3" />
                 </tr>
               </thead>
               <tbody>
                 {agents.map((a) => (
-                  <tr key={a.id} className="border-t border-border/40 hover:bg-primary/5">
+                  <tr
+                    key={a.id}
+                    onClick={() => setSelectedAgent(a)}
+                    className="border-t border-border/40 hover:bg-primary/5 cursor-pointer transition"
+                  >
                     <td className="p-3 font-mono text-primary">{a.display_name}</td>
                     <td className="p-3 font-mono text-xs text-muted-foreground truncate max-w-[200px]">
                       {a.anthropic_agent_id}
@@ -135,6 +176,9 @@ function WatchPage() {
                     <td className="p-3 text-right font-mono">{signalCountByAgent[a.id] ?? 0}</td>
                     <td className="p-3"><SevBadge sev={severityFor(a)} /></td>
                     <td className="p-3 font-mono text-xs text-muted-foreground">{relativeTime(a.last_seen_at)}</td>
+                    <td className="p-3 text-muted-foreground">
+                      <ChevronRight className="h-4 w-4" />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -144,28 +188,189 @@ function WatchPage() {
       </Panel>
 
       <div className="mt-6">
-        <Panel title="Signal tail" icon={Activity} tag="last 50">
+        <Panel title="Signal tail" icon={Radio} tag={`live · last ${signals.length}`}>
           {signals.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               No signals yet. Once your shield ingests events, they show here.
             </p>
           ) : (
-            <ul className="divide-y divide-border/40 -my-2 max-h-96 overflow-y-auto">
+            <ul className="space-y-2 max-h-[28rem] overflow-y-auto pr-1">
               {signals.map((s) => (
-                <li key={s.id} className="py-2.5 grid grid-cols-[90px_1fr] gap-3">
-                  <span className="font-mono text-[11px] text-muted-foreground">
-                    {new Date(s.ingested_at).toLocaleTimeString()}
-                  </span>
-                  <div className="text-sm font-mono text-xs">
-                    <span className="text-primary">{s.payload?.kind ?? "signal"}</span>
-                    <span className="text-muted-foreground"> · {s.payload?.summary ?? JSON.stringify(s.payload)}</span>
-                  </div>
-                </li>
+                <SignalCard
+                  key={s.id}
+                  signal={s}
+                  agentName={agentName(s.agent_id)}
+                />
               ))}
             </ul>
           )}
         </Panel>
       </div>
+
+      {selectedAgent && (
+        <AgentDetailDrawer
+          agent={selectedAgent}
+          onClose={() => setSelectedAgent(null)}
+        />
+      )}
     </DashboardLayout>
+  );
+}
+
+function SignalCard({ signal, agentName }: { signal: SignalRow; agentName: string }) {
+  const [open, setOpen] = useState(false);
+  const sev = severityOfSignal(signal.payload);
+  const kind = kindOf(signal.payload);
+  const summary = summaryOf(signal.payload);
+  const toneVar =
+    sev === "CRIT" ? "danger" : sev === "WARN" ? "warning" : sev === "INFO" ? "muted-foreground" : "success";
+
+  return (
+    <li className="rounded-lg border border-border/40 bg-background/30 hover:border-primary/40 transition overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-stretch gap-3 text-left"
+      >
+        <span
+          aria-hidden
+          className="w-1 shrink-0"
+          style={{ background: `var(--${toneVar})` }}
+        />
+        <div className="flex-1 grid grid-cols-[80px_110px_1fr_auto] items-center gap-3 px-3 py-2.5 min-w-0">
+          <span className="font-mono text-[11px] text-muted-foreground">
+            {new Date(signal.ingested_at).toLocaleTimeString()}
+          </span>
+          <span
+            className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 rounded justify-self-start"
+            style={{
+              background: `color-mix(in oklab, var(--${toneVar}) 15%, transparent)`,
+              color: `var(--${toneVar})`,
+            }}
+          >
+            {kind}
+          </span>
+          <span className="text-sm text-muted-foreground truncate font-mono">
+            <span className="text-foreground/80">{agentName}</span>
+            {summary && <span className="text-muted-foreground"> · {summary}</span>}
+          </span>
+          <ChevronRight
+            className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-90" : ""}`}
+          />
+        </div>
+      </button>
+      {open && (
+        <div className="px-4 pb-4 pt-1 border-t border-border/40 bg-background/40">
+          <pre className="font-mono text-[11px] text-muted-foreground whitespace-pre-wrap break-all max-h-72 overflow-y-auto">
+            {JSON.stringify(signal.payload, null, 2)}
+          </pre>
+        </div>
+      )}
+    </li>
+  );
+}
+
+function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => void }) {
+  const [logs, setLogs] = useState<SignalRow[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("signals")
+        .select("id,ingested_at,agent_id,window_start,window_end,payload")
+        .eq("agent_id", agent.id)
+        .order("ingested_at", { ascending: false })
+        .limit(200);
+      if (!cancelled) setLogs((data as SignalRow[] | null) ?? []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [agent.id]);
+
+  const stats = useMemo(() => {
+    if (!logs) return null;
+    const sevCounts: Record<"OK" | "WARN" | "CRIT" | "INFO", number> = { OK: 0, WARN: 0, CRIT: 0, INFO: 0 };
+    logs.forEach((l) => sevCounts[severityOfSignal(l.payload)]++);
+    return { total: logs.length, OK: sevCounts.OK, WARN: sevCounts.WARN, CRIT: sevCounts.CRIT, INFO: sevCounts.INFO };
+  }, [logs]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
+      <button
+        aria-label="Close"
+        onClick={onClose}
+        className="flex-1 bg-background/70 backdrop-blur-sm"
+      />
+      <aside className="w-full max-w-2xl h-full bg-card/95 backdrop-blur-xl border-l border-border/60 flex flex-col shadow-2xl">
+        <header className="flex items-start justify-between gap-4 p-5 border-b border-border/40">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-1">// Agent detail</p>
+            <h2 className="font-display text-xl font-bold truncate">{agent.display_name}</h2>
+            <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
+              {agent.anthropic_agent_id}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="h-9 w-9 grid place-items-center rounded-md border border-border/60 hover:border-primary/60 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </header>
+
+        <div className="grid grid-cols-4 gap-2 p-5 border-b border-border/40">
+          <MiniStat label="Logs" value={stats ? String(stats.total) : "…"} tone="primary" />
+          <MiniStat label="OK" value={stats ? String(stats.OK) : "…"} tone="success" />
+          <MiniStat label="Warn" value={stats ? String(stats.WARN) : "…"} tone="warning" />
+          <MiniStat label="Crit" value={stats ? String(stats.CRIT) : "…"} tone="danger" />
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display text-sm font-bold">Recent logs</h3>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              last {logs?.length ?? 0}
+            </span>
+          </div>
+          {!logs ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : logs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No logs for this agent yet.</p>
+          ) : (
+            <ul className="space-y-2">
+              {logs.map((s) => (
+                <SignalCard key={s.id} signal={s} agentName={agent.display_name} />
+              ))}
+            </ul>
+          )}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "primary" | "success" | "warning" | "danger";
+}) {
+  const toneClass = {
+    primary: "text-primary",
+    success: "text-success",
+    warning: "text-warning",
+    danger: "text-danger",
+  }[tone];
+  return (
+    <div className="rounded-lg border border-border/40 bg-background/40 p-3">
+      <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-1">
+        {label}
+      </div>
+      <div className={`font-display text-xl font-bold ${toneClass}`}>{value}</div>
+    </div>
   );
 }
