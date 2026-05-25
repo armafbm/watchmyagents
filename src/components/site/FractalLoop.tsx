@@ -1,6 +1,7 @@
 import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 import { LayerCards } from "@/components/site/LayerCards";
+import fortressIcon from "@/assets/wma-fortress.png";
 
 type CycleStep = {
   label: string;
@@ -48,21 +49,28 @@ export function FractalLoop() {
     <section id="fractal" className="relative py-28 border-t border-border/40">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-6 relative">
-        <div className="max-w-3xl mb-16">
-          <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">
-            // Our technology
+        <div className="flex items-start gap-8 mb-16">
+          <img
+            src={fortressIcon}
+            alt="WMA Fortress shield with all-seeing eye"
+            className="hidden md:block h-32 w-auto object-contain shrink-0 animate-float"
+          />
+          <div className="max-w-3xl">
+            <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">
+              // Our technology
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Recursive <span className="text-gradient">Fractal Security Loop</span>™
+            </h2>
+            <p className="text-muted-foreground text-lg leading-relaxed mb-3">
+              A self-similar, recursive threat intelligence architecture. The same{" "}
+              <span className="text-foreground font-semibold">Watch → Guardian → Shield</span> cycle
+              runs at every hierarchical level — metrics flow up, policies flow down.
+            </p>
+            <p className="font-mono text-xs uppercase tracking-widest text-primary/80">
+              Inspired by the ISO 27 001 norm
+            </p>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Recursive <span className="text-gradient">Fractal Security Loop</span>™
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed mb-3">
-            A self-similar, recursive threat intelligence architecture. The same{" "}
-            <span className="text-foreground font-semibold">Watch → Guardian → Shield</span> cycle
-            runs at every hierarchical level — metrics flow up, policies flow down.
-          </p>
-          <p className="font-mono text-xs uppercase tracking-widest text-primary/80">
-            Inspired by the ISO 27 001 norm
-          </p>
         </div>
 
         {/* WGS */}
