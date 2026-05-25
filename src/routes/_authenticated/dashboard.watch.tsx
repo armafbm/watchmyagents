@@ -290,9 +290,9 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
 
   const stats = useMemo(() => {
     if (!logs) return null;
-    const sevCounts = { OK: 0, WARN: 0, CRIT: 0, INFO: 0 } as Record<string, number>;
+    const sevCounts: Record<"OK" | "WARN" | "CRIT" | "INFO", number> = { OK: 0, WARN: 0, CRIT: 0, INFO: 0 };
     logs.forEach((l) => sevCounts[severityOfSignal(l.payload)]++);
-    return { total: logs.length, ...sevCounts };
+    return { total: logs.length, OK: sevCounts.OK, WARN: sevCounts.WARN, CRIT: sevCounts.CRIT, INFO: sevCounts.INFO };
   }, [logs]);
 
   return (
