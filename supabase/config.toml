@@ -2,3 +2,6 @@ project_id = "kqddnrrbczrpmhnjdzmp"
 
 [functions.guardian]
 verify_jwt = false
+
+[functions.ingest-signals]
+verify_jwt = false
