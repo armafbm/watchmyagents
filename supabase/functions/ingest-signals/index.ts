@@ -106,7 +106,7 @@ serve(async (req) => {
       agent_id: agentId,
       window_start, window_end, payload,
     }).select('id').single();
-  if (signalErr) return json(500, { error: 'signal insert failed: ' + signalErr.message });
+  if (signalErr) { console.error('[ingest-signals] signal insert:', signalErr); return json(500, { error: 'internal error — signal could not be recorded' }); }
 
   // Bump freshness (fire-and-forget)
   await Promise.all([
