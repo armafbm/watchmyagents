@@ -94,7 +94,7 @@ serve(async (req) => {
         anthropic_agent_id,
         display_name: display_name || anthropic_agent_id,
       }).select('id').single();
-    if (insertErr) return json(500, { error: 'agent auto-register failed: ' + insertErr.message });
+    if (insertErr) { console.error('[ingest-signals] agent auto-register:', insertErr); return json(500, { error: 'internal error' }); }
     agentId = (created as { id: string }).id;
     registeredNew = true;
   }
