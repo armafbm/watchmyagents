@@ -59,11 +59,14 @@ serve(async (req) => {
   // Lookup the API key
   const { data: keyRow, error: keyErr } = await supabase
     .from('api_keys')
-    .select('id, customer_id, revoked_at')
+    .select('id, customer_id, revoked_at, scopes')
     .eq('hash', apiKeyHash)
     .maybeSingle();
-  if (keyErr) return json(500, { error: 'auth lookup failed' });
+  if (keyErr) { console.error('[ingest-signals] auth lookup:', keyErr); return json(500, { error: 'internal error' }); }
   if (!keyRow || keyRow.revoked_at) return json(401, { error: 'invalid api key' });
+  if (!((keyRow as { scopes?: string[] }).scopes ?? []).includes('watch:write')) {
+    return json(403, { error: 'API key lacks watch:write scope' });
+  }
   const customerId = keyRow.customer_id;
 
   // Body
