@@ -44,9 +44,11 @@ function KeysPage() {
   const create = async () => {
     setBusy(true);
     const { key, hash, prefix } = await generateApiKey();
+    const { data: u } = await supabase.auth.getUser();
+    const customer_id = u.user!.id;
     const { error } = await supabase
       .from("api_keys")
-      .insert({ label: `Key ${new Date().toLocaleDateString()}`, prefix, hash });
+      .insert({ label: `Key ${new Date().toLocaleDateString()}`, prefix, hash, customer_id });
     setBusy(false);
     if (error) {
       toast.error(error.message);

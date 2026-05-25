@@ -31,9 +31,11 @@ function Onboarding() {
   const submitStep1 = async () => {
     if (!agentId.trim()) return;
     setLoading(true);
+    const { data: u } = await supabase.auth.getUser();
+    const customer_id = u.user!.id;
     const { data, error } = await supabase
       .from("agents")
-      .insert({ anthropic_agent_id: agentId.trim(), display_name: agentId.trim() })
+      .insert({ anthropic_agent_id: agentId.trim(), display_name: agentId.trim(), customer_id })
       .select()
       .single();
     setLoading(false);
@@ -48,7 +50,11 @@ function Onboarding() {
   const generateKey = async () => {
     setLoading(true);
     const { key, hash, prefix } = await generateApiKey();
-    const { error } = await supabase.from("api_keys").insert({ label: "Default", prefix, hash });
+    const { data: u } = await supabase.auth.getUser();
+    const customer_id = u.user!.id;
+    const { error } = await supabase
+      .from("api_keys")
+      .insert({ label: "Default", prefix, hash, customer_id });
     setLoading(false);
     if (error) {
       toast.error(error.message);

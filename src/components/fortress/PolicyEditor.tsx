@@ -49,6 +49,8 @@ export function PolicyEditor({
       return;
     }
     setSaving(true);
+    const { data: u } = await supabase.auth.getUser();
+    const customer_id = u.user!.id;
     const payload = {
       ...(draft.id ? { id: draft.id } : {}),
       rule_id: ruleId.trim(),
@@ -56,7 +58,8 @@ export function PolicyEditor({
       rationale: rationale.trim() || null,
       action,
       message: message.trim() || null,
-      match: parsed as object,
+      match: parsed as never,
+      customer_id,
     };
     const { error } = await supabase.from("policies").upsert(payload);
     setSaving(false);

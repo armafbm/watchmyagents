@@ -50,17 +50,20 @@ function SuggestionsPage() {
 
   const accept = async (s: Suggestion) => {
     setBusy(s.id);
+    const { data: u } = await supabase.auth.getUser();
+    const customer_id = u.user!.id;
     const { data: pol, error } = await supabase
       .from("policies")
       .insert({
         rule_id: "guardian-" + s.id.slice(0, 8),
         name: s.title,
         rationale: s.rationale,
-        match: s.proposed_match as object,
+        match: s.proposed_match as never,
         action: s.proposed_action,
         message: s.proposed_message,
         suggested_by_guardian: true,
         suggestion_id: s.id,
+        customer_id,
       })
       .select()
       .single();
