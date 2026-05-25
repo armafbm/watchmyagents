@@ -1,7 +1,7 @@
 import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 import { LayerCards } from "@/components/site/LayerCards";
-import fortressIcon from "@/assets/wma-fortress.png";
+import fractalShieldIcon from "@/assets/fractal-security-shield.png";
 
 type CycleStep = {
   label: string;
@@ -67,7 +67,7 @@ export function FractalLoop() {
             </p>
           </div>
           <img
-            src={fortressIcon}
+            src={fractalShieldIcon}
             alt="WMA Fortress shield with all-seeing eye"
             className="hidden md:block h-80 w-auto object-contain shrink-0 animate-float"
           />
