@@ -46,7 +46,7 @@ const levels = [
 
 export function FractalLoop() {
   return (
-    <section id="fractal" className="relative py-28 border-t border-border/40">
+    <section id="fractal" className="relative py-14 border-t border-border/40">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-6 relative">
         <div className="flex items-start gap-8 mb-16">
