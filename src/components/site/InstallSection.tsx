@@ -8,27 +8,18 @@ interface Line {
 
 const steps: Line[][] = [
   [
-    { text: "npm install watchmyagent --save", type: "command" },
-    { text: "✓ watchmyagent@1.2.5 installed", type: "output" },
+    { text: "npm install -g watchmyagents", type: "command" },
+    { text: "✓ watchmyagents installed globally", type: "output" },
   ],
   [
-    { text: "export ANTHROPIC_API_KEY=\"sk-ant-xxxxxxxxxxxxx\"", type: "command" },
-    { text: "# Or: export OPENAI_API_KEY=\"sk-xxxxx\"", type: "comment" },
-    { text: "# Or: export LANGCHAIN_API_KEY=\"lc-xxxxx\"", type: "comment" },
+    { text: "export WMA_API_KEY=wma_xxx ANTHROPIC_API_KEY=sk-ant-xxx", type: "command" },
+    { text: "# WMA_API_KEY → your Watch My Agent account key", type: "comment" },
+    { text: "# ANTHROPIC_API_KEY → your framework provider key", type: "comment" },
   ],
   [
-    { text: "cat > agent.js << 'EOF'", type: "command" },
-    { text: "const watchMyAgent = require('watchmyagent');", type: "output" },
-    { text: "", type: "output" },
-    { text: "const agent = watchMyAgent.init({", type: "output" },
-    { text: "  agentId: 'agent_xxxxxxxxxxxxx',", type: "output" },
-    { text: "  apiProvider: 'anthropic'", type: "output" },
-    { text: "});", type: "output" },
-    { text: "", type: "output" },
-    { text: "agent.run({ task: 'Your task here' });", type: "output" },
-    { text: "EOF", type: "command" },
-    { text: "node agent.js", type: "command" },
+    { text: "wma-shield --agent-id agent_xxx --policies-source fortress", type: "command" },
     { text: "✓ Agent connected to WatchMyAgent", type: "output" },
+    { text: "✓ Policies loaded from Fortress", type: "output" },
     { text: "✓ Real-time monitoring active", type: "output" },
   ],
 ];
