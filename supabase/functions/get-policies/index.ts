@@ -32,10 +32,13 @@ serve(async (req) => {
   );
 
   const { data: keyRow, error: keyErr } = await supabase
-    .from('api_keys').select('id, customer_id, revoked_at')
+    .from('api_keys').select('id, customer_id, revoked_at, scopes')
     .eq('hash', apiKeyHash).maybeSingle();
-  if (keyErr) return json(500, { error: 'auth lookup failed' });
+  if (keyErr) { console.error('[get-policies] auth lookup:', keyErr); return json(500, { error: 'internal error' }); }
   if (!keyRow || keyRow.revoked_at) return json(401, { error: 'invalid api key' });
+  if (!((keyRow as { scopes?: string[] }).scopes ?? []).includes('shield:read')) {
+    return json(403, { error: 'API key lacks shield:read scope' });
+  }
   const customerId = keyRow.customer_id;
 
   let url: URL;
@@ -72,7 +75,7 @@ serve(async (req) => {
   }
 
   const { data: policies, error: policiesErr } = await query;
-  if (policiesErr) return json(500, { error: `policies lookup failed: ${policiesErr.message}` });
+  if (policiesErr) { console.error('[get-policies] policies lookup:', policiesErr); return json(500, { error: 'internal error' }); }
 
   supabase.from('api_keys')
     .update({ last_used_at: new Date().toISOString() })

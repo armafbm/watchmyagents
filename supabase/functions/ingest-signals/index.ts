@@ -59,11 +59,14 @@ serve(async (req) => {
   // Lookup the API key
   const { data: keyRow, error: keyErr } = await supabase
     .from('api_keys')
-    .select('id, customer_id, revoked_at')
+    .select('id, customer_id, revoked_at, scopes')
     .eq('hash', apiKeyHash)
     .maybeSingle();
-  if (keyErr) return json(500, { error: 'auth lookup failed' });
+  if (keyErr) { console.error('[ingest-signals] auth lookup:', keyErr); return json(500, { error: 'internal error' }); }
   if (!keyRow || keyRow.revoked_at) return json(401, { error: 'invalid api key' });
+  if (!((keyRow as { scopes?: string[] }).scopes ?? []).includes('watch:write')) {
+    return json(403, { error: 'API key lacks watch:write scope' });
+  }
   const customerId = keyRow.customer_id;
 
   // Body
@@ -91,7 +94,7 @@ serve(async (req) => {
         anthropic_agent_id,
         display_name: display_name || anthropic_agent_id,
       }).select('id').single();
-    if (insertErr) return json(500, { error: 'agent auto-register failed: ' + insertErr.message });
+    if (insertErr) { console.error('[ingest-signals] agent auto-register:', insertErr); return json(500, { error: 'internal error' }); }
     agentId = (created as { id: string }).id;
     registeredNew = true;
   }
@@ -103,7 +106,7 @@ serve(async (req) => {
       agent_id: agentId,
       window_start, window_end, payload,
     }).select('id').single();
-  if (signalErr) return json(500, { error: 'signal insert failed: ' + signalErr.message });
+  if (signalErr) { console.error('[ingest-signals] signal insert:', signalErr); return json(500, { error: 'internal error — signal could not be recorded' }); }
 
   // Bump freshness (fire-and-forget)
   await Promise.all([

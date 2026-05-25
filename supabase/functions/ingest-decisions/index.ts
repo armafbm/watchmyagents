@@ -60,10 +60,13 @@ serve(async (req) => {
   );
 
   const { data: keyRow, error: keyErr } = await supabase
-    .from('api_keys').select('id, customer_id, revoked_at')
+    .from('api_keys').select('id, customer_id, revoked_at, scopes')
     .eq('hash', apiKeyHash).maybeSingle();
-  if (keyErr) return json(500, { error: 'auth lookup failed' });
+  if (keyErr) { console.error('[ingest-decisions] auth lookup:', keyErr); return json(500, { error: 'internal error' }); }
   if (!keyRow || keyRow.revoked_at) return json(401, { error: 'invalid api key' });
+  if (!((keyRow as { scopes?: string[] }).scopes ?? []).includes('decisions:write')) {
+    return json(403, { error: 'API key lacks decisions:write scope' });
+  }
   const customerId = keyRow.customer_id;
 
   let bodyJson: unknown;
@@ -78,7 +81,7 @@ serve(async (req) => {
     .eq('customer_id', customerId)
     .eq('anthropic_agent_id', d.anthropic_agent_id)
     .maybeSingle();
-  if (agentErr) return json(500, { error: 'agent lookup failed' });
+  if (agentErr) { console.error('[ingest-decisions] agent lookup:', agentErr); return json(500, { error: 'internal error' }); }
   if (!agent) return json(404, { error: `agent "${d.anthropic_agent_id}" not registered yet — POST a signal first` });
   const agentId = (agent as { id: string }).id;
 
@@ -106,7 +109,7 @@ serve(async (req) => {
       decided_at: d.decided_at,
       decided_in_ms: d.decided_in_ms,
     }).select('id').single();
-  if (insertErr) return json(500, { error: `decision insert failed: ${insertErr.message}` });
+  if (insertErr) { console.error('[ingest-decisions] insert failed:', insertErr); return json(500, { error: 'internal error — decision could not be recorded' }); }
 
   Promise.all([
     supabase.from('agents').update({ last_seen_at: new Date().toISOString() }).eq('id', agentId),

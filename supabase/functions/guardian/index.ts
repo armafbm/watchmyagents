@@ -214,6 +214,20 @@ serve(async (req) => {
   if (req.method !== 'POST' && req.method !== 'GET') {
     return new Response('method not allowed', { status: 405, headers: corsHeaders });
   }
+  // Auth: require shared secret or service-role key
+  const guardianSecret = Deno.env.get('GUARDIAN_SECRET');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const provided = req.headers.get('x-guardian-secret') ?? '';
+  const authHeader = req.headers.get('authorization') ?? '';
+  const bearer = authHeader.match(/^Bearer\s+(.+)$/i)?.[1] ?? '';
+  const secretOk = guardianSecret && provided === guardianSecret;
+  const serviceOk = serviceRoleKey && bearer === serviceRoleKey;
+  if (!secretOk && !serviceOk) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'content-type': 'application/json' },
+    });
+  }
   try {
     const result = await runGuardian();
     return new Response(JSON.stringify(result, null, 2), {
