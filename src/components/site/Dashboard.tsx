@@ -21,7 +21,7 @@ export function Dashboard() {
           <img
             src={castleIcon}
             alt="WMA Fortress castle"
-            className="h-[28rem] md:h-[36rem] lg:h-[42rem] w-auto object-contain shrink-0 animate-float drop-shadow-[0_0_80px_hsl(var(--primary)/0.4)]"
+            className="h-64 sm:h-80 md:h-[36rem] lg:h-[42rem] w-auto max-w-full object-contain shrink-0 animate-float drop-shadow-[0_0_80px_hsl(var(--primary)/0.4)]"
           />
           <div className="max-w-3xl">
             <div className="font-mono text-sm uppercase tracking-[0.3em] text-primary mb-6">// WMA FORTRESS</div>
