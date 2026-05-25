@@ -1,7 +1,7 @@
 import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 import { LayerCards } from "@/components/site/LayerCards";
-import fractalShieldIcon from "@/assets/fractal-security-shield.png";
+import recursiveFractalLoopShield from "@/assets/recursive-fractal-loop-shield.png";
 
 type CycleStep = {
   label: string;
@@ -67,8 +67,8 @@ export function FractalLoop() {
             </p>
           </div>
           <img
-            src={fractalShieldIcon}
-            alt="WMA Fortress shield with all-seeing eye"
+            src={recursiveFractalLoopShield}
+            alt="Recursive Fractal Security Loop shield icon"
             className="hidden md:block h-80 w-auto object-contain shrink-0 animate-float"
           />
         </div>
