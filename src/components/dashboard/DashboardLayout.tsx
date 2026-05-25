@@ -105,6 +105,13 @@ export function DashboardLayout({
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
+  const notif = useNotificationCounts();
+  const operations: NavItem[] = baseOperations.map((item) =>
+    item.to === "/dashboard/shield" && notif.shield > 0
+      ? { ...item, badge: notif.shield }
+      : item
+  );
+  const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
 
   return (
     <div className="min-h-screen flex bg-background relative overflow-hidden">
