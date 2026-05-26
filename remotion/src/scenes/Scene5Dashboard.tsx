@@ -111,7 +111,7 @@ export const Scene5Dashboard: React.FC = () => {
                   <div>Signal</div>
                 </div>
                 {incidents.map((inc, i) => (
-                  <Sequence key={i} from={inc.t} durationInFrames={480 - inc.t}>
+                  <Sequence key={i} from={inc.t} durationInFrames={480 - inc.t} layout="none">
                     <Row {...inc} />
                   </Sequence>
                 ))}

@@ -53,7 +53,7 @@ export const Scene2Problem: React.FC = () => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 1400 }}>
         {alerts.map((a, i) => (
-          <Sequence key={i} from={a.t} durationInFrames={300 - a.t}>
+          <Sequence key={i} from={a.t} durationInFrames={300 - a.t} layout="none">
             <AlertRow {...a} />
           </Sequence>
         ))}
