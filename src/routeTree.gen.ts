@@ -25,6 +25,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicEarlyAccessRouteImport } from './routes/api/public/early-access'
 import { Route as AuthenticatedDashboardWatchRouteImport } from './routes/_authenticated/dashboard.watch'
 import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_authenticated/dashboard.shield'
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
@@ -117,6 +118,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEarlyAccessRoute = ApiPublicEarlyAccessRouteImport.update({
+  id: '/api/public/early-access',
+  path: '/api/public/early-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardWatchRoute =
   AuthenticatedDashboardWatchRouteImport.update({
     id: '/watch',
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/_authenticated/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
   '/_authenticated/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
+  '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
+    | '/api/public/early-access'
     | '/lovable/email/suppression'
     | '/dashboard/'
     | '/dashboard/settings/keys'
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/shield'
     | '/dashboard/watch'
+    | '/api/public/early-access'
     | '/lovable/email/suppression'
     | '/dashboard'
     | '/dashboard/settings/keys'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/reports'
     | '/_authenticated/dashboard/shield'
     | '/_authenticated/dashboard/watch'
+    | '/api/public/early-access'
     | '/lovable/email/suppression'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/settings/keys'
@@ -367,6 +379,7 @@ export interface RootRouteChildren {
   AuthSigninRoute: typeof AuthSigninRoute
   AuthSignupRoute: typeof AuthSignupRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ApiPublicEarlyAccessRoute: typeof ApiPublicEarlyAccessRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -487,6 +500,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/suppression'
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/early-access': {
+      id: '/api/public/early-access'
+      path: '/api/public/early-access'
+      fullPath: '/api/public/early-access'
+      preLoaderRoute: typeof ApiPublicEarlyAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard/watch': {
@@ -623,6 +643,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSigninRoute: AuthSigninRoute,
   AuthSignupRoute: AuthSignupRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ApiPublicEarlyAccessRoute: ApiPublicEarlyAccessRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
