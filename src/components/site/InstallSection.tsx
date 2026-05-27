@@ -237,21 +237,21 @@ export function InstallSection() {
         {/* Split layout */}
         <div className="grid lg:grid-cols-2 gap-8 items-stretch">
           {/* LEFT — Explanation */}
-          <div className="flex flex-col justify-center">
-            <div className="space-y-6">
+          <div className="flex flex-col justify-center min-w-0">
+            <div className="space-y-6 min-w-0">
               <div className="font-mono text-xs uppercase tracking-widest" style={{ color: BLUE_ACCENT }}>
                 Step 03 / 03 — Deploy
               </div>
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 sm:gap-4 min-w-0">
                 <div
-                  className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border"
+                  className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border"
                   style={{ borderColor: `${BLUE_ACCENT}55`, background: `${BLUE_ACCENT}15` }}
                 >
-                  <Rocket className="w-6 h-6" style={{ color: BLUE_ACCENT }} />
+                  <Rocket className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: BLUE_ACCENT }} />
                 </div>
-                <div>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-2">Wrap, run, observe</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 break-words">Wrap, run, observe</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                     Initialize once with your agentId. Every prompt, tool call and response is now streamed to your Fortress in real time.
                   </p>
 
@@ -261,16 +261,16 @@ export function InstallSection() {
                       { n: 2, title: "Watch My Agent API key", desc: "The key tied to your Watch My Agent account." },
                       { n: 3, title: "Agent ID from your framework console", desc: "The unique identifier of the agent you created in the framework console." },
                     ].map((item) => (
-                      <li key={item.n} className="flex gap-3">
+                      <li key={item.n} className="flex gap-3 min-w-0">
                         <div
                           className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold"
                           style={{ background: `${BLUE_ACCENT}20`, color: BLUE_ACCENT }}
                         >
                           {item.n}
                         </div>
-                        <div className="text-sm">
-                          <div className="font-semibold">{item.title}</div>
-                          <div className="text-muted-foreground">{item.desc}</div>
+                        <div className="text-sm min-w-0 flex-1">
+                          <div className="font-semibold break-words">{item.title}</div>
+                          <div className="text-muted-foreground break-words">{item.desc}</div>
                         </div>
                       </li>
                     ))}
@@ -280,6 +280,8 @@ export function InstallSection() {
 
             </div>
           </div>
+
+
 
           {/* RIGHT — Live terminal */}
           <div>
