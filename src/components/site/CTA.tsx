@@ -1,6 +1,41 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function CTA() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const value = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value) || value.length > 255) {
+      toast.error("Please enter a valid email.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.from("early_access_signups").insert({
+      email: value,
+      source: "landing_cta",
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
+    });
+    setLoading(false);
+    if (error) {
+      if (error.code === "23505") {
+        setDone(true);
+        toast.success("You're already on the list — we'll be in touch.");
+        return;
+      }
+      toast.error("Something went wrong. Please try again.");
+      return;
+    }
+    setDone(true);
+    setEmail("");
+    toast.success("You're in. We'll be in touch shortly.");
+  };
+
   return (
     <section id="cta" className="relative py-14">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
@@ -12,20 +47,31 @@ export function CTA() {
           Join the early-access program and deploy Watch + Shield on your production agents
           in days, not quarters.
         </p>
-        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-          <input
-            type="email"
-            required
-            placeholder="you@company.com"
-            className="flex-1 px-4 py-3 rounded-md bg-input border border-border focus:border-primary focus:outline-none font-mono text-sm"
-          />
-          <button
-            type="submit"
-            className="px-6 py-3 rounded-md font-mono text-sm uppercase tracking-widest bg-primary text-primary-foreground hover:opacity-90 transition glow-cyan"
-          >
-            Request Access
-          </button>
-        </form>
+        {done ? (
+          <div className="max-w-md mx-auto border-gradient rounded-md p-5 font-mono text-sm">
+            <span className="text-primary">✓</span> Request received. We'll reach out from{" "}
+            <span className="text-primary">minedor@watchmyagents.com</span>.
+          </div>
+        ) : (
+          <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              maxLength={255}
+              placeholder="you@company.com"
+              className="flex-1 px-4 py-3 rounded-md bg-input border border-border focus:border-primary focus:outline-none font-mono text-sm"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3 rounded-md font-mono text-sm uppercase tracking-widest bg-primary text-primary-foreground hover:opacity-90 transition glow-cyan disabled:opacity-60"
+            >
+              {loading ? "Sending…" : "Request Access"}
+            </button>
+          </form>
+        )}
         <p className="text-xs text-muted-foreground mt-6 font-mono">
           Or email <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">minedor@watchmyagents.com</a>
         </p>
@@ -33,6 +79,7 @@ export function CTA() {
     </section>
   );
 }
+
 
 export function Footer() {
   return (
