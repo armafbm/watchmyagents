@@ -98,14 +98,14 @@ function LocalNode({
   desc: string;
 }) {
   return (
-    <div className="relative lg:w-44 shrink-0 rounded-2xl border-2 border-primary/40 bg-background/70 p-4 flex flex-col items-center text-center shadow-[0_0_25px_-12px_hsl(var(--primary)/0.5)]">
+    <div className="relative lg:w-56 shrink-0 rounded-2xl border-2 border-primary/40 bg-background/70 p-5 flex flex-col items-center text-center shadow-[0_0_25px_-12px_hsl(var(--primary)/0.5)]">
       <div className="absolute -top-2.5 px-2 py-0.5 rounded-full bg-primary/15 border border-primary/50 flex items-center gap-1">
         <Cpu className="h-3 w-3 text-primary" />
         <span className="font-mono text-[9px] uppercase tracking-widest text-primary">Local</span>
       </div>
-      <LayerIcon layer={layer} className="h-12 w-12 mt-1 mb-2" />
-      <div className="font-display font-bold text-base">{title}</div>
-      <p className="text-[11px] text-muted-foreground leading-snug mt-1">{desc}</p>
+      <LayerIcon layer={layer} className="h-24 w-24 mt-2 mb-3" />
+      <div className="font-display font-bold text-xl">{title}</div>
+      <p className="text-xs text-muted-foreground leading-snug mt-1.5">{desc}</p>
     </div>
   );
 }
