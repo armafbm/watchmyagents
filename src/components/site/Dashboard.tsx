@@ -103,6 +103,39 @@ export function Dashboard() {
             </div>
           </div>
 
+          {/* Sentinel Knight — on watch */}
+          <div className="border-gradient rounded-2xl p-6 lg:col-span-2 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-primary icon-neon-glow" />
+                <h3 className="font-display font-bold">Sentinel.Knight · on watch</h3>
+              </div>
+              <span className="font-mono text-[10px] text-primary uppercase tracking-widest flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                active · eu-west-3
+              </span>
+            </div>
+            <div className="rounded-lg border border-border bg-background/40 p-5">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">sentinel.knight · on watch</div>
+              <div className="text-xl md:text-2xl font-display font-bold mb-3">
+                Observing <span className="text-gradient">247 agents</span>.
+              </div>
+              <div className="font-mono text-xs text-muted-foreground mb-4">
+                18 412 actions · 326 blocked · last 24h.
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded bg-primary/15 text-primary">⚡ 18.4k actions</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded bg-success/15 text-success">● 247 online</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded bg-destructive/15 text-destructive">⛔ 326 blocked</span>
+              </div>
+            </div>
+            <div className="mt-5 grid grid-cols-3 gap-2">
+              <QuickAction label="Shield" sub="Manage policies" />
+              <QuickAction label="Guardian" sub="Review suggestions" />
+              <QuickAction label="Keys" sub="Manage API keys" />
+            </div>
+          </div>
+
           {/* Guardian inbox */}
           <div className="border-gradient rounded-2xl p-6 relative overflow-hidden">
             <div className="flex items-center justify-between mb-5">
@@ -110,12 +143,19 @@ export function Dashboard() {
                 <Inbox className="h-4 w-4 text-primary icon-neon-glow" />
                 <h3 className="font-display font-bold">Guardian inbox</h3>
               </div>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-warning">pending</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-warning">3 pending</span>
             </div>
-            <div className="font-display text-5xl font-bold text-gradient mb-2">0</div>
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-              suggestions waiting
-            </div>
+            <ul className="space-y-2.5 mb-4">
+              {suggestions.map((s) => (
+                <li key={s.title} className="flex items-start gap-2.5 rounded-lg border border-border bg-background/40 p-2.5">
+                  <span className={`font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded mt-0.5 ${sevStyle[s.sev]}`}>{s.sev}</span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-display font-bold leading-tight truncate">{s.title}</div>
+                    <div className="font-mono text-[10px] text-muted-foreground truncate">{s.agent}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
             <button className="w-full text-xs font-mono uppercase tracking-widest py-2 rounded border border-border hover:border-primary">
               Open Guardian inbox →
             </button>
@@ -128,16 +168,22 @@ export function Dashboard() {
                 <Activity className="h-4 w-4 text-primary icon-neon-glow" />
                 <h3 className="font-display font-bold">Live timeline</h3>
               </div>
-              <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">realtime</span>
+              <span className="font-mono text-[10px] text-primary uppercase tracking-widest flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                realtime
+              </span>
             </div>
-            <div className="rounded-lg border border-dashed border-border p-8 text-center">
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                No decisions yet
-              </div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                Once your shield runs, decisions appear here in realtime.
-              </div>
-            </div>
+            <ul className="divide-y divide-border/60 rounded-lg border border-border bg-background/40">
+              {timeline.map((e, i) => (
+                <li key={i} className="flex items-center gap-3 px-3 py-2">
+                  <span className="font-mono text-[10px] text-muted-foreground w-16 shrink-0">{e.t}</span>
+                  <e.icon className={`h-3.5 w-3.5 shrink-0 ${toneColor[e.tone]}`} />
+                  <span className={`font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0 ${e.tone === "danger" ? "bg-destructive/15 text-destructive" : e.tone === "warn" ? "bg-warning/15 text-warning" : e.tone === "ok" ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground"}`}>{e.tag}</span>
+                  <span className="font-mono text-[11px] text-muted-foreground truncate hidden sm:inline">{e.agent}</span>
+                  <span className="text-xs flex-1 truncate">{e.msg}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Quick actions */}
@@ -161,6 +207,7 @@ export function Dashboard() {
               ))}
             </ul>
           </div>
+
 
           {/* Intelligence row */}
           <div className="lg:col-span-3 grid md:grid-cols-3 gap-5">
