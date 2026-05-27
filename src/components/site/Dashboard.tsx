@@ -1,11 +1,26 @@
-import { Shield, Inbox, Activity, Zap, FileText, Radar, BadgeCheck } from "lucide-react";
+import { Shield, Inbox, Activity, Zap, FileText, Radar, BadgeCheck, Check, Ban, AlertTriangle, Eye } from "lucide-react";
 import castleIcon from "@/assets/wma-fortress-castle-cutout.png";
 
 const kpis = [
-  { label: "Agents protected", value: "0" },
-  { label: "Actions · 24h", value: "0" },
-  { label: "Blocked · 24h", value: "0" },
-  { label: "Tokens · 24h", value: "0" },
+  { label: "Agents protected", value: "247" },
+  { label: "Actions · 24h", value: "18.4k" },
+  { label: "Blocked · 24h", value: "326" },
+  { label: "Tokens · 24h", value: "4.2M" },
+];
+
+const timeline = [
+  { t: "12:42:08", icon: Ban, tone: "danger", agent: "agent.sales-copilot", msg: "Blocked · prompt injection attempt", tag: "SHIELD" },
+  { t: "12:41:55", icon: Check, tone: "ok", agent: "agent.support-bot", msg: "Allowed · refund query (policy v3.2)", tag: "ALLOW" },
+  { t: "12:41:31", icon: AlertTriangle, tone: "warn", agent: "agent.research-001", msg: "Flagged · PII in tool call args", tag: "GUARDIAN" },
+  { t: "12:41:02", icon: Check, tone: "ok", agent: "agent.ops-runner", msg: "Allowed · scheduled task #4821", tag: "ALLOW" },
+  { t: "12:40:47", icon: Ban, tone: "danger", agent: "agent.sales-copilot", msg: "Blocked · exfil pattern on /export", tag: "SHIELD" },
+  { t: "12:40:12", icon: Eye, tone: "info", agent: "agent.support-bot", msg: "Observed · 142 msgs · latency 412ms", tag: "WATCH" },
+];
+
+const suggestions = [
+  { sev: "high", title: "Tighten data-egress policy", agent: "agent.sales-copilot" },
+  { sev: "med", title: "Rotate API key (38d old)", agent: "agent.ops-runner" },
+  { sev: "low", title: "Enable PII redaction on logs", agent: "agent.support-bot" },
 ];
 
 const intel = [
@@ -13,6 +28,19 @@ const intel = [
   { icon: Radar, status: "SOON", title: "Threat Intel", desc: "Live feeds, IOCs and adversary playbooks." },
   { icon: BadgeCheck, status: "SOON", title: "Compliance", desc: "SOC2 · ISO27001 · EU AI Act mapping." },
 ];
+
+const toneColor: Record<string, string> = {
+  ok: "text-primary",
+  danger: "text-destructive",
+  warn: "text-warning",
+  info: "text-muted-foreground",
+};
+
+const sevStyle: Record<string, string> = {
+  high: "bg-destructive/15 text-destructive",
+  med: "bg-warning/15 text-warning",
+  low: "bg-primary/15 text-primary",
+};
 
 export function Dashboard() {
   return (
