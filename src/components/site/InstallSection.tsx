@@ -323,9 +323,10 @@ export function InstallSection() {
 
               {/* Terminal body */}
               <div
-                className="p-5 md:p-6 font-mono text-[13px] leading-relaxed min-h-[420px] overflow-x-auto"
+                className="p-4 sm:p-5 md:p-6 font-mono text-[11px] sm:text-[13px] leading-relaxed min-h-[320px] sm:min-h-[420px] overflow-x-auto"
                 style={{ background: "#0b1220", color: "#cfe3ff" }}
               >
+
                 {displayedLines.map((line, idx) => (
                   <div
                     key={`${idx}-${line.text}`}
