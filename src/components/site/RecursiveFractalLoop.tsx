@@ -1,4 +1,4 @@
-import { Infinity as InfinityIcon, ShieldCheck } from "lucide-react";
+import { Infinity as InfinityIcon, ShieldCheck, Bot, Users, Network, Building2 } from "lucide-react";
 import { LayerCards } from "@/components/site/LayerCards";
 
 export function RecursiveFractalLoop() {
