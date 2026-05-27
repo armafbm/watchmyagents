@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Play, Pause, RotateCcw, CheckCircle, Terminal, Package, Key, Rocket } from "lucide-react";
 
 interface Line {
@@ -6,17 +6,11 @@ interface Line {
   type: "command" | "output" | "comment";
 }
 
+// 3 commands only — no WMA key export in the landing demo
 const steps: Line[][] = [
-  [
-    { text: "npm install -g watchmyagents", type: "command" },
-  ],
-  [
-    { text: "export ANTHROPIC_API_KEY=\"sk-ant-...\"", type: "command" },
-    { text: "export WMA_API_KEY=\"wma_147e3a5d2eae405bb4279e13aeb4e461\"", type: "command" },
-  ],
-  [
-    { text: "wma-shield --agent-id agent_01XaNB4M88ZvcW8FoQ5GC14A", type: "command" },
-  ],
+  [{ text: "npm install -g watchmyagents", type: "command" }],
+  [{ text: "export ANTHROPIC_API_KEY=\"sk-ant-...\"", type: "command" }],
+  [{ text: "wma-shield --agent-id agent_01XaNB4M88ZvcW8FoQ5GC14A", type: "command" }],
 ];
 
 const explanations = [
@@ -44,7 +38,6 @@ const TYPING_SPEED = 35;
 const STEP_PAUSE = 800;
 const LINE_PAUSE = 300;
 
-// Tuned blue palette — replaces the previous purple band
 const BLUE_BAND = "linear-gradient(90deg, oklch(0.32 0.18 250), oklch(0.42 0.20 235))";
 const BLUE_ACCENT = "oklch(0.72 0.18 235)";
 
@@ -54,119 +47,92 @@ export function InstallSection() {
   const [charIndex, setCharIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isComplete, setIsComplete] = useState(false);
-  const [displayedLines, setDisplayedLines] = useState<{ text: string; type: "command" | "output" | "comment" }[]>([]);
-  const [cursorLine, setCursorLine] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Derive displayed lines from step/line state — never duplicate
+  const displayedLines = useMemo(() => {
+    const lines: Line[] = [];
+    for (let s = 0; s < currentStep - 1; s++) {
+      lines.push(...steps[s]);
+    }
+    for (let l = 0; l < currentLine - 1; l++) {
+      if (steps[currentStep - 1]?.[l]) {
+        lines.push(steps[currentStep - 1][l]);
+      }
+    }
+    return lines;
+  }, [currentStep, currentLine]);
+
+  const cursorLine = displayedLines.length;
+  const activeStep = isComplete ? steps.length : currentStep;
 
   const reset = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setCurrentStep(1);
     setCurrentLine(1);
-    setCharIndex(1);
+    setCharIndex(0);
     setIsPlaying(true);
     setIsComplete(false);
-    setDisplayedLines([]);
-    setCursorLine(0);
   }, []);
 
   const play = useCallback(() => setIsPlaying(true), []);
   const pause = useCallback(() => setIsPlaying(false), []);
 
-  useEffect(() => {
-    if (!isPlaying || isComplete) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-
-    const currentStepLines = steps[currentStep - 1];
-    if (!currentStepLines) {
-      setIsComplete(true);
-      setIsPlaying(false);
-      return;
-    }
-
-    const currentLineObj = currentStepLines[currentLine - 1];
-    if (!currentLineObj) {
-      timeoutRef.current = setTimeout(() => {
-        if (currentStep < steps.length) {
-          setCurrentStep((s) => s + 1);
-          setCurrentLine(1);
-          setCharIndex(1);
-        } else {
-          setIsComplete(true);
-          setIsPlaying(false);
-        }
-      }, STEP_PAUSE);
-      return;
-    }
-
-    setCursorLine(displayedLines.length);
-
-    intervalRef.current = setInterval(() => {
-      setCharIndex((prev) => {
-        if (prev >= currentLineObj.text.length) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          timeoutRef.current = setTimeout(() => {
-            setDisplayedLines((prevLines) => [
-              ...prevLines,
-              { text: currentLineObj.text, type: currentLineObj.type },
-            ]);
-            setCurrentLine((prevL) => prevL + 1);
-            return 1;
-          }, LINE_PAUSE);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, TYPING_SPEED);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [isPlaying, currentStep, currentLine, isComplete, displayedLines.length]);
-
+  // Cursor blink — independent of typing
   useEffect(() => {
     const blink = setInterval(() => setShowCursor((s) => !s), 800);
     return () => clearInterval(blink);
   }, []);
 
-  const activeStep = isComplete ? steps.length : currentStep;
+  // Main typing animation
+  useEffect(() => {
+    if (!isPlaying || isComplete) return;
+
+    const currentStepLines = steps[currentStep - 1];
+    if (!currentStepLines) {
+      setIsComplete(true);
+      return;
+    }
+
+    const currentLineObj = currentStepLines[currentLine - 1];
+
+    // No more lines in this step → pause then advance step
+    if (!currentLineObj) {
+      const timeout = setTimeout(() => {
+        if (currentStep < steps.length) {
+          setCurrentStep((s) => s + 1);
+          setCurrentLine(1);
+          setCharIndex(0);
+        } else {
+          setIsComplete(true);
+          setIsPlaying(false);
+        }
+      }, STEP_PAUSE);
+      return () => clearTimeout(timeout);
+    }
+
+    // Current line fully typed → pause then advance line
+    if (charIndex >= currentLineObj.text.length) {
+      const timeout = setTimeout(() => {
+        setCurrentLine((l) => l + 1);
+        setCharIndex(0);
+      }, LINE_PAUSE);
+      return () => clearTimeout(timeout);
+    }
+
+    // Type next character
+    const timeout = setTimeout(() => {
+      setCharIndex((prev) => prev + 1);
+    }, TYPING_SPEED);
+
+    return () => clearTimeout(timeout);
+  }, [isPlaying, currentStep, currentLine, charIndex, isComplete]);
 
   const jumpToStep = (stepNum: number) => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    const prevLines: { text: string; type: "command" | "output" | "comment" }[] = [];
-    for (let s = 0; s < stepNum - 1; s++) {
-      steps[s].forEach((l) => prevLines.push({ text: l.text, type: l.type }));
-    }
-    setDisplayedLines(prevLines);
     setCurrentStep(stepNum);
     setCurrentLine(1);
-    setCharIndex(1);
+    setCharIndex(0);
     setIsComplete(false);
     setIsPlaying(true);
-  };
-
-  const renderLineContent = (line: Line, index: number) => {
-    const isTypingLine = index === cursorLine && !isComplete && isPlaying;
-    const visibleChars = isTypingLine ? charIndex : line.text.length;
-    const visibleText = line.text.slice(0, visibleChars);
-    return (
-      <span>
-        {line.type === "command" && <span style={{ color: BLUE_ACCENT }} className="mr-2">$</span>}
-        {visibleText}
-        {isTypingLine && (
-          <span
-            className="inline-block w-[8px] h-[1.1em] align-middle ml-[1px]"
-            style={{ background: BLUE_ACCENT, opacity: showCursor ? 1 : 0.2, verticalAlign: "text-bottom" }}
-          />
-        )}
-      </span>
-    );
   };
 
   const activeExplanation = explanations[activeStep - 1] ?? explanations[explanations.length - 1];
@@ -281,11 +247,8 @@ export function InstallSection() {
             </div>
           </div>
 
-
-
           {/* RIGHT — Live terminal */}
           <div className="min-w-0">
-
             <div
               className="rounded-xl overflow-hidden border border-border/50 shadow-2xl"
               style={{ boxShadow: "var(--shadow-card)" }}
@@ -323,14 +286,14 @@ export function InstallSection() {
 
               {/* Terminal body */}
               <div
-                className="p-4 sm:p-5 md:p-6 font-mono text-[11px] sm:text-[13px] leading-relaxed min-h-[320px] sm:min-h-[420px] overflow-x-auto"
+                className="p-4 sm:p-5 md:p-6 font-mono text-[11px] sm:text-[13px] leading-relaxed min-h-[280px] sm:min-h-[380px]"
                 style={{ background: "#0b1220", color: "#cfe3ff" }}
               >
-
+                {/* Completed lines */}
                 {displayedLines.map((line, idx) => (
                   <div
                     key={`${idx}-${line.text}`}
-                    className="whitespace-pre"
+                    className="break-all"
                     style={{
                       color:
                         line.type === "command"
@@ -347,9 +310,10 @@ export function InstallSection() {
                   </div>
                 ))}
 
+                {/* Currently typing line */}
                 {!isComplete && isPlaying && steps[currentStep - 1]?.[currentLine - 1] && (
                   <div
-                    className="whitespace-pre"
+                    className="break-all"
                     style={{
                       color:
                         steps[currentStep - 1][currentLine - 1].type === "command"
@@ -359,7 +323,18 @@ export function InstallSection() {
                           : "#dbeafe",
                     }}
                   >
-                    {renderLineContent(steps[currentStep - 1][currentLine - 1], cursorLine)}
+                    {steps[currentStep - 1][currentLine - 1].type === "command" && (
+                      <span style={{ color: BLUE_ACCENT }} className="mr-2">$</span>
+                    )}
+                    {steps[currentStep - 1][currentLine - 1].text.slice(0, charIndex)}
+                    <span
+                      className="inline-block w-[8px] h-[1.1em] align-middle ml-[1px]"
+                      style={{
+                        background: BLUE_ACCENT,
+                        opacity: showCursor ? 1 : 0.2,
+                        verticalAlign: "text-bottom",
+                      }}
+                    />
                   </div>
                 )}
               </div>
@@ -405,7 +380,6 @@ export function InstallSection() {
                       )}
                       <span className="uppercase tracking-wider truncate">{label}</span>
                     </button>
-
                   );
                 })}
               </div>

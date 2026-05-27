@@ -21,6 +21,15 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 const SITE_NAME = "watchmyagents"
 const ROOT_DOMAIN = "watchmyagents.com"
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return result === 0
+}
+
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
@@ -75,7 +84,8 @@ export const Route = createFileRoute("/lovable/email/auth/preview")({
 
         // Verify the caller is authorized with LOVABLE_API_KEY
         const authHeader = request.headers.get('Authorization')
-        if (!authHeader || authHeader !== `Bearer ${apiKey}`) {
+        const expected = `Bearer ${apiKey}`
+        if (!authHeader || !timingSafeEqual(authHeader, expected)) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
