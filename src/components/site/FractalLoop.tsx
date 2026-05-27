@@ -1,168 +1,41 @@
-import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
-import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
-import { LayerCards } from "@/components/site/LayerCards";
+import { Cpu, Cloud } from "lucide-react";
 import { ArchitectureDiagram } from "@/components/site/ArchitectureDiagram";
 import recursiveFractalLoopShield from "@/assets/recursive-fractal-loop-shield-clean.png";
-
-type CycleStep = {
-  label: string;
-  desc: string;
-  layer?: LayerKey;
-  icon?: typeof RefreshCw;
-};
-
-const cycle: CycleStep[] = [
-  { layer: "watch", label: "Watch", desc: "Observes logs, traces, drift, token burn, latency." },
-  { layer: "guardian", label: "Guardian", desc: "Analyzes risk, reports findings, suggests policies." },
-  { layer: "shield", label: "Shield", desc: "Enforces rate limits, sandboxing, isolation, auto-remediation." },
-  { icon: RefreshCw, label: "Re-Watch", desc: "Measures policy efficacy and feeds Guardian back." },
-];
-
-const levels = [
-  {
-    icon: User,
-    tag: "Level 1",
-    title: "Unitary Agent",
-    desc: "Per-agent behavior: drift, anomaly signals, API call patterns, token burn.",
-  },
-  {
-    icon: Users,
-    tag: "Level 2",
-    title: "Team Intelligence",
-    desc: "Inter-agent communication, shared resources, cascade risks, RBAC, quotas.",
-  },
-  {
-    icon: Layers,
-    tag: "Level 3",
-    title: "Fleet Intelligence",
-    desc: "Cross-agent patterns at fleet scale (10 → 1000+): dependencies, auto-scaling.",
-  },
-  {
-    icon: Globe,
-    tag: "Level 4",
-    title: "Global Intelligence",
-    desc: "Anonymized meta-learning across all users: universal threat signatures, zero-day indicators.",
-  },
-];
 
 export function FractalLoop() {
   return (
     <section id="fractal" className="relative py-14 border-t border-border/40">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
-        <div className="flex items-start gap-8 mb-16">
+        <div className="flex items-start gap-8 mb-12">
           <div className="max-w-3xl">
-            <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">
-              // Our technology
-            </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Recursive <span className="text-gradient">Fractal Security Loop</span>™
+              How it <span className="text-gradient">works</span>
             </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed mb-3">
-              A self-similar, recursive threat intelligence architecture. The same{" "}
-              <span className="text-foreground font-semibold">Watch → Guardian → Shield</span> cycle
-              runs at every hierarchical level — metrics flow up, policies flow down.
-            </p>
-            <p className="font-mono text-xs uppercase tracking-widest text-primary/80">
-              Inspired by the ISO 27 001 norm
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              Watch and Shield run <span className="text-foreground font-semibold">locally on your machine</span>. Guardian runs in the cloud on anonymized data. You stay in control.
             </p>
           </div>
           <img
             src={recursiveFractalLoopShield}
-            alt="Recursive Fractal Security Loop shield icon"
-            className="hidden md:block h-80 w-auto object-contain shrink-0 animate-float"
+            alt="WatchMyAgents shield"
+            className="hidden md:block h-48 w-auto object-contain shrink-0 animate-float"
           />
         </div>
 
-        {/* WGS */}
-        <div className="mb-20">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            01 — WGS
+        {/* Legend */}
+        <div className="flex flex-wrap gap-6 mb-8">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Cpu className="h-4 w-4 text-primary" />
+            <span>Runs on your computer</span>
           </div>
-          <LayerCards />
-        </div>
-
-        {/* Full architecture loop */}
-        <div className="mb-20">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            02 — Full system loop · Watch · Guardian · Shield · Fortress
-          </div>
-          <ArchitectureDiagram />
-        </div>
-
-        {/* Fractal levels */}
-        <div className="mb-20">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-            03 — Four fractal levels
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {levels.map((l) => (
-              <div
-                key={l.tag}
-                className="border border-border/60 rounded-xl p-6 bg-card/40 backdrop-blur-sm hover:border-primary/40 transition-colors"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <l.icon className="h-6 w-6 text-primary icon-neon-glow" />
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {l.tag}
-                  </span>
-                </div>
-                <h3 className="font-display text-lg font-bold mb-2">{l.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{l.desc}</p>
-              </div>
-            ))}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Cloud className="h-4 w-4 text-accent" />
+            <span>Runs in the cloud</span>
           </div>
         </div>
 
-        {/* Bidirectional flow */}
-        <div className="grid lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-              04 — Bidirectional data flow
-            </div>
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
-              Metrics flow up. Policies flow down.
-            </h3>
-            <ul className="space-y-3 text-muted-foreground">
-              <li className="flex gap-3">
-                <ArrowUp className="h-5 w-5 text-primary shrink-0 mt-0.5 icon-neon-glow" />
-                <span>
-                  <span className="text-foreground font-semibold">Upward:</span> metrics aggregate
-                  agent → team → fleet → global.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <ArrowDown className="h-5 w-5 text-primary shrink-0 mt-0.5 icon-neon-glow" />
-                <span>
-                  <span className="text-foreground font-semibold">Downward:</span> learned policies
-                  cascade global → fleet → team → agent.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <RefreshCw className="h-5 w-5 text-primary shrink-0 mt-0.5 icon-neon-glow" />
-                <span>
-                  <span className="text-foreground font-semibold">Continuous:</span> real-time
-                  closed loop at every level — no dead-ends, no manual relay.
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="border-gradient rounded-xl p-6 font-mono text-xs leading-relaxed bg-background/60">
-            <pre className="text-muted-foreground overflow-x-auto">{`Level 4  ── Global
-   ↑ anonymized metrics  ↓ collective learning
-Level 3  ── Fleet
-   ↑ fleet context       ↓ fleet policies
-Level 2  ── Team
-   ↑ team constraints    ↓ team policies
-Level 1  ── Agent
-   ↑ individual metrics  ↓ agent policies`}</pre>
-          </div>
-        </div>
-
-        <p className="mt-16 text-xs font-mono text-muted-foreground/70">
-          Fractal Security Loop™ — trademark of WatchMyAgents · PCT pending (filed 05/23/2026).
-        </p>
+        <ArchitectureDiagram />
       </div>
     </section>
   );
