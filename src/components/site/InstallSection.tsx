@@ -284,7 +284,8 @@ export function InstallSection() {
 
 
           {/* RIGHT — Live terminal */}
-          <div>
+          <div className="min-w-0">
+
             <div
               className="rounded-xl overflow-hidden border border-border/50 shadow-2xl"
               style={{ boxShadow: "var(--shadow-card)" }}
