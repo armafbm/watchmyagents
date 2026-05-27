@@ -377,7 +377,7 @@ export function InstallSection() {
                     <button
                       key={stepNum}
                       onClick={() => jumpToStep(stepNum)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-mono transition-all"
+                      className="flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-md text-[11px] sm:text-xs font-mono transition-all"
                       style={{
                         background: isActive
                           ? `${BLUE_ACCENT}25`
@@ -399,12 +399,13 @@ export function InstallSection() {
                       }}
                     >
                       {isDone ? (
-                        <CheckCircle className="w-3.5 h-3.5" />
+                        <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                       ) : (
-                        <span className="font-bold">0{stepNum}</span>
+                        <span className="font-bold shrink-0">0{stepNum}</span>
                       )}
-                      <span className="uppercase tracking-wider">{label}</span>
+                      <span className="uppercase tracking-wider truncate">{label}</span>
                     </button>
+
                   );
                 })}
               </div>
