@@ -28,6 +28,7 @@ import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
 import { Route as AuthenticatedDashboardLegionsRouteImport } from './routes/_authenticated/dashboard.legions'
 import { Route as AuthenticatedDashboardGuardianRouteImport } from './routes/_authenticated/dashboard.guardian'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as AuthenticatedDashboardSettingsKeysRouteImport } from './routes/_authenticated/dashboard.settings.keys'
 
 const TermsRoute = TermsRouteImport.update({
@@ -130,6 +131,12 @@ const AuthenticatedDashboardGuardianRoute =
     path: '/guardian',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedDashboardSettingsKeysRoute =
   AuthenticatedDashboardSettingsKeysRouteImport.update({
     id: '/settings/keys',
@@ -157,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,6 +185,7 @@ export interface FileRoutesByTo {
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -200,6 +209,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/dashboard/watch'
     | '/dashboard/'
     | '/dashboard/settings/keys'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/dashboard/watch'
     | '/dashboard'
     | '/dashboard/settings/keys'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -265,6 +277,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/watch'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/settings/keys'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -279,6 +292,7 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -416,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardGuardianRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/settings/keys': {
       id: '/_authenticated/dashboard/settings/keys'
       path: '/settings/keys'
@@ -479,6 +500,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthSignupRoute: AuthSignupRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
