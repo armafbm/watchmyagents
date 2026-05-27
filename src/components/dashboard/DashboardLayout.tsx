@@ -76,10 +76,10 @@ function useNotificationCounts() {
 
     load();
     const channel = supabase
-      .channel("notif-suggestions")
+      .channel(`notif-suggestions:${user.id}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "suggestions" },
+        { event: "*", schema: "public", table: "suggestions", filter: `customer_id=eq.${user.id}` },
         () => load()
       )
       .subscribe();
