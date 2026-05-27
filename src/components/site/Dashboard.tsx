@@ -78,30 +78,6 @@ export function Dashboard() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-5">
-          {/* Sentinel Knight — on watch */}
-          <div className="border-gradient rounded-2xl p-6 lg:col-span-2 relative overflow-hidden">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary icon-neon-glow" />
-                <h3 className="font-display font-bold">Sentinel.Knight · on watch</h3>
-              </div>
-              <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">status: idle · eu-west-3</span>
-            </div>
-            <div className="rounded-lg border border-border bg-background/40 p-6">
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-2">No agent connected yet</div>
-              <div className="text-lg md:text-xl font-display font-bold mb-4">
-                Register your first agent to start watching.
-              </div>
-              <button className="text-xs font-mono uppercase tracking-widest py-2 px-4 rounded bg-primary text-primary-foreground hover:opacity-90">
-                Register an agent →
-              </button>
-            </div>
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              <QuickAction label="Shield" sub="Manage policies" />
-              <QuickAction label="Guardian" sub="Review suggestions" />
-              <QuickAction label="Keys" sub="Manage API keys" />
-            </div>
-          </div>
 
           {/* Sentinel Knight — on watch */}
           <div className="border-gradient rounded-2xl p-6 lg:col-span-2 relative overflow-hidden">
