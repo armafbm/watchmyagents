@@ -1,11 +1,26 @@
-import { Shield, Inbox, Activity, Zap, FileText, Radar, BadgeCheck } from "lucide-react";
+import { Shield, Inbox, Activity, Zap, FileText, Radar, BadgeCheck, Check, Ban, AlertTriangle, Eye } from "lucide-react";
 import castleIcon from "@/assets/wma-fortress-castle-cutout.png";
 
 const kpis = [
-  { label: "Agents protected", value: "0" },
-  { label: "Actions · 24h", value: "0" },
-  { label: "Blocked · 24h", value: "0" },
-  { label: "Tokens · 24h", value: "0" },
+  { label: "Agents protected", value: "247" },
+  { label: "Actions · 24h", value: "18.4k" },
+  { label: "Blocked · 24h", value: "326" },
+  { label: "Tokens · 24h", value: "4.2M" },
+];
+
+const timeline = [
+  { t: "12:42:08", icon: Ban, tone: "danger", agent: "agent.sales-copilot", msg: "Blocked · prompt injection attempt", tag: "SHIELD" },
+  { t: "12:41:55", icon: Check, tone: "ok", agent: "agent.support-bot", msg: "Allowed · refund query (policy v3.2)", tag: "ALLOW" },
+  { t: "12:41:31", icon: AlertTriangle, tone: "warn", agent: "agent.research-001", msg: "Flagged · PII in tool call args", tag: "GUARDIAN" },
+  { t: "12:41:02", icon: Check, tone: "ok", agent: "agent.ops-runner", msg: "Allowed · scheduled task #4821", tag: "ALLOW" },
+  { t: "12:40:47", icon: Ban, tone: "danger", agent: "agent.sales-copilot", msg: "Blocked · exfil pattern on /export", tag: "SHIELD" },
+  { t: "12:40:12", icon: Eye, tone: "info", agent: "agent.support-bot", msg: "Observed · 142 msgs · latency 412ms", tag: "WATCH" },
+];
+
+const suggestions = [
+  { sev: "high", title: "Tighten data-egress policy", agent: "agent.sales-copilot" },
+  { sev: "med", title: "Rotate API key (38d old)", agent: "agent.ops-runner" },
+  { sev: "low", title: "Enable PII redaction on logs", agent: "agent.support-bot" },
 ];
 
 const intel = [
@@ -13,6 +28,19 @@ const intel = [
   { icon: Radar, status: "SOON", title: "Threat Intel", desc: "Live feeds, IOCs and adversary playbooks." },
   { icon: BadgeCheck, status: "SOON", title: "Compliance", desc: "SOC2 · ISO27001 · EU AI Act mapping." },
 ];
+
+const toneColor: Record<string, string> = {
+  ok: "text-primary",
+  danger: "text-destructive",
+  warn: "text-warning",
+  info: "text-muted-foreground",
+};
+
+const sevStyle: Record<string, string> = {
+  high: "bg-destructive/15 text-destructive",
+  med: "bg-warning/15 text-warning",
+  low: "bg-primary/15 text-primary",
+};
 
 export function Dashboard() {
   return (
@@ -50,6 +78,7 @@ export function Dashboard() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-5">
+
           {/* Sentinel Knight — on watch */}
           <div className="border-gradient rounded-2xl p-6 lg:col-span-2 relative overflow-hidden">
             <div className="flex items-center justify-between mb-5">
@@ -57,16 +86,24 @@ export function Dashboard() {
                 <Shield className="h-4 w-4 text-primary icon-neon-glow" />
                 <h3 className="font-display font-bold">Sentinel.Knight · on watch</h3>
               </div>
-              <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">status: idle · eu-west-3</span>
+              <span className="font-mono text-[10px] text-primary uppercase tracking-widest flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                active · eu-west-3
+              </span>
             </div>
-            <div className="rounded-lg border border-border bg-background/40 p-6">
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-2">No agent connected yet</div>
-              <div className="text-lg md:text-xl font-display font-bold mb-4">
-                Register your first agent to start watching.
+            <div className="rounded-lg border border-border bg-background/40 p-5">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">sentinel.knight · on watch</div>
+              <div className="text-xl md:text-2xl font-display font-bold mb-3">
+                Observing <span className="text-gradient">247 agents</span>.
               </div>
-              <button className="text-xs font-mono uppercase tracking-widest py-2 px-4 rounded bg-primary text-primary-foreground hover:opacity-90">
-                Register an agent →
-              </button>
+              <div className="font-mono text-xs text-muted-foreground mb-4">
+                18 412 actions · 326 blocked · last 24h.
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded bg-primary/15 text-primary">⚡ 18.4k actions</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded bg-success/15 text-success">● 247 online</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded bg-destructive/15 text-destructive">⛔ 326 blocked</span>
+              </div>
             </div>
             <div className="mt-5 grid grid-cols-3 gap-2">
               <QuickAction label="Shield" sub="Manage policies" />
@@ -82,12 +119,19 @@ export function Dashboard() {
                 <Inbox className="h-4 w-4 text-primary icon-neon-glow" />
                 <h3 className="font-display font-bold">Guardian inbox</h3>
               </div>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-warning">pending</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-warning">3 pending</span>
             </div>
-            <div className="font-display text-5xl font-bold text-gradient mb-2">0</div>
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-              suggestions waiting
-            </div>
+            <ul className="space-y-2.5 mb-4">
+              {suggestions.map((s) => (
+                <li key={s.title} className="flex items-start gap-2.5 rounded-lg border border-border bg-background/40 p-2.5">
+                  <span className={`font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded mt-0.5 ${sevStyle[s.sev]}`}>{s.sev}</span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-display font-bold leading-tight truncate">{s.title}</div>
+                    <div className="font-mono text-[10px] text-muted-foreground truncate">{s.agent}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
             <button className="w-full text-xs font-mono uppercase tracking-widest py-2 rounded border border-border hover:border-primary">
               Open Guardian inbox →
             </button>
@@ -100,16 +144,22 @@ export function Dashboard() {
                 <Activity className="h-4 w-4 text-primary icon-neon-glow" />
                 <h3 className="font-display font-bold">Live timeline</h3>
               </div>
-              <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">realtime</span>
+              <span className="font-mono text-[10px] text-primary uppercase tracking-widest flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                realtime
+              </span>
             </div>
-            <div className="rounded-lg border border-dashed border-border p-8 text-center">
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                No decisions yet
-              </div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                Once your shield runs, decisions appear here in realtime.
-              </div>
-            </div>
+            <ul className="divide-y divide-border/60 rounded-lg border border-border bg-background/40">
+              {timeline.map((e, i) => (
+                <li key={i} className="flex items-center gap-3 px-3 py-2">
+                  <span className="font-mono text-[10px] text-muted-foreground w-16 shrink-0">{e.t}</span>
+                  <e.icon className={`h-3.5 w-3.5 shrink-0 ${toneColor[e.tone]}`} />
+                  <span className={`font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0 ${e.tone === "danger" ? "bg-destructive/15 text-destructive" : e.tone === "warn" ? "bg-warning/15 text-warning" : e.tone === "ok" ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground"}`}>{e.tag}</span>
+                  <span className="font-mono text-[11px] text-muted-foreground truncate hidden sm:inline">{e.agent}</span>
+                  <span className="text-xs flex-1 truncate">{e.msg}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Quick actions */}
@@ -133,6 +183,7 @@ export function Dashboard() {
               ))}
             </ul>
           </div>
+
 
           {/* Intelligence row */}
           <div className="lg:col-span-3 grid md:grid-cols-3 gap-5">
