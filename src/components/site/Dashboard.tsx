@@ -169,12 +169,3 @@ function QuickAction({ label, sub }: { label: string; sub: string }) {
     </div>
   );
 }
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="flex justify-between gap-4 border-b border-border/50 pb-2 last:border-0">
-      <span className="text-muted-foreground text-xs uppercase tracking-wider font-mono">{k}</span>
-      <span className="text-right">{v}</span>
-    </div>
-  );
-}
