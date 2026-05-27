@@ -237,21 +237,21 @@ export function InstallSection() {
         {/* Split layout */}
         <div className="grid lg:grid-cols-2 gap-8 items-stretch">
           {/* LEFT — Explanation */}
-          <div className="flex flex-col justify-center">
-            <div className="space-y-6">
+          <div className="flex flex-col justify-center min-w-0">
+            <div className="space-y-6 min-w-0">
               <div className="font-mono text-xs uppercase tracking-widest" style={{ color: BLUE_ACCENT }}>
                 Step 03 / 03 — Deploy
               </div>
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 sm:gap-4 min-w-0">
                 <div
-                  className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border"
+                  className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border"
                   style={{ borderColor: `${BLUE_ACCENT}55`, background: `${BLUE_ACCENT}15` }}
                 >
-                  <Rocket className="w-6 h-6" style={{ color: BLUE_ACCENT }} />
+                  <Rocket className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: BLUE_ACCENT }} />
                 </div>
-                <div>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-2">Wrap, run, observe</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 break-words">Wrap, run, observe</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                     Initialize once with your agentId. Every prompt, tool call and response is now streamed to your Fortress in real time.
                   </p>
 
@@ -261,16 +261,16 @@ export function InstallSection() {
                       { n: 2, title: "Watch My Agent API key", desc: "The key tied to your Watch My Agent account." },
                       { n: 3, title: "Agent ID from your framework console", desc: "The unique identifier of the agent you created in the framework console." },
                     ].map((item) => (
-                      <li key={item.n} className="flex gap-3">
+                      <li key={item.n} className="flex gap-3 min-w-0">
                         <div
                           className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold"
                           style={{ background: `${BLUE_ACCENT}20`, color: BLUE_ACCENT }}
                         >
                           {item.n}
                         </div>
-                        <div className="text-sm">
-                          <div className="font-semibold">{item.title}</div>
-                          <div className="text-muted-foreground">{item.desc}</div>
+                        <div className="text-sm min-w-0 flex-1">
+                          <div className="font-semibold break-words">{item.title}</div>
+                          <div className="text-muted-foreground break-words">{item.desc}</div>
                         </div>
                       </li>
                     ))}
@@ -281,8 +281,11 @@ export function InstallSection() {
             </div>
           </div>
 
+
+
           {/* RIGHT — Live terminal */}
-          <div>
+          <div className="min-w-0">
+
             <div
               className="rounded-xl overflow-hidden border border-border/50 shadow-2xl"
               style={{ boxShadow: "var(--shadow-card)" }}
@@ -320,9 +323,10 @@ export function InstallSection() {
 
               {/* Terminal body */}
               <div
-                className="p-5 md:p-6 font-mono text-[13px] leading-relaxed min-h-[420px] overflow-x-auto"
+                className="p-4 sm:p-5 md:p-6 font-mono text-[11px] sm:text-[13px] leading-relaxed min-h-[320px] sm:min-h-[420px] overflow-x-auto"
                 style={{ background: "#0b1220", color: "#cfe3ff" }}
               >
+
                 {displayedLines.map((line, idx) => (
                   <div
                     key={`${idx}-${line.text}`}
@@ -373,7 +377,7 @@ export function InstallSection() {
                     <button
                       key={stepNum}
                       onClick={() => jumpToStep(stepNum)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-mono transition-all"
+                      className="flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-md text-[11px] sm:text-xs font-mono transition-all"
                       style={{
                         background: isActive
                           ? `${BLUE_ACCENT}25`
@@ -395,12 +399,13 @@ export function InstallSection() {
                       }}
                     >
                       {isDone ? (
-                        <CheckCircle className="w-3.5 h-3.5" />
+                        <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                       ) : (
-                        <span className="font-bold">0{stepNum}</span>
+                        <span className="font-bold shrink-0">0{stepNum}</span>
                       )}
-                      <span className="uppercase tracking-wider">{label}</span>
+                      <span className="uppercase tracking-wider truncate">{label}</span>
                     </button>
+
                   );
                 })}
               </div>
