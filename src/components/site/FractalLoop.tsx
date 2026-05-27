@@ -1,6 +1,7 @@
 import { RefreshCw, ArrowUp, ArrowDown, User, Users, Layers, Globe } from "lucide-react";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 import { LayerCards } from "@/components/site/LayerCards";
+import { ArchitectureDiagram } from "@/components/site/ArchitectureDiagram";
 import recursiveFractalLoopShield from "@/assets/recursive-fractal-loop-shield-clean.png";
 
 type CycleStep = {
