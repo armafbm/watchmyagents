@@ -24,13 +24,15 @@ export function Dashboard() {
             className="h-64 sm:h-80 md:h-[36rem] lg:h-[42rem] w-auto max-w-full object-contain shrink-0 animate-float drop-shadow-[0_0_80px_hsl(var(--primary)/0.4)]"
           />
           <div className="max-w-3xl">
-            <div className="font-mono text-sm uppercase tracking-[0.3em] text-primary mb-6">// WMA FORTRESS</div>
+            <div className="font-mono text-sm uppercase tracking-[0.3em] text-primary mb-6">// WMA COMMAND CENTER</div>
             <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-[0.95]">
-              Your <span className="text-gradient">command center</span>.
+              Your <span className="text-gradient">Fortress</span>
             </h2>
-            <p className="text-muted-foreground text-xl md:text-2xl leading-relaxed">
-              Triage, suggest, simulate, approve. Every Shield change is linked back to the
-              Watch signal that triggered it.
+            <p className="text-muted-foreground text-xl md:text-2xl leading-relaxed font-display font-bold mb-3">
+              Watch the unseen. Guard what matters.
+            </p>
+            <p className="text-muted-foreground text-lg md:text-xl leading-relaxed">
+              Every move your AI makes is watched, analyzed, and defended. Your agents move fast. WatchMyAgents moves faster. Real-time visibility, intelligent defense, total control—keeping your AI systems safe at every decision.
             </p>
           </div>
         </div>
