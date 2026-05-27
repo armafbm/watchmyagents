@@ -4,6 +4,7 @@ import { Hero } from "@/components/site/Hero";
 import { Problem } from "@/components/site/Problem";
 import { InstallSection } from "@/components/site/InstallSection";
 import { FractalLoop } from "@/components/site/FractalLoop";
+import { RecursiveFractalLoop } from "@/components/site/RecursiveFractalLoop";
 import { Plugins } from "@/components/site/Plugins";
 
 import { Dashboard } from "@/components/site/Dashboard";
