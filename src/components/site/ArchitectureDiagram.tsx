@@ -7,8 +7,8 @@ import { LayerIcon } from "@/components/site/LayerIcons";
  */
 export function ArchitectureDiagram() {
   return (
-    <div className="relative rounded-2xl border border-border/60 bg-gradient-to-br from-background/80 via-card/40 to-background/80 backdrop-blur-md overflow-hidden p-6 md:p-10">
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-72 w-[60%] rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+    <div className="relative rounded-2xl border border-border/60 bg-gradient-to-br from-background/80 via-card/40 to-background/80 backdrop-blur-md p-6 md:p-10">
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-72 w-[60%] rounded-full bg-accent/10 blur-3xl pointer-events-none -z-10" />
 
       <div className="relative flex flex-col lg:flex-row items-stretch gap-6">
         {/* LEFT — WATCH (local) */}
