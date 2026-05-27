@@ -1,16 +1,17 @@
-import { Activity, ShieldAlert, GitPullRequest, UserCheck } from "lucide-react";
+import { Shield, Inbox, Activity, Zap, FileText, Radar, BadgeCheck } from "lucide-react";
 import castleIcon from "@/assets/wma-fortress-castle-cutout.png";
 
-const incidents = [
-  { sev: "CRITICAL", color: "danger", agent: "agent.support · prod", cat: "Data access", signal: "Suspected exfiltration" },
-  { sev: "HIGH",     color: "warning", agent: "agent.crm · prod",     cat: "Prompt injection", signal: "Malicious pattern in input" },
-  { sev: "WARN",     color: "primary", agent: "agent.finance · prod", cat: "Permissions",      signal: "Scope=admin on read task" },
+const kpis = [
+  { label: "Agents protected", value: "0" },
+  { label: "Actions · 24h", value: "0" },
+  { label: "Blocked · 24h", value: "0" },
+  { label: "Tokens · 24h", value: "0" },
 ];
 
-const hygiene = [
-  { agent: "Agent Finance", score: 72, issue: "Excessive permissions", suggest: "Reduce scopes + HITL" },
-  { agent: "Agent Ops",     score: 81, issue: "Verbose logs",          suggest: "PII redaction + sampling" },
-  { agent: "Agent Support", score: 89, issue: "Stale secret",          suggest: "Rotate + alert on reuse" },
+const intel = [
+  { icon: FileText, status: "LIVE", title: "Reports & Audit", desc: "Decision history, exportable for audit." },
+  { icon: Radar, status: "SOON", title: "Threat Intel", desc: "Live feeds, IOCs and adversary playbooks." },
+  { icon: BadgeCheck, status: "SOON", title: "Compliance", desc: "SOC2 · ISO27001 · EU AI Act mapping." },
 ];
 
 export function Dashboard() {
