@@ -8,6 +8,9 @@ const SITE_NAME = 'watchmyagents'
 const SENDER_DOMAIN = 'notify.watchmyagents.com'
 const FROM_DOMAIN = 'watchmyagents.com'
 const TEMPLATE_NAME = 'early-access-confirmation'
+const ADMIN_TEMPLATE_NAME = 'early-access-admin-notification'
+const ADMIN_EMAIL = 'hello@watchmyagents.com'
+
 
 function generateToken(): string {
   const bytes = new Uint8Array(32)
@@ -160,7 +163,55 @@ export const Route = createFileRoute('/api/public/early-access')({
           return Response.json({ success: true, emailQueued: false })
         }
 
+        // 6. Enqueue admin notification (best-effort, don't fail request)
+        try {
+          const adminTemplate = TEMPLATES[ADMIN_TEMPLATE_NAME]
+          if (adminTemplate) {
+            const adminProps = {
+              signupEmail: email,
+              source,
+              userAgent: userAgent ?? 'n/a',
+              signedUpAt: new Date().toISOString(),
+            }
+            const adminElement = React.createElement(adminTemplate.component, adminProps)
+            const adminHtml = await render(adminElement)
+            const adminText = await render(adminElement, { plainText: true })
+            const adminSubject =
+              typeof adminTemplate.subject === 'function'
+                ? adminTemplate.subject(adminProps)
+                : adminTemplate.subject
+            const adminMessageId = crypto.randomUUID()
+
+            await supabase.from('email_send_log').insert({
+              message_id: adminMessageId,
+              template_name: ADMIN_TEMPLATE_NAME,
+              recipient_email: ADMIN_EMAIL,
+              status: 'pending',
+            })
+
+            await supabase.rpc('enqueue_email', {
+              queue_name: 'transactional_emails',
+              payload: {
+                message_id: adminMessageId,
+                to: ADMIN_EMAIL,
+                from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+                sender_domain: SENDER_DOMAIN,
+                subject: adminSubject,
+                html: adminHtml,
+                text: adminText,
+                purpose: 'transactional',
+                label: ADMIN_TEMPLATE_NAME,
+                idempotency_key: `early-access-admin-${email}`,
+                queued_at: new Date().toISOString(),
+              },
+            })
+          }
+        } catch (e) {
+          console.error('admin notification enqueue failed', e)
+        }
+
         return Response.json({ success: true, emailQueued: true })
+
       },
     },
   },
