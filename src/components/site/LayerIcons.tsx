@@ -1,11 +1,13 @@
 import watchIcon from "@/assets/wma-icon-watch.png";
 import guardianIcon from "@/assets/wma-icon-guardian.png";
 import shieldIcon from "@/assets/wma-icon-shield.png";
+import fortressIcon from "@/assets/wma-fortress.png";
 
 export const layerIcons = {
   watch: watchIcon,
   guardian: guardianIcon,
   shield: shieldIcon,
+  fortress: fortressIcon,
 } as const;
 
 export type LayerKey = keyof typeof layerIcons;
