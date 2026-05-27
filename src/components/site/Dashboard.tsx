@@ -27,10 +27,10 @@ export function Dashboard() {
           <div className="max-w-3xl">
             <div className="font-mono text-sm uppercase tracking-[0.3em] text-primary mb-6">// FORTRESS · COMMAND CENTER</div>
             <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-[0.95]">
-              Your AI agents. <span className="text-gradient">Under protection.</span>
+              MY <span className="text-gradient">FORTRESS</span>
             </h2>
             <p className="text-muted-foreground text-xl md:text-2xl leading-relaxed font-display font-bold mb-3">
-              Realtime posture across every fleet.
+              Your AI agents. <span className="text-gradient">Under protection.</span>
             </p>
             <p className="text-muted-foreground text-lg md:text-xl leading-relaxed">
               Watch detects, Shield enforces, Guardian explains. One command center for every agent you ship — with audit, intelligence and compliance built in.
