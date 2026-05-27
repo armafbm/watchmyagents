@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function CTA() {
@@ -16,25 +15,36 @@ export function CTA() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("early_access_signups").insert({
-      email: value,
-      source: "landing_cta",
-      user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
-    });
-    setLoading(false);
-    if (error) {
-      if (error.code === "23505") {
-        setDone(true);
-        toast.success("You're already on the list — we'll be in touch.");
+    try {
+      const res = await fetch("/api/public/early-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: value,
+          source: "landing_cta",
+          userAgent:
+            typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      setLoading(false);
+      if (!res.ok) {
+        toast.error("Something went wrong. Please try again.");
         return;
       }
+      setDone(true);
+      setEmail("");
+      if (data.alreadyRegistered) {
+        toast.success("You're already on the list — we'll be in touch.");
+      } else {
+        toast.success("You're in. Check your inbox for confirmation.");
+      }
+    } catch {
+      setLoading(false);
       toast.error("Something went wrong. Please try again.");
-      return;
     }
-    setDone(true);
-    setEmail("");
-    toast.success("You're in. We'll be in touch shortly.");
   };
+
 
   return (
     <section id="cta" className="relative py-14">
