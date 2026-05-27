@@ -76,10 +76,10 @@ function useNotificationCounts() {
 
     load();
     const channel = supabase
-      .channel("notif-suggestions")
+      .channel(`notif-suggestions:${user.id}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "suggestions" },
+        { event: "*", schema: "public", table: "suggestions", filter: `customer_id=eq.${user.id}` },
         () => load()
       )
       .subscribe();
@@ -386,9 +386,11 @@ function IconBtn({ children }: { children: ReactNode }) {
 }
 
 function FleetStatusCard() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<{ total: number; active: number } | null>(null);
 
   useEffect(() => {
+    if (!user) return;
     let cancelled = false;
     const load = async () => {
       const { data, error } = await supabase
@@ -402,10 +404,10 @@ function FleetStatusCard() {
     load();
 
     const channel = supabase
-      .channel("fleet-status-agents")
+      .channel(`fleet-status-agents:${user.id}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "agents" },
+        { event: "*", schema: "public", table: "agents", filter: `customer_id=eq.${user.id}` },
         () => load(),
       )
       .subscribe();
@@ -414,7 +416,7 @@ function FleetStatusCard() {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   const total = stats?.total ?? 0;
   const active = stats?.active ?? 0;
