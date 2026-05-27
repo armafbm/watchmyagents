@@ -8,6 +8,15 @@ const DEFAULT_SEND_DELAY_MS = 200
 const DEFAULT_AUTH_TTL_MINUTES = 15
 const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return result === 0
+}
+
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
 // falls back to parsing the error message for older versions.
@@ -84,7 +93,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
         }
 
         const token = authHeader.slice('Bearer '.length).trim()
-        if (token !== supabaseServiceKey) {
+        if (!timingSafeEqual(token, supabaseServiceKey)) {
           return Response.json({ error: 'Forbidden' }, { status: 403 })
         }
 
