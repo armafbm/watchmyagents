@@ -41,6 +41,7 @@ function Index() {
         <Hero />
         <Problem />
         <FractalLoop />
+        <RecursiveFractalLoop />
         <InstallSection />
         <Plugins />
         
