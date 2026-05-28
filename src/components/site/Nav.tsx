@@ -7,7 +7,7 @@ import legionsImg from "@/assets/wma-legions.png";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown } from "lucide-react";
+import { Shield, ChevronDown, AlertTriangle, Cpu, RefreshCw, Download, Lock, Rocket } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,10 +36,16 @@ export function Nav() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-64">
                 <DropdownMenuItem asChild>
-                  <a href="#problem" className="cursor-pointer">Threats</a>
+                  <a href="#problem" className="flex items-center gap-2 cursor-pointer">
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                    Threats
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#recursive-fractal" className="cursor-pointer">Our technology</a>
+                  <a href="#recursive-fractal" className="flex items-center gap-2 cursor-pointer">
+                    <Cpu className="h-4 w-4 text-muted-foreground" />
+                    Our technology
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#watch" className="flex items-center gap-2 cursor-pointer">
@@ -66,7 +72,10 @@ export function Nav() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#fractal" className="cursor-pointer">How it works</a>
+                  <a href="#fractal" className="flex items-center gap-2 cursor-pointer">
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                    How it works
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#dashboard" className="flex items-center gap-2 cursor-pointer">
@@ -75,13 +84,22 @@ export function Nav() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#install" className="cursor-pointer">How to install</a>
+                  <a href="#install" className="flex items-center gap-2 cursor-pointer">
+                    <Download className="h-4 w-4 text-muted-foreground" />
+                    How to install
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#privacy" className="cursor-pointer">Privacy by design</a>
+                  <a href="#privacy" className="flex items-center gap-2 cursor-pointer">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    Privacy by design
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#cta" className="cursor-pointer">Early access</a>
+                  <a href="#cta" className="flex items-center gap-2 cursor-pointer">
+                    <Rocket className="h-4 w-4 text-muted-foreground" />
+                    Early access
+                  </a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
