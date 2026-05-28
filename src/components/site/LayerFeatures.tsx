@@ -48,7 +48,7 @@ function LayerCard({ id, image, imageAlt, kicker, titlePrefix, titleHighlight, t
           />
         </div>
         <div>
-          <div className={`font-mono text-xs uppercase tracking-widest ${s.kicker} mb-4`}>
+          <div className={`eyebrow mb-4 ${s.kicker}`} style={{ color: "currentColor" }}>
             // {kicker}
           </div>
           <h3 className="text-3xl md:text-4xl font-bold mb-5">
