@@ -42,6 +42,7 @@ function Index() {
         <Hero />
         <Problem />
         <RecursiveFractalLoop />
+        <LayerFeatures />
         <FractalLoop />
         <InstallSection />
         <Plugins />
