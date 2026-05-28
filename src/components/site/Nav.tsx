@@ -72,7 +72,10 @@ export function Nav() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#fractal" className="cursor-pointer">How it works</a>
+                  <a href="#fractal" className="flex items-center gap-2 cursor-pointer">
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                    How it works
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#dashboard" className="flex items-center gap-2 cursor-pointer">
@@ -81,13 +84,22 @@ export function Nav() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#install" className="cursor-pointer">How to install</a>
+                  <a href="#install" className="flex items-center gap-2 cursor-pointer">
+                    <Download className="h-4 w-4 text-muted-foreground" />
+                    How to install
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#privacy" className="cursor-pointer">Privacy by design</a>
+                  <a href="#privacy" className="flex items-center gap-2 cursor-pointer">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    Privacy by design
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#cta" className="cursor-pointer">Early access</a>
+                  <a href="#cta" className="flex items-center gap-2 cursor-pointer">
+                    <Rocket className="h-4 w-4 text-muted-foreground" />
+                    Early access
+                  </a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
