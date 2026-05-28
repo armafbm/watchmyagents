@@ -158,9 +158,9 @@ function PipelineStep({
       >
         {icon}
       </div>
-      <div className="font-display font-bold text-[11px] md:text-xs leading-tight text-foreground break-words hyphens-auto w-full px-0.5">{title}</div>
+      <div className="font-display font-bold text-xs md:text-sm leading-tight text-foreground whitespace-nowrap w-full px-0.5">{title}</div>
       {subtitle && (
-        <div className="font-mono text-[8px] uppercase tracking-[0.12em] text-muted-foreground mt-1 leading-tight break-words w-full px-0.5">
+        <div className="font-mono text-[8px] md:text-[9px] uppercase tracking-[0.12em] text-muted-foreground mt-1 leading-tight whitespace-nowrap w-full px-0.5">
           {subtitle}
         </div>
       )}
