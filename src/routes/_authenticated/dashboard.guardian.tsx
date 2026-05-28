@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Brain, Check, X, Loader2, Sparkles, Shield, AlertTriangle, Target, RefreshCw } from "lucide-react";
+import { Brain, Check, X, Loader2, Sparkles, Shield, AlertTriangle, Target, RefreshCw, MessageCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import mascot from "@/assets/wma-mascot.png";
@@ -7,6 +7,8 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GuardianChatPanel } from "@/components/dashboard/GuardianChatPanel";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/guardian")({
