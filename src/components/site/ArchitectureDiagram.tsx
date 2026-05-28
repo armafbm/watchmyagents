@@ -54,17 +54,17 @@ export function ArchitectureDiagram() {
           </div>
 
           {/* Pipeline */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-center">
-            <PipelineStep icon={<BarChart3 className="h-4 w-4" />} title="Analyze" />
-            <PipelineStep icon={<LayerIcon layer="fortress" className="h-5 w-5" />} title="Dashboard" subtitle="report" />
-            <PipelineStep icon={<Lightbulb className="h-4 w-4" />} title="Suggest" subtitle="policies" />
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-stretch">
+            <PipelineStep icon={<BarChart3 className="h-5 w-5" />} title="Analyze" subtitle="signals" />
+            <PipelineStep icon={<LayerIcon layer="fortress" className="h-6 w-6" />} title="Dashboard" subtitle="report" />
+            <PipelineStep icon={<Lightbulb className="h-5 w-5" />} title="Suggest" subtitle="policies" />
             <PipelineStep
-              icon={<UserCheck className="h-4 w-4" />}
+              icon={<UserCheck className="h-5 w-5" />}
               title="User"
               subtitle="agreement"
               highlight
             />
-            <PipelineStep icon={<Rocket className="h-4 w-4" />} title="Deploy" subtitle="policies" />
+            <PipelineStep icon={<Rocket className="h-5 w-5" />} title="Deploy" subtitle="policies" />
           </div>
 
           <p className="text-[11px] text-muted-foreground text-center mt-4 leading-snug">
