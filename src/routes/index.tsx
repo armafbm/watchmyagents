@@ -40,8 +40,8 @@ function Index() {
       <main>
         <Hero />
         <Problem />
-        <FractalLoop />
         <RecursiveFractalLoop />
+        <FractalLoop />
         <InstallSection />
         <Plugins />
         
