@@ -1,166 +1,73 @@
-import { Brain, Cpu, Cloud, Radar, Bell, FileBarChart, LineChart, Sparkles, GitBranch, Ban, Lock, Workflow } from "lucide-react";
-import { LayerIcon } from "@/components/site/LayerIcons";
+import { Brain, Zap, ShieldCheck, GitBranch, Radar, Bell, FileBarChart, Layers, Ban, Lock, Workflow, Activity } from "lucide-react";
+import watchIcon from "@/assets/wma-icon-watch.png";
+import guardianIcon from "@/assets/wma-icon-guardian.png";
+import shieldIcon from "@/assets/wma-icon-shield.png";
 
-type Feature = { icon: React.ComponentType<{ className?: string }>; text: string };
+type Capability = { icon: React.ComponentType<{ className?: string }>; title: string; desc: string };
 type Accent = "primary" | "accent";
 
-const styles: Record<Accent, {
-  halo: string;
-  ring: string;
-  border: string;
-  shadow: string;
-  glow: string;
-  badge: string;
-  dot: string;
-  text: string;
-  iconBorder: string;
-  iconGlow: string;
-  iconDrop: string;
-  title: string;
-  runtimeText: string;
-  hover: string;
-  pillBg: string;
-  pillText: string;
-  pillIcon: string;
-}> = {
+type LayerCardProps = {
+  id: string;
+  image: string;
+  imageAlt: string;
+  kicker: string;
+  titlePrefix: string;
+  titleHighlight: string;
+  titleSuffix: string;
+  description: string;
+  capabilities: Capability[];
+  accent: Accent;
+};
+
+const accentStyles: Record<Accent, { kicker: string; icon: string; hover: string; glow: string }> = {
   primary: {
-    halo: "from-primary/30 via-accent/20 to-primary/30",
-    ring: "from-primary/60 via-accent/40 to-primary/60",
-    border: "border-primary/40",
-    shadow: "shadow-[0_0_60px_-15px_hsl(var(--primary)/0.5)]",
-    glow: "bg-primary/20",
-    badge: "border-primary/40 bg-primary/10",
-    dot: "bg-primary",
-    text: "text-primary",
-    iconBorder: "border-primary/50",
-    iconGlow: "bg-primary/30",
-    iconDrop: "drop-shadow-[0_0_12px_hsl(var(--primary)/0.8)]",
-    title: "from-foreground via-primary to-foreground",
-    runtimeText: "text-primary",
-    hover: "hover:border-primary/40",
-    pillBg: "bg-primary/10",
-    pillText: "text-primary",
-    pillIcon: "text-primary",
+    kicker: "text-primary",
+    icon: "text-primary",
+    hover: "hover:border-primary/50",
+    glow: "drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]",
   },
   accent: {
-    halo: "from-accent/30 via-primary/20 to-accent/30",
-    ring: "from-accent/60 via-primary/40 to-accent/60",
-    border: "border-accent/40",
-    shadow: "shadow-[0_0_60px_-15px_hsl(var(--accent)/0.5)]",
-    glow: "bg-accent/20",
-    badge: "border-accent/40 bg-accent/10",
-    dot: "bg-accent",
-    text: "text-accent",
-    iconBorder: "border-accent/50",
-    iconGlow: "bg-accent/30",
-    iconDrop: "drop-shadow-[0_0_12px_hsl(var(--accent)/0.8)]",
-    title: "from-foreground via-accent to-foreground",
-    runtimeText: "text-accent",
-    hover: "hover:border-accent/40",
-    pillBg: "bg-accent/10",
-    pillText: "text-accent",
-    pillIcon: "text-accent",
+    kicker: "text-accent",
+    icon: "text-accent",
+    hover: "hover:border-accent/50",
+    glow: "drop-shadow-[0_0_60px_hsl(var(--accent)/0.35)]",
   },
 };
 
-type LayerFeatureProps = {
-  id: string;
-  layer: "watch" | "guardian" | "shield";
-  badge: string;
-  badgeDot: string;
-  title: string;
-  tagline: string;
-  description: string;
-  features: Feature[];
-  runtime: { icon: React.ComponentType<{ className?: string }>; label: string };
-  accent: Accent;
-  terminal: React.ReactNode;
-};
-
-function LayerFeature({
-  id,
-  layer,
-  badge,
-  badgeDot,
-  title,
-  tagline,
-  description,
-  features,
-  runtime,
-  accent,
-  terminal,
-}: LayerFeatureProps) {
-  const s = styles[accent];
-  const RuntimeIcon = runtime.icon;
-
+function LayerCard({ id, image, imageAlt, kicker, titlePrefix, titleHighlight, titleSuffix, description, capabilities, accent }: LayerCardProps) {
+  const s = accentStyles[accent];
   return (
-    <div id={id} className="relative group">
-      <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${s.halo} blur-2xl opacity-60 animate-pulse pointer-events-none`} />
-      <div className={`absolute -inset-px rounded-3xl bg-gradient-to-r ${s.ring} opacity-70 pointer-events-none`} />
-
-      <div className={`relative rounded-3xl border ${s.border} bg-background/90 backdrop-blur-xl ${s.shadow} overflow-hidden`}>
-        <div className="absolute inset-0 grid-bg opacity-10 pointer-events-none" />
-        <div className={`absolute -top-32 -right-32 h-72 w-72 rounded-full ${s.glow} blur-3xl pointer-events-none`} />
-
-        <div className="relative grid lg:grid-cols-5 gap-8 p-6 md:p-10">
-          {/* Left — branding */}
-          <div className="lg:col-span-2 flex flex-col">
-            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${s.badge} w-fit mb-5`}>
-              <span className={`inline-block h-1.5 w-1.5 rounded-full ${s.dot} animate-pulse`} />
-              <span className={`font-mono text-[10px] uppercase tracking-[0.2em] ${s.text}`}>
-                {badge}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4 mb-4">
-              <div className="relative shrink-0">
-                <div className={`absolute inset-0 rounded-2xl ${s.iconGlow} blur-xl animate-pulse`} />
-                <div className={`relative h-20 w-20 rounded-2xl border ${s.iconBorder} bg-background/70 flex items-center justify-center`}>
-                  <LayerIcon layer={layer} className={`h-14 w-14 ${s.iconDrop}`} />
-                </div>
-              </div>
-              <div>
-                <h3 className={`text-3xl md:text-4xl font-display font-bold bg-gradient-to-r ${s.title} bg-clip-text text-transparent`}>
-                  {title}
-                </h3>
-                <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mt-1">
-                  {badgeDot}
-                </div>
-              </div>
-            </div>
-
-            <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-              {tagline}
-            </p>
-
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/60 bg-background/60 w-fit text-xs">
-              <RuntimeIcon className={`h-3.5 w-3.5 ${s.runtimeText}`} />
-              <span className="text-muted-foreground">{runtime.label}</span>
-            </div>
+    <div id={id} className="border-gradient rounded-2xl p-8 md:p-12 relative overflow-hidden scroll-mt-24">
+      <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--${accent})/0.12),transparent_70%)] pointer-events-none`} />
+      <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center relative">
+        <div className="flex justify-center">
+          <img
+            src={image}
+            alt={imageAlt}
+            className={`h-56 sm:h-72 md:h-[28rem] w-auto max-w-full object-contain animate-float ${s.glow}`}
+          />
+        </div>
+        <div>
+          <div className={`font-mono text-xs uppercase tracking-widest ${s.kicker} mb-4`}>
+            // {kicker}
           </div>
-
-          {/* Middle — features */}
-          <div className="lg:col-span-3 flex flex-col gap-5">
-            <p className="text-base text-foreground/90 leading-relaxed">
-              {description}
-            </p>
-            <ul className="space-y-3">
-              {features.map(({ icon: Icon, text }, k) => (
-                <li
-                  key={k}
-                  className={`flex items-start gap-3 text-sm p-3 rounded-xl border border-border/40 bg-background/40 ${s.hover} transition-colors`}
-                >
-                  <div className={`h-8 w-8 rounded-lg ${s.pillBg} ${s.pillText} flex items-center justify-center shrink-0`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <span className="pt-1.5 leading-snug">{text}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="rounded-xl bg-background/80 border border-border p-4 font-mono text-xs space-y-1.5">
-              {terminal}
-            </div>
+          <h3 className="text-3xl md:text-4xl font-bold mb-5">
+            {titlePrefix} <span className="text-gradient">{titleHighlight}</span> {titleSuffix}
+          </h3>
+          <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+            {description}
+          </p>
+          <div className="grid sm:grid-cols-2 gap-5">
+            {capabilities.map((c) => (
+              <div
+                key={c.title}
+                className={`border border-border/60 rounded-xl p-5 bg-background/40 backdrop-blur-sm ${s.hover} transition-colors`}
+              >
+                <c.icon className={`h-5 w-5 ${s.icon} mb-3 icon-neon-glow`} />
+                <h4 className="font-display font-bold mb-1.5">{c.title}</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -168,11 +75,80 @@ function LayerFeature({
   );
 }
 
+const watchCapabilities: Capability[] = [
+  {
+    icon: Radar,
+    title: "Full-spectrum capture",
+    desc: "Model calls, tool calls, parameters and sensitive data access — instrumented at the SDK layer, nothing slips through.",
+  },
+  {
+    icon: Bell,
+    title: "Real-time severity triage",
+    desc: "Every signal classified Info → Warning → High → Critical, with the context needed to act in seconds.",
+  },
+  {
+    icon: FileBarChart,
+    title: "Tamper-evident timeline",
+    desc: "An immutable, audit-ready record of what every agent tried and what it actually did, per agent and per environment.",
+  },
+  {
+    icon: Activity,
+    title: "Local-first runtime",
+    desc: "Runs on your machine alongside your agents. Zero telemetry leaves your perimeter without your explicit consent.",
+  },
+];
+
+const guardianCapabilities: Capability[] = [
+  {
+    icon: Brain,
+    title: "Contextual reasoning",
+    desc: "Correlates Watch signals across agents, tools and time windows to surface real threats — not noise.",
+  },
+  {
+    icon: Zap,
+    title: "Adaptive policy synthesis",
+    desc: "Drafts new Shield policies on the fly from observed behavior, ranked by impact and false-positive risk.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Human-in-the-loop",
+    desc: "Every suggestion is explainable, simulatable and reversible. You stay in control of what ships to prod.",
+  },
+  {
+    icon: GitBranch,
+    title: "Continuous learning",
+    desc: "Feeds policy efficacy back into the loop — Guardian gets sharper with every incident across the fleet.",
+  },
+];
+
+const shieldCapabilities: Capability[] = [
+  {
+    icon: Ban,
+    title: "Tool allow / deny lists",
+    desc: "Per-agent, per-environment restrictions on tools, parameters and domains. Block dangerous calls before they fire.",
+  },
+  {
+    icon: Lock,
+    title: "Injection & exfiltration block",
+    desc: "Stops prompt injection, secret leakage and PII exfiltration in real time, with automatic redaction on the wire.",
+  },
+  {
+    icon: Workflow,
+    title: "Rate & token budgets",
+    desc: "Hard rate limits, token caps and loop detection — runaway agents are throttled or quarantined automatically.",
+  },
+  {
+    icon: Layers,
+    title: "Approved by Guardian",
+    desc: "Every active rule is versioned, simulated and signed off. Roll back any policy in one click without redeploying agents.",
+  },
+];
+
 export function LayerFeatures() {
   return (
     <section id="layers" className="relative py-20 border-t border-border/40">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.06),transparent_70%)] pointer-events-none" />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="font-mono text-xs uppercase tracking-widest text-accent mb-3">
             // 03 — The three layers in detail
@@ -187,79 +163,43 @@ export function LayerFeatures() {
         </div>
 
         <div className="space-y-12">
-          <LayerFeature
+          <LayerCard
             id="watch"
-            layer="watch"
-            badge="Layer 01 · Observation"
-            badgeDot="The sensor"
+            image={watchIcon}
+            imageAlt="Watch layer icon"
+            kicker="Layer 01 · Observation"
+            titlePrefix="The"
+            titleHighlight="all-seeing eye"
+            titleSuffix="of your fleet."
+            description="Watch instruments every agent at the SDK and tool layer. Model calls, tool calls, parameters and data access are captured, classified and turned into a triage-ready signal — without ever leaving your machine."
+            capabilities={watchCapabilities}
             accent="primary"
-            title="Watch"
-            tagline="Your eyes on every agent — a precise, tamper-evident timeline of what every agent tried and what it actually did."
-            description="Watch instruments your agents at the SDK and tool layer. Every model call, tool call, parameter and data access is captured, classified and turned into a triage-ready signal."
-            runtime={{ icon: Cpu, label: "Runs locally on your machine" }}
-            features={[
-              { icon: Radar, text: "Model calls, tool calls, data access, sensitive actions" },
-              { icon: Bell, text: "Real-time alerts: Info → Warning → High → Critical" },
-              { icon: FileBarChart, text: "Triage context for every signal, per agent & per environment" },
-            ]}
-            terminal={
-              <>
-                <div className="text-muted-foreground">// live stream</div>
-                <div><span className="text-success">[INFO]</span> agent.support → tool.crm.read OK</div>
-                <div><span className="text-warning">[WARN]</span> agent.finance → scope=admin (unusual)</div>
-                <div><span className="text-danger animate-blink">[CRIT]</span> agent.ops → suspected exfiltration</div>
-              </>
-            }
           />
 
-          <LayerFeature
+          <LayerCard
             id="guardian"
-            layer="guardian"
-            badge="Layer 02 · Brain"
-            badgeDot="AI · always on"
+            image={guardianIcon}
+            imageAlt="Guardian AI icon"
+            kicker="Layer 02 · Brain"
+            titlePrefix="The"
+            titleHighlight="reasoning core"
+            titleSuffix="of the loop."
+            description="Guardian is the brain between Watch and Shield. It interprets signals, reasons about intent, and turns raw telemetry into precise, explainable policy decisions — at machine speed, under human authority."
+            capabilities={guardianCapabilities}
             accent="accent"
-            title="Guardian AI"
-            tagline="The intelligence layer. Correlates signals, scores risk, and proposes the policies Shield should enforce — with rationale and false-positive estimates."
-            description="Guardian normalizes the firehose from Watch, learns the baseline of each agent and legion, and turns anomalies into ready-to-validate rules. Nothing is deployed without your explicit approval."
-            runtime={{ icon: Cloud, label: "Runs in Fortress Cloud · anonymized data only" }}
-            features={[
-              { icon: LineChart, text: "Signal correlation, hygiene & risk scoring per agent" },
-              { icon: Sparkles, text: "Auto-suggested rules with rationale & false-positive estimate" },
-              { icon: GitBranch, text: "Governance: simulation, approval, versioning, rollback" },
-            ]}
-            terminal={
-              <>
-                <div className="text-muted-foreground">// guardian.suggest()</div>
-                <div><span className="text-accent">trigger:</span> export &gt; 5MB ×3 in 2m</div>
-                <div><span className="text-accent">propose:</span> size_limit + rate_limit</div>
-                <div><span className="text-accent">est_fp:</span> medium · <span className="text-success">approve?</span></div>
-              </>
-            }
           />
 
-          <LayerFeature
+          <LayerCard
             id="shield"
-            layer="shield"
-            badge="Layer 03 · Enforcement"
-            badgeDot="The bouncer"
+            image={shieldIcon}
+            imageAlt="Shield layer icon"
+            kicker="Layer 03 · Enforcement"
+            titlePrefix="The"
+            titleHighlight="enforcement perimeter"
+            titleSuffix="of your agents."
+            description="Shield runs alongside your agents and applies Guardian-approved policies in real time. Tool allowlists, parameter restrictions, rate limits, PII redaction, auto-quarantine — every guardrail is enforced before damage happens."
+            capabilities={shieldCapabilities}
             accent="primary"
-            title="Shield"
-            tagline="The enforcement engine — per-agent, per-environment policies that protect each agent from itself and from the outside world."
-            description="Shield runs alongside your agents and applies the approved policies in real time. Tool allowlists, parameter restrictions, rate limits, PII redaction, auto-quarantine — all enforced before damage happens."
-            runtime={{ icon: Cpu, label: "Runs locally on your machine" }}
-            features={[
-              { icon: Ban, text: "Tool allow/deny lists, parameter & domain restrictions" },
-              { icon: Lock, text: "Injection / exfiltration protection, PII & secret redaction" },
-              { icon: Workflow, text: "Rate limits, token budgets, loop caps, auto-quarantine" },
-            ]}
-            terminal={
-              <>
-                <div className="text-muted-foreground">// policy.shield.yaml</div>
-                <div><span className="text-primary">rule:</span> block_export &gt; 5MB</div>
-                <div><span className="text-primary">tools:</span> allowlist=[crm, mailer]</div>
-                <div><span className="text-primary">approval:</span> required if sev ≥ high</div>
-              </>
-            }
           />
         </div>
       </div>
