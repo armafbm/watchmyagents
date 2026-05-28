@@ -35,23 +35,11 @@ export function Nav() {
                 <ChevronDown className="h-3.5 w-3.5" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-64">
-                <DropdownMenuLabel>Threats</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
-                  <a href="#problem" className="cursor-pointer">The problem</a>
+                  <a href="#problem" className="cursor-pointer">Threats</a>
                 </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Technology</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <a href="#recursive-fractal" className="cursor-pointer">Our technology</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <a href="#fractal" className="cursor-pointer">Recursive Fractal Security Loop™</a>
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <a href="#fractal" className="cursor-pointer font-medium">How it works</a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#watch" className="flex items-center gap-2 cursor-pointer">
@@ -71,8 +59,12 @@ export function Nav() {
                     Shield
                   </a>
                 </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <a href="#fractal" className="cursor-pointer">How it works</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="#dashboard" className="cursor-pointer">Fortress</a>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#install" className="cursor-pointer">How to install</a>
                 </DropdownMenuItem>
