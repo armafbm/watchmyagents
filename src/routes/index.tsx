@@ -5,6 +5,7 @@ import { Problem } from "@/components/site/Problem";
 import { InstallSection } from "@/components/site/InstallSection";
 import { FractalLoop } from "@/components/site/FractalLoop";
 import { RecursiveFractalLoop } from "@/components/site/RecursiveFractalLoop";
+import { LayerFeatures } from "@/components/site/LayerFeatures";
 import { Plugins } from "@/components/site/Plugins";
 
 import { Dashboard } from "@/components/site/Dashboard";
