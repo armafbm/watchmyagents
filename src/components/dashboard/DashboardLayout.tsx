@@ -235,6 +235,19 @@ export function DashboardLayout({
 
         <main className="flex-1 px-6 py-8 max-w-[1600px] w-full mx-auto">{children}</main>
       </div>
+
+      {/* Floating Guardian Chat FAB */}
+      <Link
+        to="/dashboard/guardian-chat"
+        aria-label="Chat with Guardian AI"
+        className="fixed bottom-6 right-6 z-50 group flex items-center gap-2 h-12 pl-3 pr-4 rounded-full border border-primary/40 bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all"
+      >
+        <span className="absolute inset-0 rounded-full bg-primary/40 blur-xl -z-10 animate-pulse-ring" />
+        <MessageCircle className="h-5 w-5" />
+        <span className="hidden sm:inline font-display text-sm font-semibold tracking-wide">
+          Ask Guardian
+        </span>
+      </Link>
     </div>
   );
 }
