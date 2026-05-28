@@ -145,7 +145,7 @@ function PipelineStep({
 }) {
   return (
     <div
-      className={`min-h-[110px] rounded-xl border p-3 flex flex-col items-center justify-center text-center bg-background/80 backdrop-blur-sm transition-colors ${
+      className={`min-h-[110px] rounded-xl border px-2 py-3 flex flex-col items-center justify-center text-center bg-background/80 backdrop-blur-sm transition-colors ${
         highlight
           ? "border-primary/70 shadow-[0_0_24px_-6px_hsl(var(--primary)/0.7)] bg-primary/5"
           : "border-accent/30 hover:border-accent/60"
