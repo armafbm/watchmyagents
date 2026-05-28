@@ -106,7 +106,7 @@ function LocalNode({
   desc: string;
 }) {
   return (
-    <div className="relative lg:w-56 shrink-0 rounded-2xl border-2 border-primary/40 bg-background/70 p-5 flex flex-col items-center text-center shadow-[0_0_25px_-12px_hsl(var(--primary)/0.5)]">
+    <div className="relative lg:w-44 shrink-0 rounded-2xl border-2 border-primary/40 bg-background/70 p-4 flex flex-col items-center text-center shadow-[0_0_25px_-12px_hsl(var(--primary)/0.5)]">
       <div className="px-2 py-0.5 rounded-full bg-primary/15 border border-primary/50 flex items-center gap-1 mb-3">
         <Cpu className="h-3 w-3 text-primary" />
         <span className="font-mono text-[9px] uppercase tracking-widest text-primary">Local</span>
@@ -120,7 +120,7 @@ function LocalNode({
 
 function Connector({ label }: { label: string }) {
   return (
-    <div className="flex lg:flex-col items-center justify-center gap-2 lg:w-24 shrink-0">
+    <div className="flex lg:flex-col items-center justify-center gap-2 lg:w-16 shrink-0">
       <div className="hidden lg:block text-[9px] font-mono uppercase tracking-widest text-muted-foreground text-center px-1 leading-tight">
         {label}
       </div>
@@ -158,9 +158,9 @@ function PipelineStep({
       >
         {icon}
       </div>
-      <div className="font-display font-bold text-[11px] md:text-xs leading-tight text-foreground break-words hyphens-auto w-full px-0.5">{title}</div>
+      <div className="font-display font-bold text-xs md:text-sm leading-tight text-foreground whitespace-nowrap w-full px-0.5">{title}</div>
       {subtitle && (
-        <div className="font-mono text-[8px] uppercase tracking-[0.12em] text-muted-foreground mt-1 leading-tight break-words w-full px-0.5">
+        <div className="font-mono text-[8px] md:text-[9px] uppercase tracking-[0.12em] text-muted-foreground mt-1 leading-tight whitespace-nowrap w-full px-0.5">
           {subtitle}
         </div>
       )}
