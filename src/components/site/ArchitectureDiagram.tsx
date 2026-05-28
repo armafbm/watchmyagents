@@ -120,7 +120,7 @@ function LocalNode({
 
 function Connector({ label }: { label: string }) {
   return (
-    <div className="flex lg:flex-col items-center justify-center gap-2 lg:w-24 shrink-0">
+    <div className="flex lg:flex-col items-center justify-center gap-2 lg:w-16 shrink-0">
       <div className="hidden lg:block text-[9px] font-mono uppercase tracking-widest text-muted-foreground text-center px-1 leading-tight">
         {label}
       </div>
