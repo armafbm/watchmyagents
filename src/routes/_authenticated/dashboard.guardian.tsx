@@ -202,190 +202,209 @@ function GuardianPage() {
         }
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Stat label="Pending risks" value={String(stats.count)} icon={AlertTriangle} tone="warning" />
-        <Stat
-          label="Average risk score"
-          value={`${stats.avg}/100`}
-          icon={Target}
-          tone={stats.avg >= 70 ? "danger" : stats.avg >= 40 ? "warning" : "success"}
-        />
-        <Stat
-          label="Categories"
-          value={String(Object.keys(stats.byCategory).length)}
-          icon={Shield}
-          tone="primary"
-          delta={
-            Object.entries(stats.byCategory)
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 3)
-              .map(([k, v]) => `${k}:${v}`)
-              .join("  ") || undefined
-          }
-        />
-      </div>
+      <Tabs defaultValue="risks" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="risks">
+            <Brain className="h-4 w-4 mr-2" /> Risks & policies
+          </TabsTrigger>
+          <TabsTrigger value="chat">
+            <MessageCircle className="h-4 w-4 mr-2" /> Chat
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid lg:grid-cols-[1fr_320px] gap-4">
-        <Panel title="Validation queue" icon={Brain} tag={`${list.length} pending`}>
-          {loading ? (
-            <div className="py-10 flex justify-center text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </div>
-          ) : list.length === 0 ? (
-            <div className="py-12 text-center">
-              <Brain className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-              <div className="font-display text-lg font-bold mb-1">Inbox empty</div>
-              <p className="text-sm text-muted-foreground">
-                Guardian scans every 15 minutes. Run a manual scan to populate suggestions.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {list.map((s) => {
-                const sev = severityTone(s.risk_score);
-                const pp = s.proposed_policy;
-                const surface = surfaceOverride[s.id] ?? s.surface_type ?? "agent";
-                const enforceable = pp?.enforceable_now === true;
-                return (
-                  <div
-                    key={s.id}
-                    className={`rounded-xl border ${sev.border} bg-background/40 p-4`}
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`flex flex-col items-center justify-center rounded-lg border ${sev.border} ${sev.bg} ${sev.text} px-3 py-2 min-w-[70px]`}
-                        >
-                          <span className="font-display text-2xl font-bold leading-none">{s.risk_score ?? 0}</span>
-                          <span className="font-mono text-[9px] uppercase tracking-widest mt-1">{sev.label}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold leading-snug">{s.title}</h3>
-                          <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                              {s.risk_category ?? "other"}
-                            </span>
-                            <span className="font-mono text-[10px] text-muted-foreground">
-                              · confidence {s.confidence ?? 0}%
-                            </span>
-                            <span className="font-mono text-[10px] text-muted-foreground">
-                              · {new Date(s.generated_at).toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded border text-xs font-mono uppercase tracking-widest ${actionTone(s.proposed_action)}`}
+        <TabsContent value="risks" className="mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <Stat label="Pending risks" value={String(stats.count)} icon={AlertTriangle} tone="warning" />
+            <Stat
+              label="Average risk score"
+              value={`${stats.avg}/100`}
+              icon={Target}
+              tone={stats.avg >= 70 ? "danger" : stats.avg >= 40 ? "warning" : "success"}
+            />
+            <Stat
+              label="Categories"
+              value={String(Object.keys(stats.byCategory).length)}
+              icon={Shield}
+              tone="primary"
+              delta={
+                Object.entries(stats.byCategory)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 3)
+                  .map(([k, v]) => `${k}:${v}`)
+                  .join("  ") || undefined
+              }
+            />
+          </div>
+
+          <div className="grid lg:grid-cols-[1fr_320px] gap-4">
+            <Panel title="Validation queue" icon={Brain} tag={`${list.length} pending`}>
+              {loading ? (
+                <div className="py-10 flex justify-center text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : list.length === 0 ? (
+                <div className="py-12 text-center">
+                  <Brain className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+                  <div className="font-display text-lg font-bold mb-1">Inbox empty</div>
+                  <p className="text-sm text-muted-foreground">
+                    Guardian scans every 15 minutes. Run a manual scan to populate suggestions.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {list.map((s) => {
+                    const sev = severityTone(s.risk_score);
+                    const pp = s.proposed_policy;
+                    const surface = surfaceOverride[s.id] ?? s.surface_type ?? "agent";
+                    const enforceable = pp?.enforceable_now === true;
+                    return (
+                      <div
+                        key={s.id}
+                        className={`rounded-xl border ${sev.border} bg-background/40 p-4`}
                       >
-                        {s.proposed_action}
-                      </span>
-                    </div>
-
-                    {s.objective && (
-                      <div className="mb-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-                        <div className="font-mono text-[10px] uppercase tracking-widest text-primary mb-1">
-                          // Objective
-                        </div>
-                        <p className="text-sm">{s.objective}</p>
-                      </div>
-                    )}
-
-                    <p className="text-sm text-muted-foreground mb-3 whitespace-pre-line">
-                      {s.rationale}
-                    </p>
-
-                    {pp && (
-                      <div className="rounded-lg border border-border/60 bg-background/60 p-3 mb-4 space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                            rule_id
-                          </span>
-                          <code className="font-mono text-xs text-foreground">{pp.rule_id}</code>
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`flex flex-col items-center justify-center rounded-lg border ${sev.border} ${sev.bg} ${sev.text} px-3 py-2 min-w-[70px]`}
+                            >
+                              <span className="font-display text-2xl font-bold leading-none">{s.risk_score ?? 0}</span>
+                              <span className="font-mono text-[9px] uppercase tracking-widest mt-1">{sev.label}</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold leading-snug">{s.title}</h3>
+                              <div className="flex flex-wrap items-center gap-2 mt-1">
+                                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                                  {s.risk_category ?? "other"}
+                                </span>
+                                <span className="font-mono text-[10px] text-muted-foreground">
+                                  · confidence {s.confidence ?? 0}%
+                                </span>
+                                <span className="font-mono text-[10px] text-muted-foreground">
+                                  · {new Date(s.generated_at).toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                           <span
-                            className={`ml-auto px-2 py-0.5 rounded border text-[10px] font-mono uppercase tracking-widest ${
-                              enforceable
-                                ? "bg-success/15 text-success border-success/40"
-                                : "bg-muted text-muted-foreground border-border"
-                            }`}
-                            title={pp.enforcement_note ?? undefined}
+                            className={`px-2 py-1 rounded border text-xs font-mono uppercase tracking-widest ${actionTone(s.proposed_action)}`}
                           >
-                            {enforceable ? "enforceable now" : "needs Shield capability"}
+                            {s.proposed_action}
                           </span>
                         </div>
-                        <pre className="text-xs font-mono bg-background/80 border border-border/40 rounded-md p-2 overflow-x-auto">
-                          {JSON.stringify(pp.match, null, 2)}
-                        </pre>
-                        {pp.message && (
-                          <div className="text-xs text-muted-foreground">
-                            <span className="font-mono uppercase tracking-widest text-[10px] mr-2">deny msg</span>
-                            {pp.message}
+
+                        {s.objective && (
+                          <div className="mb-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                            <div className="font-mono text-[10px] uppercase tracking-widest text-primary mb-1">
+                              // Objective
+                            </div>
+                            <p className="text-sm">{s.objective}</p>
                           </div>
                         )}
-                      </div>
-                    )}
 
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                          deploy on
-                        </span>
-                        <Select
-                          value={surface}
-                          onValueChange={(v) => setSurfaceOverride((m) => ({ ...m, [s.id]: v }))}
-                        >
-                          <SelectTrigger className="h-8 w-[140px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="agent">This agent</SelectItem>
-                            <SelectItem value="type">Same type</SelectItem>
-                            <SelectItem value="fleet">Entire fleet</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="ml-auto flex gap-2">
-                        <Button onClick={() => accept(s)} disabled={busy === s.id || !pp}>
-                          <Check className="h-4 w-4 mr-2" /> Accept & deploy
-                        </Button>
-                        <Button variant="ghost" onClick={() => reject(s)} disabled={busy === s.id}>
-                          <X className="h-4 w-4 mr-2" /> Reject
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Panel>
+                        <p className="text-sm text-muted-foreground mb-3 whitespace-pre-line">
+                          {s.rationale}
+                        </p>
 
-        <div className="space-y-4">
-          <Panel title="Sentinel" icon={Sparkles}>
-            <div className="relative h-40 grid place-items-center">
-              <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-pulse-ring" />
-              <img src={mascot} alt="" className="relative h-36 w-36 object-contain animate-float" />
+                        {pp && (
+                          <div className="rounded-lg border border-border/60 bg-background/60 p-3 mb-4 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                                rule_id
+                              </span>
+                              <code className="font-mono text-xs text-foreground">{pp.rule_id}</code>
+                              <span
+                                className={`ml-auto px-2 py-0.5 rounded border text-[10px] font-mono uppercase tracking-widest ${
+                                  enforceable
+                                    ? "bg-success/15 text-success border-success/40"
+                                    : "bg-muted text-muted-foreground border-border"
+                                }`}
+                                title={pp.enforcement_note ?? undefined}
+                              >
+                                {enforceable ? "enforceable now" : "needs Shield capability"}
+                              </span>
+                            </div>
+                            <pre className="text-xs font-mono bg-background/80 border border-border/40 rounded-md p-2 overflow-x-auto">
+                              {JSON.stringify(pp.match, null, 2)}
+                            </pre>
+                            {pp.message && (
+                              <div className="text-xs text-muted-foreground">
+                                <span className="font-mono uppercase tracking-widest text-[10px] mr-2">deny msg</span>
+                                {pp.message}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                              deploy on
+                            </span>
+                            <Select
+                              value={surface}
+                              onValueChange={(v) => setSurfaceOverride((m) => ({ ...m, [s.id]: v }))}
+                            >
+                              <SelectTrigger className="h-8 w-[140px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="agent">This agent</SelectItem>
+                                <SelectItem value="type">Same type</SelectItem>
+                                <SelectItem value="fleet">Entire fleet</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="ml-auto flex gap-2">
+                            <Button onClick={() => accept(s)} disabled={busy === s.id || !pp}>
+                              <Check className="h-4 w-4 mr-2" /> Accept & deploy
+                            </Button>
+                            <Button variant="ghost" onClick={() => reject(s)} disabled={busy === s.id}>
+                              <X className="h-4 w-4 mr-2" /> Reject
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Panel>
+
+            <div className="space-y-4">
+              <Panel title="Sentinel" icon={Sparkles}>
+                <div className="relative h-40 grid place-items-center">
+                  <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-pulse-ring" />
+                  <img src={mascot} alt="" className="relative h-36 w-36 object-contain animate-float" />
+                </div>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Guardian online · LLM scan every 15min
+                </p>
+              </Panel>
+              <Panel title="Pipeline">
+                <ol className="space-y-2 text-sm text-muted-foreground list-decimal pl-4">
+                  <li><span className="text-foreground font-medium">Analyze</span> — aggregate anonymized signals.</li>
+                  <li><span className="text-foreground font-medium">Report</span> — LLM identifies & scores risks.</li>
+                  <li><span className="text-foreground font-medium">Suggest</span> — propose a deployable policy.</li>
+                  <li><span className="text-foreground font-medium">Approve</span> — you accept, modify, or reject.</li>
+                  <li><span className="text-foreground font-medium">Deploy</span> — Shield enforces in real time.</li>
+                </ol>
+              </Panel>
+              <Panel title="Privacy">
+                <p className="text-xs text-muted-foreground">
+                  Guardian only ever sees anonymized counts, distributions and salted hashes.
+                  Raw URLs, prompts and commands never leave your environment.
+                </p>
+              </Panel>
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Guardian online · LLM scan every 15min
-            </p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="chat" className="mt-0">
+          <Panel title="Conversation" icon={MessageCircle} tag="gemini-2.5-flash">
+            <GuardianChatPanel />
           </Panel>
-          <Panel title="Pipeline">
-            <ol className="space-y-2 text-sm text-muted-foreground list-decimal pl-4">
-              <li><span className="text-foreground font-medium">Analyze</span> — aggregate anonymized signals.</li>
-              <li><span className="text-foreground font-medium">Report</span> — LLM identifies & scores risks.</li>
-              <li><span className="text-foreground font-medium">Suggest</span> — propose a deployable policy.</li>
-              <li><span className="text-foreground font-medium">Approve</span> — you accept, modify, or reject.</li>
-              <li><span className="text-foreground font-medium">Deploy</span> — Shield enforces in real time.</li>
-            </ol>
-          </Panel>
-          <Panel title="Privacy">
-            <p className="text-xs text-muted-foreground">
-              Guardian only ever sees anonymized counts, distributions and salted hashes.
-              Raw URLs, prompts and commands never leave your environment.
-            </p>
-          </Panel>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </DashboardLayout>
   );
 }
