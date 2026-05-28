@@ -33,10 +33,39 @@ export function Nav() {
                 What the f*** ?
                 <ChevronDown className="h-3.5 w-3.5" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-48">
+              <DropdownMenuContent align="start" className="min-w-52">
                 <DropdownMenuLabel>Threats</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
-                  <a href="#fractal" className="flex items-center gap-2 cursor-pointer">
+                  <a href="#problem" className="cursor-pointer">The problem</a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-primary transition-colors outline-none">
+                Technology
+                <ChevronDown className="h-3.5 w-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-64">
+                <DropdownMenuItem asChild>
+                  <a href="#recursive-fractal" className="cursor-pointer">Our technology</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="#fractal" className="cursor-pointer">Recursive Fractal Security Loop™</a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-primary transition-colors outline-none">
+                How it works
+                <ChevronDown className="h-3.5 w-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-52">
+                <DropdownMenuItem asChild>
+                  <a href="#watch" className="flex items-center gap-2 cursor-pointer">
                     <img src={watchIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Watch
                   </a>
@@ -48,35 +77,22 @@ export function Nav() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#install" className="flex items-center gap-2 cursor-pointer">
+                  <a href="#shield" className="flex items-center gap-2 cursor-pointer">
                     <img src={shieldIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Shield
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuLabel>Fortress</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <a href="#dashboard" className="flex items-center gap-2 cursor-pointer">
-                    <img src={fortressIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
-                    Fortress
                   </a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </li>
           <li>
-            <a href="#fractal" className="hover:text-primary transition-colors">
-              Technology
-            </a>
+            <a href="#install" className="hover:text-primary transition-colors">How to install</a>
           </li>
           <li>
-            <a href="#install" className="hover:text-primary transition-colors">
-              Install
-            </a>
+            <a href="#privacy" className="hover:text-primary transition-colors">Privacy by design</a>
           </li>
           <li>
-            <Link to="/dashboard/legions" className="hover:text-primary transition-colors">
-              Legions
-            </Link>
+            <a href="#cta" className="hover:text-primary transition-colors">Early access</a>
           </li>
         </ul>
 
