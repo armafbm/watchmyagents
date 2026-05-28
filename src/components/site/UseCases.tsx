@@ -38,7 +38,7 @@ export function UseCases() {
             />
           </div>
           <div>
-            <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">
+            <div className="eyebrow mb-4">
               // Agents fleet management
             </div>
             <h3 className="text-3xl md:text-4xl font-bold mb-4">
