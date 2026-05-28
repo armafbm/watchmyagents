@@ -22,10 +22,10 @@ export function ArchitectureDiagram() {
         <Connector label="encrypted & anonymized export" />
 
         {/* CENTER — FORTRESS CLOUD */}
-        <div className="relative flex-1 rounded-3xl border-2 border-dashed border-accent/60 bg-accent/5 p-5 md:p-6">
-          <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-background border border-accent/60 flex items-center gap-2">
-            <Cloud className="h-3.5 w-3.5 text-accent" />
-            <span className="font-display font-bold text-xs tracking-wide">
+        <div className="relative flex-1 rounded-3xl border-2 border-dashed border-accent/60 bg-gradient-to-br from-accent/10 via-background/40 to-primary/5 p-5 md:p-8 pt-8 md:pt-10">
+          <div className="absolute -top-4 left-6 px-4 py-1.5 rounded-full bg-background border-2 border-accent/70 flex items-center gap-2 shadow-[0_0_20px_-4px_hsl(var(--accent)/0.6)]">
+            <Cloud className="h-4 w-4 text-accent" />
+            <span className="font-display font-bold text-[11px] tracking-[0.2em] uppercase text-accent">
               Fortress Cloud · WatchMyAgents
             </span>
           </div>
