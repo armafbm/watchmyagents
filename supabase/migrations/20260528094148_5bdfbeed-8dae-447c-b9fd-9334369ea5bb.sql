@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.prevent_customer_plan_change() FROM PUBLIC, anon, authenticated;
