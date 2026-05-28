@@ -60,10 +60,19 @@ export function Nav() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <a href="/dashboard/legions" className="flex items-center gap-2 cursor-pointer">
+                    <img src={legionsImg} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    Legions
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <a href="#fractal" className="cursor-pointer">How it works</a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#dashboard" className="cursor-pointer">Fortress</a>
+                  <a href="#dashboard" className="flex items-center gap-2 cursor-pointer">
+                    <img src={fortressIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    Fortress
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#install" className="cursor-pointer">How to install</a>
