@@ -45,11 +45,10 @@ function Index() {
         <RecursiveFractalLoop />
         <LayerFeatures />
         <FractalLoop />
+        <Dashboard />
         <FractalLevels />
         <InstallSection />
         <Plugins />
-        
-        <Dashboard />
         <UseCases />
         <Privacy />
         <CTA />
