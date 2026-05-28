@@ -37,13 +37,13 @@ export function Nav() {
               <DropdownMenuContent align="start" className="min-w-64">
                 <DropdownMenuItem asChild>
                   <a href="#problem" className="flex items-center gap-2 cursor-pointer">
-                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                    <AlertTriangle className="h-5 w-5 text-primary icon-neon-glow" />
                     Threats
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#recursive-fractal" className="flex items-center gap-2 cursor-pointer">
-                    <Cpu className="h-4 w-4 text-muted-foreground" />
+                    <Cpu className="h-5 w-5 text-primary icon-neon-glow" />
                     Our technology
                   </a>
                 </DropdownMenuItem>
@@ -73,7 +73,7 @@ export function Nav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#fractal" className="flex items-center gap-2 cursor-pointer">
-                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                    <RefreshCw className="h-5 w-5 text-primary icon-neon-glow" />
                     How it works
                   </a>
                 </DropdownMenuItem>
@@ -85,19 +85,19 @@ export function Nav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#install" className="flex items-center gap-2 cursor-pointer">
-                    <Download className="h-4 w-4 text-muted-foreground" />
+                    <Download className="h-5 w-5 text-primary icon-neon-glow" />
                     How to install
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#privacy" className="flex items-center gap-2 cursor-pointer">
-                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <Lock className="h-5 w-5 text-primary icon-neon-glow" />
                     Privacy by design
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#cta" className="flex items-center gap-2 cursor-pointer">
-                    <Rocket className="h-4 w-4 text-muted-foreground" />
+                    <Rocket className="h-5 w-5 text-primary icon-neon-glow" />
                     Early access
                   </a>
                 </DropdownMenuItem>

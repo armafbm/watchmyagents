@@ -48,7 +48,7 @@ export function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col items-center gap-10 lg:gap-16 mb-16 text-center">
           <div className="max-w-3xl">
-            <div className="font-mono text-sm uppercase tracking-[0.3em] text-primary mb-6">// FORTRESS · COMMAND CENTER</div>
+            <div className="eyebrow mb-6">// FORTRESS · COMMAND CENTER</div>
             <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-[0.95]">
               MY <span className="text-gradient">FORTRESS</span>
             </h2>

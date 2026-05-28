@@ -22,10 +22,10 @@ export function ArchitectureDiagram() {
         <Connector label="encrypted & anonymized export" />
 
         {/* CENTER — FORTRESS CLOUD */}
-        <div className="relative flex-1 rounded-3xl border-2 border-dashed border-accent/60 bg-accent/5 p-5 md:p-6">
-          <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-background border border-accent/60 flex items-center gap-2">
-            <Cloud className="h-3.5 w-3.5 text-accent" />
-            <span className="font-display font-bold text-xs tracking-wide">
+        <div className="relative flex-1 rounded-3xl border-2 border-dashed border-accent/60 bg-gradient-to-br from-accent/10 via-background/40 to-primary/5 p-5 md:p-8 pt-8 md:pt-10">
+          <div className="absolute -top-4 left-6 px-4 py-1.5 rounded-full bg-background border-2 border-accent/70 flex items-center gap-2 shadow-[0_0_20px_-4px_hsl(var(--accent)/0.6)]">
+            <Cloud className="h-4 w-4 text-accent" />
+            <span className="font-display font-bold text-[11px] tracking-[0.2em] uppercase text-accent">
               Fortress Cloud · WatchMyAgents
             </span>
           </div>
@@ -54,17 +54,17 @@ export function ArchitectureDiagram() {
           </div>
 
           {/* Pipeline */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-center">
-            <PipelineStep icon={<BarChart3 className="h-4 w-4" />} title="Analyze" />
-            <PipelineStep icon={<LayerIcon layer="fortress" className="h-5 w-5" />} title="Dashboard" subtitle="report" />
-            <PipelineStep icon={<Lightbulb className="h-4 w-4" />} title="Suggest" subtitle="policies" />
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-stretch">
+            <PipelineStep icon={<BarChart3 className="h-5 w-5" />} title="Analyze" subtitle="signals" />
+            <PipelineStep icon={<LayerIcon layer="fortress" className="h-6 w-6" />} title="Dashboard" subtitle="report" />
+            <PipelineStep icon={<Lightbulb className="h-5 w-5" />} title="Suggest" subtitle="policies" />
             <PipelineStep
-              icon={<UserCheck className="h-4 w-4" />}
+              icon={<UserCheck className="h-5 w-5" />}
               title="User"
               subtitle="agreement"
               highlight
             />
-            <PipelineStep icon={<Rocket className="h-4 w-4" />} title="Deploy" subtitle="policies" />
+            <PipelineStep icon={<Rocket className="h-5 w-5" />} title="Deploy" subtitle="policies" />
           </div>
 
           <p className="text-[11px] text-muted-foreground text-center mt-4 leading-snug">
@@ -145,22 +145,22 @@ function PipelineStep({
 }) {
   return (
     <div
-      className={`rounded-xl border p-3 flex flex-col items-center text-center bg-background/70 transition-colors ${
+      className={`min-h-[110px] rounded-xl border p-3 flex flex-col items-center justify-center text-center bg-background/80 backdrop-blur-sm transition-colors ${
         highlight
-          ? "border-primary/60 shadow-[0_0_20px_-8px_hsl(var(--primary)/0.6)]"
-          : "border-border/60 hover:border-accent/50"
+          ? "border-primary/70 shadow-[0_0_24px_-6px_hsl(var(--primary)/0.7)] bg-primary/5"
+          : "border-accent/30 hover:border-accent/60"
       }`}
     >
       <div
-        className={`h-8 w-8 rounded-lg flex items-center justify-center mb-1.5 ${
-          highlight ? "bg-primary/15 text-primary" : "bg-accent/10 text-accent"
+        className={`h-10 w-10 rounded-lg flex items-center justify-center mb-2 ${
+          highlight ? "bg-primary/20 text-primary" : "bg-accent/15 text-accent"
         }`}
       >
         {icon}
       </div>
-      <div className="font-display font-bold text-xs">{title}</div>
+      <div className="font-display font-bold text-sm leading-tight text-foreground">{title}</div>
       {subtitle && (
-        <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+        <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground mt-1 leading-tight">
           {subtitle}
         </div>
       )}

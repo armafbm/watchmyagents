@@ -8,9 +8,9 @@ export function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-xs font-mono uppercase tracking-widest text-primary mb-6">
-            <span className="h-2 w-2 rounded-full bg-primary animate-blink" />
-            Runtime cybersecurity for AI agents
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/50 bg-primary/10 mb-6 shadow-[0_0_20px_-4px_hsl(var(--primary)/0.6)]">
+            <span className="h-2 w-2 rounded-full bg-primary animate-blink shadow-[0_0_8px_hsl(var(--primary))]" />
+            <span className="eyebrow !text-[11px]">Runtime cybersecurity for AI agents</span>
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-[0.95] mb-6">
             Your <span className="text-gradient">AI agents</span>.<br />

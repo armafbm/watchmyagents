@@ -12,7 +12,7 @@ export function Problem() {
     <section id="problem" className="relative py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-3xl mb-16">
-          <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// The problem</div>
+          <div className="eyebrow mb-4">// The problem</div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             AI agents are the new <span className="text-gradient">attack surface</span>.
           </h2>

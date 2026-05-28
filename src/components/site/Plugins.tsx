@@ -6,7 +6,7 @@ export function Plugins() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-10 items-center">
           <div className="max-w-3xl">
-            <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Three layers, one mission</div>
+            <div className="eyebrow mb-4">// Three layers, one mission</div>
             <h2 className="text-4xl md:text-5xl font-bold">
               <span className="text-gradient">Watch</span> sees everything.{" "}
               <span className="text-gradient">Guardian AI</span> thinks.{" "}
