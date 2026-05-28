@@ -2,6 +2,66 @@ import { Brain, Cpu, Cloud, Radar, Bell, FileBarChart, LineChart, Sparkles, GitB
 import { LayerIcon } from "@/components/site/LayerIcons";
 
 type Feature = { icon: React.ComponentType<{ className?: string }>; text: string };
+type Accent = "primary" | "accent";
+
+const styles: Record<Accent, {
+  halo: string;
+  ring: string;
+  border: string;
+  shadow: string;
+  glow: string;
+  badge: string;
+  dot: string;
+  text: string;
+  iconBorder: string;
+  iconGlow: string;
+  iconDrop: string;
+  title: string;
+  runtimeText: string;
+  hover: string;
+  pillBg: string;
+  pillText: string;
+  pillIcon: string;
+}> = {
+  primary: {
+    halo: "from-primary/30 via-accent/20 to-primary/30",
+    ring: "from-primary/60 via-accent/40 to-primary/60",
+    border: "border-primary/40",
+    shadow: "shadow-[0_0_60px_-15px_hsl(var(--primary)/0.5)]",
+    glow: "bg-primary/20",
+    badge: "border-primary/40 bg-primary/10",
+    dot: "bg-primary",
+    text: "text-primary",
+    iconBorder: "border-primary/50",
+    iconGlow: "bg-primary/30",
+    iconDrop: "drop-shadow-[0_0_12px_hsl(var(--primary)/0.8)]",
+    title: "from-foreground via-primary to-foreground",
+    runtimeText: "text-primary",
+    hover: "hover:border-primary/40",
+    pillBg: "bg-primary/10",
+    pillText: "text-primary",
+    pillIcon: "text-primary",
+  },
+  accent: {
+    halo: "from-accent/30 via-primary/20 to-accent/30",
+    ring: "from-accent/60 via-primary/40 to-accent/60",
+    border: "border-accent/40",
+    shadow: "shadow-[0_0_60px_-15px_hsl(var(--accent)/0.5)]",
+    glow: "bg-accent/20",
+    badge: "border-accent/40 bg-accent/10",
+    dot: "bg-accent",
+    text: "text-accent",
+    iconBorder: "border-accent/50",
+    iconGlow: "bg-accent/30",
+    iconDrop: "drop-shadow-[0_0_12px_hsl(var(--accent)/0.8)]",
+    title: "from-foreground via-accent to-foreground",
+    runtimeText: "text-accent",
+    hover: "hover:border-accent/40",
+    pillBg: "bg-accent/10",
+    pillText: "text-accent",
+    pillIcon: "text-accent",
+  },
+};
 
 type LayerFeatureProps = {
   id: string;
@@ -13,7 +73,7 @@ type LayerFeatureProps = {
   description: string;
   features: Feature[];
   runtime: { icon: React.ComponentType<{ className?: string }>; label: string };
-  accent: "primary" | "accent";
+  accent: Accent;
   terminal: React.ReactNode;
 };
 
@@ -30,62 +90,37 @@ function LayerFeature({
   accent,
   terminal,
 }: LayerFeatureProps) {
-  const accentColor = accent === "accent" ? "accent" : "primary";
-  const otherColor = accent === "accent" ? "primary" : "accent";
+  const s = styles[accent];
   const RuntimeIcon = runtime.icon;
 
   return (
     <div id={id} className="relative group">
-      {/* Halo */}
-      <div
-        className={`absolute inset-0 rounded-3xl bg-gradient-to-r from-${accentColor}/30 via-${otherColor}/20 to-${accentColor}/30 blur-2xl opacity-60 animate-pulse pointer-events-none`}
-      />
-      <div
-        className={`absolute -inset-px rounded-3xl bg-gradient-to-r from-${accentColor}/60 via-${otherColor}/40 to-${accentColor}/60 opacity-70 pointer-events-none`}
-      />
+      <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${s.halo} blur-2xl opacity-60 animate-pulse pointer-events-none`} />
+      <div className={`absolute -inset-px rounded-3xl bg-gradient-to-r ${s.ring} opacity-70 pointer-events-none`} />
 
-      <div
-        className={`relative rounded-3xl border border-${accentColor}/40 bg-background/90 backdrop-blur-xl shadow-[0_0_60px_-15px_hsl(var(--${accentColor})/0.5)] overflow-hidden`}
-      >
+      <div className={`relative rounded-3xl border ${s.border} bg-background/90 backdrop-blur-xl ${s.shadow} overflow-hidden`}>
         <div className="absolute inset-0 grid-bg opacity-10 pointer-events-none" />
-        <div
-          className={`absolute -top-32 -right-32 h-72 w-72 rounded-full bg-${accentColor}/20 blur-3xl pointer-events-none`}
-        />
+        <div className={`absolute -top-32 -right-32 h-72 w-72 rounded-full ${s.glow} blur-3xl pointer-events-none`} />
 
         <div className="relative grid lg:grid-cols-5 gap-8 p-6 md:p-10">
           {/* Left — branding */}
           <div className="lg:col-span-2 flex flex-col">
-            <div
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-${accentColor}/40 bg-${accentColor}/10 w-fit mb-5`}
-            >
-              <span
-                className={`inline-block h-1.5 w-1.5 rounded-full bg-${accentColor} animate-pulse`}
-              />
-              <span
-                className={`font-mono text-[10px] uppercase tracking-[0.2em] text-${accentColor}`}
-              >
+            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${s.badge} w-fit mb-5`}>
+              <span className={`inline-block h-1.5 w-1.5 rounded-full ${s.dot} animate-pulse`} />
+              <span className={`font-mono text-[10px] uppercase tracking-[0.2em] ${s.text}`}>
                 {badge}
               </span>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
               <div className="relative shrink-0">
-                <div
-                  className={`absolute inset-0 rounded-2xl bg-${accentColor}/30 blur-xl animate-pulse`}
-                />
-                <div
-                  className={`relative h-20 w-20 rounded-2xl border border-${accentColor}/50 bg-background/70 flex items-center justify-center`}
-                >
-                  <LayerIcon
-                    layer={layer}
-                    className={`h-14 w-14 drop-shadow-[0_0_12px_hsl(var(--${accentColor})/0.8)]`}
-                  />
+                <div className={`absolute inset-0 rounded-2xl ${s.iconGlow} blur-xl animate-pulse`} />
+                <div className={`relative h-20 w-20 rounded-2xl border ${s.iconBorder} bg-background/70 flex items-center justify-center`}>
+                  <LayerIcon layer={layer} className={`h-14 w-14 ${s.iconDrop}`} />
                 </div>
               </div>
               <div>
-                <h3
-                  className={`text-3xl md:text-4xl font-display font-bold bg-gradient-to-r from-foreground via-${accentColor} to-foreground bg-clip-text text-transparent`}
-                >
+                <h3 className={`text-3xl md:text-4xl font-display font-bold bg-gradient-to-r ${s.title} bg-clip-text text-transparent`}>
                   {title}
                 </h3>
                 <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mt-1">
@@ -98,10 +133,8 @@ function LayerFeature({
               {tagline}
             </p>
 
-            <div
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/60 bg-background/60 w-fit text-xs`}
-            >
-              <RuntimeIcon className={`h-3.5 w-3.5 text-${accentColor}`} />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/60 bg-background/60 w-fit text-xs">
+              <RuntimeIcon className={`h-3.5 w-3.5 ${s.runtimeText}`} />
               <span className="text-muted-foreground">{runtime.label}</span>
             </div>
           </div>
@@ -115,11 +148,9 @@ function LayerFeature({
               {features.map(({ icon: Icon, text }, k) => (
                 <li
                   key={k}
-                  className={`flex items-start gap-3 text-sm p-3 rounded-xl border border-border/40 bg-background/40 hover:border-${accentColor}/40 transition-colors`}
+                  className={`flex items-start gap-3 text-sm p-3 rounded-xl border border-border/40 bg-background/40 ${s.hover} transition-colors`}
                 >
-                  <div
-                    className={`h-8 w-8 rounded-lg bg-${accentColor}/10 text-${accentColor} flex items-center justify-center shrink-0`}
-                  >
+                  <div className={`h-8 w-8 rounded-lg ${s.pillBg} ${s.pillText} flex items-center justify-center shrink-0`}>
                     <Icon className="h-4 w-4" />
                   </div>
                   <span className="pt-1.5 leading-snug">{text}</span>
