@@ -30,6 +30,7 @@ import { Route as AuthenticatedDashboardWatchRouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_authenticated/dashboard.shield'
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
 import { Route as AuthenticatedDashboardLegionsRouteImport } from './routes/_authenticated/dashboard.legions'
+import { Route as AuthenticatedDashboardGuardianChatRouteImport } from './routes/_authenticated/dashboard.guardian-chat'
 import { Route as AuthenticatedDashboardGuardianRouteImport } from './routes/_authenticated/dashboard.guardian'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -147,6 +148,12 @@ const AuthenticatedDashboardLegionsRoute =
     path: '/legions',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardGuardianChatRoute =
+  AuthenticatedDashboardGuardianChatRouteImport.update({
+    id: '/guardian-chat',
+    path: '/guardian-chat',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardGuardianRoute =
   AuthenticatedDashboardGuardianRouteImport.update({
     id: '/guardian',
@@ -203,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
+  '/dashboard/guardian-chat': typeof AuthenticatedDashboardGuardianChatRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
@@ -231,6 +239,7 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
+  '/dashboard/guardian-chat': typeof AuthenticatedDashboardGuardianChatRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
@@ -262,6 +271,7 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
+  '/_authenticated/dashboard/guardian-chat': typeof AuthenticatedDashboardGuardianChatRoute
   '/_authenticated/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/_authenticated/dashboard/shield': typeof AuthenticatedDashboardShieldRoute
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/email/unsubscribe'
     | '/dashboard/guardian'
+    | '/dashboard/guardian-chat'
     | '/dashboard/legions'
     | '/dashboard/reports'
     | '/dashboard/shield'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/email/unsubscribe'
     | '/dashboard/guardian'
+    | '/dashboard/guardian-chat'
     | '/dashboard/legions'
     | '/dashboard/reports'
     | '/dashboard/shield'
@@ -351,6 +363,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/email/unsubscribe'
     | '/_authenticated/dashboard/guardian'
+    | '/_authenticated/dashboard/guardian-chat'
     | '/_authenticated/dashboard/legions'
     | '/_authenticated/dashboard/reports'
     | '/_authenticated/dashboard/shield'
@@ -537,6 +550,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardLegionsRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/guardian-chat': {
+      id: '/_authenticated/dashboard/guardian-chat'
+      path: '/guardian-chat'
+      fullPath: '/dashboard/guardian-chat'
+      preLoaderRoute: typeof AuthenticatedDashboardGuardianChatRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/guardian': {
       id: '/_authenticated/dashboard/guardian'
       path: '/guardian'
@@ -591,6 +611,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardGuardianRoute: typeof AuthenticatedDashboardGuardianRoute
+  AuthenticatedDashboardGuardianChatRoute: typeof AuthenticatedDashboardGuardianChatRoute
   AuthenticatedDashboardLegionsRoute: typeof AuthenticatedDashboardLegionsRoute
   AuthenticatedDashboardReportsRoute: typeof AuthenticatedDashboardReportsRoute
   AuthenticatedDashboardShieldRoute: typeof AuthenticatedDashboardShieldRoute
@@ -602,6 +623,8 @@ interface AuthenticatedDashboardRouteChildren {
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardGuardianRoute: AuthenticatedDashboardGuardianRoute,
+    AuthenticatedDashboardGuardianChatRoute:
+      AuthenticatedDashboardGuardianChatRoute,
     AuthenticatedDashboardLegionsRoute: AuthenticatedDashboardLegionsRoute,
     AuthenticatedDashboardReportsRoute: AuthenticatedDashboardReportsRoute,
     AuthenticatedDashboardShieldRoute: AuthenticatedDashboardShieldRoute,
@@ -654,3 +677,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

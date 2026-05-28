@@ -14,6 +14,7 @@ import {
   Swords,
   KeyRound,
   Home,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
@@ -49,6 +50,7 @@ const commandChildren: NavItem[] = [
 const baseOperations: Omit<NavItem, "badge">[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: WatchAvatar as unknown as LucideIcon },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: GuardianAvatar as unknown as LucideIcon },
+  { to: "/dashboard/guardian-chat", label: "Guardian Chat", icon: MessageCircle },
   { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon },
   { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
 ];
