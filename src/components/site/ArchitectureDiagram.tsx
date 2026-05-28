@@ -145,22 +145,22 @@ function PipelineStep({
 }) {
   return (
     <div
-      className={`rounded-xl border p-3 flex flex-col items-center text-center bg-background/70 transition-colors ${
+      className={`min-h-[110px] rounded-xl border p-3 flex flex-col items-center justify-center text-center bg-background/80 backdrop-blur-sm transition-colors ${
         highlight
-          ? "border-primary/60 shadow-[0_0_20px_-8px_hsl(var(--primary)/0.6)]"
-          : "border-border/60 hover:border-accent/50"
+          ? "border-primary/70 shadow-[0_0_24px_-6px_hsl(var(--primary)/0.7)] bg-primary/5"
+          : "border-accent/30 hover:border-accent/60"
       }`}
     >
       <div
-        className={`h-8 w-8 rounded-lg flex items-center justify-center mb-1.5 ${
-          highlight ? "bg-primary/15 text-primary" : "bg-accent/10 text-accent"
+        className={`h-10 w-10 rounded-lg flex items-center justify-center mb-2 ${
+          highlight ? "bg-primary/20 text-primary" : "bg-accent/15 text-accent"
         }`}
       >
         {icon}
       </div>
-      <div className="font-display font-bold text-xs">{title}</div>
+      <div className="font-display font-bold text-sm leading-tight text-foreground">{title}</div>
       {subtitle && (
-        <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+        <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground mt-1 leading-tight">
           {subtitle}
         </div>
       )}
