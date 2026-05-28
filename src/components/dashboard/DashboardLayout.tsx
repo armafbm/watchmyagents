@@ -14,9 +14,9 @@ import {
   Swords,
   KeyRound,
   Home,
-  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
+import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
