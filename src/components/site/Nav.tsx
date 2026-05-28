@@ -50,7 +50,9 @@ export function Nav() {
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel>How it works</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <a href="#fractal" className="cursor-pointer font-medium">How it works</a>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#watch" className="flex items-center gap-2 cursor-pointer">
                     <img src={watchIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
