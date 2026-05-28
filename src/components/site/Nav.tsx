@@ -36,10 +36,16 @@ export function Nav() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-64">
                 <DropdownMenuItem asChild>
-                  <a href="#problem" className="cursor-pointer">Threats</a>
+                  <a href="#problem" className="flex items-center gap-2 cursor-pointer">
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                    Threats
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#recursive-fractal" className="cursor-pointer">Our technology</a>
+                  <a href="#recursive-fractal" className="flex items-center gap-2 cursor-pointer">
+                    <Cpu className="h-4 w-4 text-muted-foreground" />
+                    Our technology
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#watch" className="flex items-center gap-2 cursor-pointer">
