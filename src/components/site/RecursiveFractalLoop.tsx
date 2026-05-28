@@ -7,9 +7,9 @@ export function RecursiveFractalLoop() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08),transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/40 bg-accent/5 mb-5">
-            <InfinityIcon className="h-3.5 w-3.5 text-accent" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-accent">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/60 bg-accent/10 mb-5 shadow-[0_0_20px_-4px_hsl(var(--accent)/0.5)]">
+            <InfinityIcon className="h-4 w-4 text-accent" />
+            <span className="eyebrow eyebrow-accent !text-[11px]">
               Our technology · WGS methodology
             </span>
           </div>
