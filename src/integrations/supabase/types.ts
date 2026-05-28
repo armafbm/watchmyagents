@@ -484,46 +484,70 @@ export type Database = {
         Row: {
           agent_id: string
           applied_policy_id: string | null
+          confidence: number | null
           customer_id: string
           generated_at: string
+          generated_by: string | null
           id: string
+          objective: string | null
           proposed_action: string
           proposed_match: Json
           proposed_message: string | null
+          proposed_policy: Json | null
           rationale: string
           resolved_at: string | null
           resolved_by: string | null
+          risk_category: string | null
+          risk_score: number | null
           status: string
+          surface_ref: string | null
+          surface_type: string | null
           title: string
         }
         Insert: {
           agent_id: string
           applied_policy_id?: string | null
+          confidence?: number | null
           customer_id: string
           generated_at?: string
+          generated_by?: string | null
           id?: string
+          objective?: string | null
           proposed_action: string
           proposed_match: Json
           proposed_message?: string | null
+          proposed_policy?: Json | null
           rationale: string
           resolved_at?: string | null
           resolved_by?: string | null
+          risk_category?: string | null
+          risk_score?: number | null
           status?: string
+          surface_ref?: string | null
+          surface_type?: string | null
           title: string
         }
         Update: {
           agent_id?: string
           applied_policy_id?: string | null
+          confidence?: number | null
           customer_id?: string
           generated_at?: string
+          generated_by?: string | null
           id?: string
+          objective?: string | null
           proposed_action?: string
           proposed_match?: Json
           proposed_message?: string | null
+          proposed_policy?: Json | null
           rationale?: string
           resolved_at?: string | null
           resolved_by?: string | null
+          risk_category?: string | null
+          risk_score?: number | null
           status?: string
+          surface_ref?: string | null
+          surface_type?: string | null
           title?: string
         }
         Relationships: [
