@@ -30,16 +30,24 @@ export function ArchitectureDiagram() {
             </span>
           </div>
 
-          {/* Guardian AI badge */}
-          <div className="flex justify-center mb-5 mt-1">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-accent/50 bg-background/70 shadow-[0_0_30px_-10px_hsl(var(--accent)/0.6)]">
-              <LayerIcon layer="guardian" className="h-7 w-7" />
-              <div className="text-left">
-                <div className="font-mono text-[9px] uppercase tracking-widest text-accent">
-                  AI brain
+          {/* Guardian AI badge — hero of the cloud */}
+          <div className="flex justify-center mb-6 mt-2">
+            <div className="relative group">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-accent/40 via-primary/30 to-accent/40 blur-xl opacity-70 animate-pulse" />
+              <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-accent/60 via-primary/50 to-accent/60 opacity-80" />
+              <div className="relative flex items-center gap-4 px-5 py-3.5 rounded-2xl border border-accent/60 bg-background/90 backdrop-blur-xl shadow-[0_0_50px_-10px_hsl(var(--accent)/0.7)]">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-accent/30 blur-lg animate-pulse" />
+                  <LayerIcon layer="guardian" className="relative h-10 w-10 drop-shadow-[0_0_12px_hsl(var(--accent)/0.8)]" />
                 </div>
-                <div className="font-display font-bold text-sm flex items-center gap-1.5">
-                  <Brain className="h-3.5 w-3.5" /> Guardian AI
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-accent mb-0.5">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+                    AI brain · always on
+                  </div>
+                  <div className="font-display font-bold text-base flex items-center gap-1.5 bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">
+                    <Brain className="h-4 w-4 text-accent" /> Guardian AI
+                  </div>
                 </div>
               </div>
             </div>

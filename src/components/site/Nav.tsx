@@ -48,7 +48,7 @@ export function Nav() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#shield" className="flex items-center gap-2 cursor-pointer">
+                  <a href="#install" className="flex items-center gap-2 cursor-pointer">
                     <img src={shieldIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Shield
                   </a>
