@@ -150,7 +150,7 @@ export function LayerFeatures() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.06),transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="font-mono text-xs uppercase tracking-widest text-accent mb-3">
+          <div className="eyebrow eyebrow-accent mb-3">
             // 03 — The three layers in detail
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">

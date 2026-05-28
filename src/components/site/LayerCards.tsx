@@ -13,7 +13,7 @@ export function LayerCards({ withIds = true }: { withIds?: boolean } = {}) {
               <LayerIcon layer="watch" className="h-10 w-10" alt="Watch" />
             </div>
             <div>
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Layer 01</div>
+              <div className="eyebrow !text-muted-foreground" style={{textShadow:"none"}}>Layer 01</div>
               <h3 className="text-2xl font-bold">Watch</h3>
             </div>
           </div>
