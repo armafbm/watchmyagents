@@ -2,8 +2,8 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { getSafeAuthRedirect } from "@/lib/auth-redirect";
 
-const RESTORE_ATTEMPTS = 20;
-const RESTORE_DELAY_MS = 100;
+const RESTORE_ATTEMPTS = 6;
+const RESTORE_DELAY_MS = 50;
 
 function wait(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
