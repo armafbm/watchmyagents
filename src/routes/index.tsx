@@ -43,10 +43,10 @@ function Index() {
         <Hero />
         <Problem />
         <RecursiveFractalLoop />
+        <FractalLevels />
         <LayerFeatures />
         <FractalLoop />
         <Dashboard />
-        <FractalLevels />
         <InstallSection />
         <Plugins />
         <UseCases />
