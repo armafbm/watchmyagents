@@ -7,10 +7,10 @@ import { LayerIcon } from "@/components/site/LayerIcons";
  */
 export function ArchitectureDiagram() {
   return (
-    <div className="relative rounded-2xl border border-border/60 bg-gradient-to-br from-background/80 via-card/40 to-background/80 backdrop-blur-md p-6 md:p-10">
+    <div className="relative rounded-2xl border border-border/60 bg-gradient-to-br from-background/80 via-card/40 to-background/80 backdrop-blur-md p-3 md:p-4">
       <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-72 w-[60%] rounded-full bg-accent/10 blur-3xl pointer-events-none -z-10" />
 
-      <div className="relative flex flex-col lg:flex-row items-stretch gap-6">
+      <div className="relative flex flex-col lg:flex-row items-stretch gap-2">
         {/* LEFT — WATCH (local) */}
         <LocalNode
           layer="watch"
@@ -106,7 +106,7 @@ function LocalNode({
   desc: string;
 }) {
   return (
-    <div className="relative lg:w-44 shrink-0 rounded-2xl border-2 border-primary/40 bg-background/70 p-4 flex flex-col items-center text-center shadow-[0_0_25px_-12px_hsl(var(--primary)/0.5)]">
+    <div className="relative lg:w-40 shrink-0 rounded-2xl border-2 border-primary/40 bg-background/70 p-3 flex flex-col items-center text-center shadow-[0_0_25px_-12px_hsl(var(--primary)/0.5)]">
       <div className="px-2 py-0.5 rounded-full bg-primary/15 border border-primary/50 flex items-center gap-1 mb-3">
         <Cpu className="h-3 w-3 text-primary" />
         <span className="font-mono text-[9px] uppercase tracking-widest text-primary">Local</span>
@@ -120,7 +120,7 @@ function LocalNode({
 
 function Connector({ label }: { label: string }) {
   return (
-    <div className="flex lg:flex-col items-center justify-center gap-2 lg:w-16 shrink-0">
+    <div className="flex lg:flex-col items-center justify-center gap-2 lg:w-14 shrink-0">
       <div className="hidden lg:block text-[9px] font-mono uppercase tracking-widest text-muted-foreground text-center px-1 leading-tight">
         {label}
       </div>
@@ -145,7 +145,7 @@ function PipelineStep({
 }) {
   return (
     <div
-      className={`min-h-[110px] rounded-xl border p-3 flex flex-col items-center justify-center text-center bg-background/80 backdrop-blur-sm transition-colors ${
+      className={`min-h-[110px] rounded-xl border px-2 py-3 flex flex-col items-center justify-center text-center bg-background/80 backdrop-blur-sm transition-colors ${
         highlight
           ? "border-primary/70 shadow-[0_0_24px_-6px_hsl(var(--primary)/0.7)] bg-primary/5"
           : "border-accent/30 hover:border-accent/60"
