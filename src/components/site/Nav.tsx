@@ -2,7 +2,7 @@ import logo from "@/assets/wma-logo.png";
 import watchIcon from "@/assets/wma-icon-watch.png";
 import guardianIcon from "@/assets/wma-icon-guardian.png";
 import shieldIcon from "@/assets/wma-icon-shield.png";
-import fortressIcon from "@/assets/wma-fortress-castle-cutout.png";
+
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
 import { Shield, ChevronDown } from "lucide-react";
