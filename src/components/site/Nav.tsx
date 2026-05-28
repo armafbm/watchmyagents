@@ -7,7 +7,7 @@ import legionsImg from "@/assets/wma-legions.png";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown } from "lucide-react";
+import { Shield, ChevronDown, AlertTriangle, Cpu, RefreshCw, Download, Lock, Rocket } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
