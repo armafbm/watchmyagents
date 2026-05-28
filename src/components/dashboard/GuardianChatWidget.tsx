@@ -186,10 +186,10 @@ export function GuardianChatWidget() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close Guardian chat" : "Open Guardian chat"}
         aria-expanded={open}
-        className="fixed bottom-6 right-6 z-50 group flex items-center gap-2 h-12 pl-3 pr-4 rounded-full border border-primary/40 bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all"
+        className="fixed bottom-6 right-6 z-50 group flex items-center gap-3 h-14 pl-2 pr-5 rounded-full border border-primary/40 bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all"
       >
         <span className="absolute inset-0 rounded-full bg-primary/40 blur-xl -z-10 animate-pulse-ring" />
-        <LayerIcon layer="guardian" className="h-5 w-5" />
+        <LayerIcon layer="guardian" className="h-10 w-10 shrink-0" />
         <span className="hidden sm:inline font-display text-sm font-semibold tracking-wide">
           Ask Guardian
         </span>
