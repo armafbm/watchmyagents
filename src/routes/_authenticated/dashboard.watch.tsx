@@ -17,7 +17,30 @@ type Agent = {
   status: string;
   last_seen_at: string | null;
   shield_mode_detected: string | null;
+  agent_type: string | null;
+  agent_type_confidence: number | null;
+  agent_type_stage: string | null;
 };
+
+function TypologyBadge({ a }: { a: Agent }) {
+  const t = a.agent_type;
+  const dim = !t || t === "generic" || !a.agent_type_stage;
+  const conf = a.agent_type_confidence != null ? Math.round(a.agent_type_confidence * 100) : null;
+  return (
+    <span
+      className={`px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest ${
+        dim ? "bg-muted/40 text-muted-foreground border-border/40"
+            : "bg-primary/10 text-primary border-primary/30"
+      }`}
+      title="Detected agent typology"
+    >
+      {t ?? "unknown"}
+      {a.agent_type_stage ? ` · ${a.agent_type_stage}` : ""}
+      {conf != null ? ` · ${conf}%` : ""}
+    </span>
+  );
+}
+
 
 type SignalRow = {
   id: string;
