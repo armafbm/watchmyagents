@@ -15,6 +15,18 @@ function json(status: number, body: unknown) {
   });
 }
 
+const VALID_AGENT_TYPES = new Set([
+  'coding','devops_infra','data_rag','customer_facing','browser_web',
+  'orchestrator','workflow_backoffice','personal_assistant',
+  'transactional_financial','generic',
+]);
+const VALID_STAGES = new Set(['cold_start','provisional','stable']);
+// Stricter stages dominate. Overwriting a stricter stage with a looser one
+// requires a high-confidence (>=0.85) new classification.
+const STAGE_STRICTNESS: Record<string, number> = {
+  cold_start: 0, provisional: 1, stable: 2,
+};
+
 function validateBody(b: unknown) {
   if (!b || typeof b !== 'object') return { ok: false, error: 'body must be a JSON object' };
   const o = b as Record<string, unknown>;
@@ -27,6 +39,20 @@ function validateBody(b: unknown) {
   const payloadStr = JSON.stringify(o.payload);
   if (payloadStr.length > 256 * 1024)
     return { ok: false, error: 'payload too large (>256 KB)' };
+
+  // Optional classification
+  let classification: { agent_type: string; confidence: number; stage: string } | null = null;
+  if (o.classification && typeof o.classification === 'object') {
+    const c = o.classification as Record<string, unknown>;
+    if (typeof c.agent_type !== 'string' || !VALID_AGENT_TYPES.has(c.agent_type))
+      return { ok: false, error: 'classification.agent_type invalid' };
+    if (typeof c.confidence !== 'number' || c.confidence < 0 || c.confidence > 1)
+      return { ok: false, error: 'classification.confidence must be 0..1' };
+    if (typeof c.stage !== 'string' || !VALID_STAGES.has(c.stage))
+      return { ok: false, error: 'classification.stage invalid' };
+    classification = { agent_type: c.agent_type, confidence: c.confidence, stage: c.stage };
+  }
+
   return {
     ok: true,
     data: {
@@ -35,9 +61,11 @@ function validateBody(b: unknown) {
       window_start: o.window_start,
       window_end: o.window_end,
       payload: o.payload,
+      classification,
     },
   };
 }
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
