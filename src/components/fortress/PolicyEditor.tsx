@@ -48,7 +48,23 @@ export function PolicyEditor({
   const [action, setAction] = useState<string>(draft.action ?? "deny");
   const [message, setMessage] = useState(draft.message ?? "");
   const [matchStr, setMatchStr] = useState(draft.match ?? `{\n  "tool_name": "*"\n}`);
+  const [surfaceType, setSurfaceType] = useState<"agent" | "type" | "fleet">(
+    draft.surface_type ?? (draft.agent_id ? "agent" : "fleet"),
+  );
+  const [surfaceRef, setSurfaceRef] = useState<string>(draft.surface_ref ?? "generic");
+  const [agentId, setAgentId] = useState<string | null>(draft.agent_id ?? null);
+  const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null }>>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("agents")
+      .select("id, display_name, agent_type")
+      .order("display_name")
+      .then(({ data }) => {
+        setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null }> | null) ?? []));
+      });
+  }, []);
 
   const save = async () => {
     let parsed: unknown;
@@ -62,6 +78,14 @@ export function PolicyEditor({
       toast.error("Name and rule_id are required");
       return;
     }
+    if (surfaceType === "agent" && !agentId) {
+      toast.error("Pick an agent for surface 'agent'");
+      return;
+    }
+    if (surfaceType === "type" && !surfaceRef) {
+      toast.error("Pick a typology for surface 'type'");
+      return;
+    }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const customer_id = u.user!.id;
@@ -73,6 +97,9 @@ export function PolicyEditor({
       action,
       message: message.trim() || null,
       match: parsed as never,
+      surface_type: surfaceType,
+      surface_ref: surfaceType === "type" ? surfaceRef : null,
+      agent_id: surfaceType === "agent" ? agentId : null,
       customer_id,
     };
     const { error } = await supabase.from("policies").upsert(payload);
@@ -81,9 +108,10 @@ export function PolicyEditor({
       toast.error(error.message);
       return;
     }
-    toast.success(draft.id ? "Policy updated" : "Policy created");
+    toast.success(draft.id ? "Policy updated" : "Policy created (pending — enable to deploy)");
     onSaved();
   };
+
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4">
