@@ -84,6 +84,7 @@ function WatchPage() {
   const [signals, setSignals] = useState<SignalRow[]>([]);
   const [signalCountByAgent, setSignalCountByAgent] = useState<Record<string, number>>({});
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -104,6 +105,7 @@ function WatchPage() {
         counts[r.agent_id] = (counts[r.agent_id] ?? 0) + 1;
       });
       setSignalCountByAgent(counts);
+      setLoading(false);
     })();
   }, []);
 
