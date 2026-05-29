@@ -130,14 +130,20 @@ function WatchPage() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Stat label="Agents registered" value={String(agents.length)} tone="success" icon={Eye} />
-        <Stat label="Online (last hour)" value={String(onlineCount)} icon={Activity} tone={onlineCount > 0 ? "success" : "warning"} />
-        <Stat label="Signals (recent 50)" value={String(signals.length)} icon={Activity} />
-        <Stat label="Unique sources" value={String(Object.keys(signalCountByAgent).length)} />
+        <Stat label="Agents registered" value={loading ? "—" : String(agents.length)} tone="success" icon={Eye} />
+        <Stat label="Online (last hour)" value={loading ? "—" : String(onlineCount)} icon={Activity} tone={onlineCount > 0 ? "success" : "warning"} />
+        <Stat label="Signals (recent 50)" value={loading ? "—" : String(signals.length)} icon={Activity} />
+        <Stat label="Unique sources" value={loading ? "—" : String(Object.keys(signalCountByAgent).length)} />
       </div>
 
-      <Panel title="Agents under watch" icon={Eye} tag={`${agents.length} agent${agents.length === 1 ? "" : "s"}`}>
-        {agents.length === 0 ? (
+      <Panel title="Agents under watch" icon={Eye} tag={loading ? "loading…" : `${agents.length} agent${agents.length === 1 ? "" : "s"}`}>
+        {loading ? (
+          <div className="space-y-2 py-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-10 rounded-md bg-muted/30 animate-pulse" />
+            ))}
+          </div>
+        ) : agents.length === 0 ? (
           <div className="py-10 text-center">
             <p className="text-muted-foreground text-sm mb-4">No agent registered yet.</p>
             <Link
@@ -190,8 +196,14 @@ function WatchPage() {
       </Panel>
 
       <div className="mt-6">
-        <Panel title="Signal tail" icon={Radio} tag={`live · last ${signals.length}`}>
-          {signals.length === 0 ? (
+        <Panel title="Signal tail" icon={Radio} tag={loading ? "loading…" : `live · last ${signals.length}`}>
+          {loading ? (
+            <div className="space-y-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="h-12 rounded-md bg-muted/30 animate-pulse" />
+              ))}
+            </div>
+          ) : signals.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               No signals yet. Once your shield ingests events, they show here.
             </p>
@@ -208,6 +220,7 @@ function WatchPage() {
           )}
         </Panel>
       </div>
+
 
       {selectedAgent && (
         <AgentDetailDrawer
