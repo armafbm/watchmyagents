@@ -122,9 +122,22 @@ function GuardianPage() {
       toast.error("Suggestion is missing a deployable policy");
       return;
     }
-    const surface = surfaceOverride[s.id] ?? s.surface_type ?? "agent";
-    // 'fleet' => agent_id null; 'agent' / 'type' => this agent (type behaves like agent until typing exists)
-    const agentId = surface === "fleet" ? null : s.agent_id;
+    const surface = (surfaceOverride[s.id] ?? s.surface_type ?? "agent") as "agent" | "type" | "fleet";
+
+    // Resolve surface_ref for 'type' (need the agent's agent_type)
+    let surfaceRef: string | null = null;
+    if (surface === "type") {
+      const { data: ag } = await supabase
+        .from("agents").select("agent_type").eq("id", s.agent_id).maybeSingle();
+      surfaceRef = (ag as { agent_type: string | null } | null)?.agent_type ?? s.surface_ref ?? null;
+      if (!surfaceRef) {
+        setBusy(null);
+        toast.error("This agent has no detected typology yet — pick agent or fleet.");
+        return;
+      }
+    }
+
+    const agentId = surface === "agent" ? s.agent_id : null;
 
     // Collision-safe rule_id
     let ruleId = pp.rule_id;
@@ -141,6 +154,8 @@ function GuardianPage() {
       .insert({
         customer_id: s.customer_id,
         agent_id: agentId,
+        surface_type: surface,
+        surface_ref: surfaceRef,
         rule_id: ruleId,
         name: pp.name,
         rationale: s.rationale,
@@ -150,7 +165,8 @@ function GuardianPage() {
         priority: pp.priority ?? 100,
         suggested_by_guardian: true,
         suggestion_id: s.id,
-        enabled: true,
+        // Human gate: PENDING until user flips the switch in Shield.
+        enabled: false,
       })
       .select()
       .single();
@@ -172,9 +188,10 @@ function GuardianPage() {
       toast.error(e2.message);
       return;
     }
-    toast.success(`Policy deployed (${surface})`);
+    toast.success(`Policy created (pending) on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}. Enable it in Shield to deploy.`);
     reload();
   };
+
 
   const reject = async (s: Suggestion) => {
     setBusy(s.id);
