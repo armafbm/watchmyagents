@@ -283,6 +283,19 @@ function semanticSig(
   return `${agentId}|${category}|${actionType}|${toolKeyOf(m)}|${status}|${action}`;
 }
 
+// Structural sig (no category) — used to compare candidates against deployed
+// policies, which carry no risk_category.
+function structuralSig(
+  agentId: string,
+  match: Record<string, unknown> | null | undefined,
+  action: string,
+): string {
+  const m = (match ?? {}) as Record<string, unknown>;
+  const actionType = (m.action_type as string | undefined) ?? '';
+  const status = (m.status as string | undefined) ?? '';
+  return `${agentId}|${actionType}|${toolKeyOf(m)}|${status}|${action}`;
+}
+
 function sigForValidated(v: Validated, agentId: string): string {
   return semanticSig(agentId, v.category, v.proposed_policy.match as Record<string, unknown>, v.proposed_policy.action);
 }
