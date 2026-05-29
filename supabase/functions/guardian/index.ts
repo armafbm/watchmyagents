@@ -443,7 +443,7 @@ async function runGuardian() {
         deployedStructuralSigs.add(structuralSig(agent.id, row.match, row.action));
       }
       const validated = llm.risks
-        .map((r) => validateRisk(r, agent, deployedRuleIds))
+        .map((r) => validateRisk(r, agent, deployedRuleIds, recentAgg.tool_stats))
         .filter((v): v is Validated => v !== null)
         .sort((a, b) => b.score - a.score)
         .slice(0, MAX_SUGGESTIONS_PER_AGENT);
