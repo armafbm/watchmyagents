@@ -204,8 +204,10 @@ function WatchPage() {
                     <td className="p-3 font-mono text-xs text-muted-foreground">
                       {a.shield_mode_detected ?? "—"}
                     </td>
+                    <td className="p-3"><TypologyBadge a={a} /></td>
                     <td className="p-3 text-right font-mono">{signalCountByAgent[a.id] ?? 0}</td>
                     <td className="p-3"><SevBadge sev={severityFor(a)} /></td>
+
                     <td className="p-3 font-mono text-xs text-muted-foreground">{relativeTime(a.last_seen_at)}</td>
                     <td className="p-3 text-muted-foreground">
                       <ChevronRight className="h-4 w-4" />
