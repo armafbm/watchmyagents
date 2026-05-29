@@ -29,13 +29,7 @@ const AGENT_TYPES = [
   "transactional_financial","generic",
 ] as const;
 
-  rule_id?: string;
-  name?: string;
-  rationale?: string;
-  action?: string;
-  message?: string;
-  match?: string; // JSON string
-};
+
 
 const ACTIONS = ["allow", "deny", "interrupt"] as const;
 
