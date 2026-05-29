@@ -27,9 +27,8 @@ export const Route = createFileRoute("/pricing")({
 type Tier = {
   name: string;
   agents: string;
-  price: string;
-  period?: string;
-  note: string;
+  monthlyPrice: number | null;
+  monthlyAnnual: number | null;
   features: string[];
   cta: string;
   ctaHref: string;
@@ -41,8 +40,8 @@ const TIERS: Tier[] = [
   {
     name: "Starter",
     agents: "1 agent",
-    price: "Free",
-    note: "Forever",
+    monthlyPrice: 0,
+    monthlyAnnual: 0,
     features: ["Basic monitoring", "7-day history", "Community support", "1 workspace"],
     cta: "Get started",
     ctaHref: "/auth/signup",
@@ -50,9 +49,8 @@ const TIERS: Tier[] = [
   {
     name: "Pro",
     agents: "Up to 10 agents",
-    price: "$29",
-    period: "/month",
-    note: "$290/year (save 17%)",
+    monthlyPrice: 29,
+    monthlyAnnual: 20.3,
     features: ["Advanced monitoring", "Smart alerts", "90-day history", "Email support (24h)", "Webhooks"],
     cta: "Start free trial",
     ctaHref: "/auth/signup",
@@ -60,9 +58,8 @@ const TIERS: Tier[] = [
   {
     name: "Pro+",
     agents: "Up to 50 agents",
-    price: "$79",
-    period: "/month",
-    note: "$790/year (save 17%)",
+    monthlyPrice: 79,
+    monthlyAnnual: 55.3,
     features: [
       "Security Score",
       "Cost Optimization",
@@ -77,9 +74,8 @@ const TIERS: Tier[] = [
   {
     name: "Business",
     agents: "Up to 500 agents",
-    price: "$299",
-    period: "/month",
-    note: "+ usage-based pricing",
+    monthlyPrice: 299,
+    monthlyAnnual: 209.3,
     features: [
       "Guardian AI",
       "Auto-rollback",
@@ -97,9 +93,8 @@ const TIERS: Tier[] = [
   {
     name: "Advanced",
     agents: "Unlimited agents",
-    price: "$899",
-    period: "/month",
-    note: "+ usage-based pricing",
+    monthlyPrice: 899,
+    monthlyAnnual: 629.3,
     features: [
       "Shield security",
       "Custom integrations",
@@ -115,8 +110,8 @@ const TIERS: Tier[] = [
   {
     name: "Enterprise",
     agents: "Custom deployment",
-    price: "Custom",
-    note: "Annual contract",
+    monthlyPrice: null,
+    monthlyAnnual: null,
     features: [
       "On-premises option",
       "Dedicated support",
@@ -132,6 +127,20 @@ const TIERS: Tier[] = [
 
 function PricingPage() {
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+
+  const getPrice = (t: Tier) => {
+    if (t.monthlyPrice === null) return "Custom";
+    if (t.monthlyPrice === 0) return "Free";
+    const v = billing === "monthly" ? t.monthlyPrice : (t.monthlyAnnual ?? t.monthlyPrice);
+    return `$${v.toFixed(0)}`;
+  };
+
+  const getNote = (t: Tier) => {
+    if (t.monthlyPrice === null) return "Annual contract";
+    if (t.monthlyPrice === 0) return "Forever";
+    const monthly = billing === "annual" ? (t.monthlyAnnual ?? t.monthlyPrice) : t.monthlyPrice;
+    return `$${(monthly * 12).toFixed(0)}/year`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,21 +159,31 @@ function PricingPage() {
             </p>
           </div>
 
-          <div className="flex justify-center gap-3 mb-12">
-            {(["monthly", "annual"] as const).map((b) => (
-              <button
-                key={b}
-                onClick={() => setBilling(b)}
-                className={cn(
-                  "px-4 py-2 rounded-md font-mono text-xs uppercase tracking-widest border transition-all",
-                  billing === b
-                    ? "border-primary/50 bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {b}
-              </button>
-            ))}
+          <div className="flex justify-center items-center gap-3 mb-12">
+            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              Billing:
+            </span>
+            <div className="inline-flex rounded-md border border-border overflow-hidden">
+              {(["monthly", "annual"] as const).map((b) => (
+                <button
+                  key={b}
+                  onClick={() => setBilling(b)}
+                  className={cn(
+                    "px-4 py-2 font-mono text-xs uppercase tracking-widest transition-all",
+                    billing === b
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
+            {billing === "annual" && (
+              <span className="bg-primary/15 text-primary text-[10px] font-mono font-bold tracking-widest uppercase px-2.5 py-1 rounded">
+                Save 30%
+              </span>
+            )}
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -187,12 +206,12 @@ function PricingPage() {
                 <div className="text-xs text-muted-foreground mt-1">{t.agents}</div>
 
                 <div className="flex items-baseline gap-1.5 mt-5">
-                  <span className="font-display text-4xl font-bold">{t.price}</span>
-                  {t.period && (
-                    <span className="text-sm text-muted-foreground">{t.period}</span>
+                  <span className="font-display text-4xl font-bold">{getPrice(t)}</span>
+                  {t.monthlyPrice !== null && t.monthlyPrice !== 0 && (
+                    <span className="text-sm text-muted-foreground">/month</span>
                   )}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1 mb-5">{t.note}</div>
+                <div className="text-xs text-muted-foreground mt-1 mb-5">{getNote(t)}</div>
 
                 <ul className="space-y-2 flex-1 mb-6">
                   {t.features.map((f) => (
