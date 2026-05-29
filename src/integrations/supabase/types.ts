@@ -16,6 +16,10 @@ export type Database = {
     Tables: {
       agents: {
         Row: {
+          agent_type: string | null
+          agent_type_confidence: number | null
+          agent_type_stage: string | null
+          agent_type_updated_at: string | null
           anthropic_agent_id: string
           created_at: string
           customer_id: string
@@ -27,6 +31,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agent_type?: string | null
+          agent_type_confidence?: number | null
+          agent_type_stage?: string | null
+          agent_type_updated_at?: string | null
           anthropic_agent_id: string
           created_at?: string
           customer_id: string
@@ -38,6 +46,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agent_type?: string | null
+          agent_type_confidence?: number | null
+          agent_type_stage?: string | null
+          agent_type_updated_at?: string | null
           anthropic_agent_id?: string
           created_at?: string
           customer_id?: string
@@ -354,6 +366,8 @@ export type Database = {
           rule_id: string
           suggested_by_guardian: boolean
           suggestion_id: string | null
+          surface_ref: string | null
+          surface_type: string | null
           updated_at: string
         }
         Insert: {
@@ -371,6 +385,8 @@ export type Database = {
           rule_id: string
           suggested_by_guardian?: boolean
           suggestion_id?: string | null
+          surface_ref?: string | null
+          surface_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -388,6 +404,8 @@ export type Database = {
           rule_id?: string
           suggested_by_guardian?: boolean
           suggestion_id?: string | null
+          surface_ref?: string | null
+          surface_type?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -420,6 +438,33 @@ export type Database = {
             referencedColumns: ["customer_id"]
           },
         ]
+      }
+      shield_templates: {
+        Row: {
+          archetype: string
+          baseline_policies: Json | null
+          id: string
+          threat_profile: Json | null
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          archetype: string
+          baseline_policies?: Json | null
+          id?: string
+          threat_profile?: Json | null
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          archetype?: string
+          baseline_policies?: Json | null
+          id?: string
+          threat_profile?: Json | null
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: []
       }
       signals: {
         Row: {

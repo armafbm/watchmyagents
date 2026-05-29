@@ -46,12 +46,13 @@ serve(async (req) => {
   const filterAnthropicAgentId = url.searchParams.get('agent_id');
 
   let agentUuid: string | null = null;
+  let agentType: string | null = null;
   if (filterAnthropicAgentId) {
     if (!/^agent_[a-zA-Z0-9]+$/.test(filterAnthropicAgentId)) {
       return json(400, { error: 'invalid agent_id format' });
     }
     const { data: agent } = await supabase
-      .from('agents').select('id')
+      .from('agents').select('id, agent_type')
       .eq('customer_id', customerId)
       .eq('anthropic_agent_id', filterAnthropicAgentId)
       .maybeSingle();
@@ -59,23 +60,34 @@ serve(async (req) => {
       return json(200, { ok: true, fetched_at: new Date().toISOString(), policies: [] });
     }
     agentUuid = (agent as { id: string }).id;
+    agentType = (agent as { agent_type: string | null }).agent_type;
   }
 
+  // Surface-aware resolution.
+  //   fleet                          => always applies
+  //   agent (this agent)             => surface_type='agent' AND agent_id = this
+  //   type  (this agent's type)      => surface_type='type'  AND surface_ref = this.agent_type
+  // Back-compat: rows with NULL surface_type were backfilled (fleet when agent_id null, agent otherwise).
   let query = supabase
     .from('policies')
-    .select('id, rule_id, name, rationale, match, action, message, priority, agent_id')
+    .select('id, rule_id, name, rationale, match, action, message, priority, agent_id, surface_type, surface_ref')
     .eq('customer_id', customerId)
     .eq('enabled', true)
     .order('priority', { ascending: true });
 
   if (agentUuid !== null) {
-    query = query.or(`agent_id.is.null,agent_id.eq.${agentUuid}`);
+    // Build OR clause covering the three surfaces.
+    const orParts = [`surface_type.eq.fleet`, `and(surface_type.eq.agent,agent_id.eq.${agentUuid})`];
+    if (agentType) orParts.push(`and(surface_type.eq.type,surface_ref.eq.${agentType})`);
+    query = query.or(orParts.join(','));
   } else {
-    query = query.is('agent_id', null);
+    // No agent_id filter -> fleet only.
+    query = query.eq('surface_type', 'fleet');
   }
 
   const { data: policies, error: policiesErr } = await query;
   if (policiesErr) { console.error('[get-policies] policies lookup:', policiesErr); return json(500, { error: 'internal error' }); }
+
 
   supabase.from('api_keys')
     .update({ last_used_at: new Date().toISOString() })
