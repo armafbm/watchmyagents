@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PostLoginRouteImport } from './routes/post-login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -51,6 +52,11 @@ const SigninRoute = SigninRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostLoginRoute = PostLoginRouteImport.update({
@@ -191,6 +197,7 @@ const AuthenticatedDashboardSettingsKeysRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/post-login': typeof PostLoginRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/post-login': typeof PostLoginRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/post-login': typeof PostLoginRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/post-login'
+    | '/pricing'
     | '/privacy'
     | '/signin'
     | '/terms'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/post-login'
+    | '/pricing'
     | '/privacy'
     | '/signin'
     | '/terms'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/post-login'
+    | '/pricing'
     | '/privacy'
     | '/signin'
     | '/terms'
@@ -370,6 +382,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   PostLoginRoute: typeof PostLoginRoute
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   SigninRoute: typeof SigninRoute
   TermsRoute: typeof TermsRoute
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/post-login': {
@@ -634,6 +654,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   PostLoginRoute: PostLoginRoute,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   SigninRoute: SigninRoute,
   TermsRoute: TermsRoute,
