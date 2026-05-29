@@ -164,8 +164,16 @@ function aggregateRecent(signals: { payload: SignalPayload }[]) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .map(([pattern, count]) => ({ pattern, count }));
+  // Build per-tool stats: { calls, errors, error_rate } — gives the LLM the
+  // absolute counts needed for small-sample discounting.
+  const tool_stats: Record<string, { calls: number; errors: number; error_rate: number }> = {};
+  for (const [tool, calls] of Object.entries(tool_counts)) {
+    const rate = error_rate_by_tool[tool] ?? 0;
+    const errors = Math.round(calls * rate);
+    tool_stats[tool] = { calls, errors, error_rate: Number(rate.toFixed(3)) };
+  }
   return {
-    tool_counts, action_counts, error_rate_by_tool, stop_reasons,
+    tool_counts, action_counts, error_rate_by_tool, tool_stats, stop_reasons,
     tokens_total, ioc_distinct: ioc_freq.size, ioc_hashes_frequent, top_sequences,
   };
 }
