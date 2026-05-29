@@ -416,13 +416,18 @@ async function runGuardian() {
         continue;
       }
       const deployedRuleIds = new Set((policies ?? []).map((p) => (p as { rule_id: string }).rule_id));
+      const deployedStructuralSigs = new Set<string>();
+      for (const p of policies ?? []) {
+        const row = p as { match: Record<string, unknown> | null; action: string };
+        deployedStructuralSigs.add(structuralSig(agent.id, row.match, row.action));
+      }
       const validated = llm.risks
         .map((r) => validateRisk(r, agent, deployedRuleIds))
         .filter((v): v is Validated => v !== null)
         .sort((a, b) => b.score - a.score)
         .slice(0, MAX_SUGGESTIONS_PER_AGENT);
 
-      const fresh = await filterAlreadySuggested(supabase, agent.id, validated);
+      const fresh = await filterAlreadySuggested(supabase, agent.id, validated, deployedStructuralSigs);
       if (fresh.length === 0) continue;
 
       const rows = fresh.map((v) => ({
