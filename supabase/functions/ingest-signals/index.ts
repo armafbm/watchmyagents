@@ -103,18 +103,22 @@ serve(async (req) => {
   catch { return json(400, { error: 'body is not valid JSON' }); }
   const v = validateBody(bodyJson);
   if (!v.ok) return json(400, { error: v.error });
-  const { anthropic_agent_id, display_name, window_start, window_end, payload } = v.data!;
+  const { anthropic_agent_id, display_name, window_start, window_end, payload, classification } = v.data!;
 
   // Resolve or auto-register the agent
   let agentId: string;
   let registeredNew = false;
+  let existingAgentType: string | null = null;
+  let existingAgentStage: string | null = null;
   const { data: existing } = await supabase
-    .from('agents').select('id')
+    .from('agents').select('id, agent_type, agent_type_stage')
     .eq('customer_id', customerId)
     .eq('anthropic_agent_id', anthropic_agent_id)
     .maybeSingle();
   if (existing) {
-    agentId = (existing as { id: string }).id;
+    agentId = (existing as { id: string; agent_type: string | null; agent_type_stage: string | null }).id;
+    existingAgentType = (existing as { agent_type: string | null }).agent_type;
+    existingAgentStage = (existing as { agent_type_stage: string | null }).agent_type_stage;
   } else {
     const { data: created, error: insertErr } = await supabase
       .from('agents').insert({
@@ -126,6 +130,26 @@ serve(async (req) => {
     agentId = (created as { id: string }).id;
     registeredNew = true;
   }
+
+  // Upsert typology if provided (Modèle C: never touches policies)
+  if (classification) {
+    const existingStrict = existingAgentStage ? (STAGE_STRICTNESS[existingAgentStage] ?? -1) : -1;
+    const incomingStrict = STAGE_STRICTNESS[classification.stage] ?? -1;
+    // Allow when: no existing type, OR incoming stage is at least as strict,
+    // OR (incoming less strict but confidence >= 0.85 — degradation guard).
+    const allow = !existingAgentType
+      || incomingStrict >= existingStrict
+      || classification.confidence >= 0.85;
+    if (allow) {
+      await supabase.from('agents').update({
+        agent_type: classification.agent_type,
+        agent_type_confidence: classification.confidence,
+        agent_type_stage: classification.stage,
+        agent_type_updated_at: new Date().toISOString(),
+      }).eq('id', agentId);
+    }
+  }
+
 
   // Insert the signal
   const { data: signal, error: signalErr } = await supabase
