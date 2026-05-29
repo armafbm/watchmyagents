@@ -8,7 +8,8 @@ const MODEL = 'google/gemini-2.5-flash';
 const RECENT_HOURS = 24;
 const BASELINE_DAYS = 30;
 const MAX_SUGGESTIONS_PER_AGENT = 5;
-const DEDUPE_DAYS = 30;
+const REJECT_COOLDOWN_DAYS = 7;
+const SMALL_SAMPLE_THRESHOLD = 5;
 
 interface SignalPayload {
   counts?: Record<string, number>;
