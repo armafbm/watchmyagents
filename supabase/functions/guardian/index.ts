@@ -218,7 +218,12 @@ async function callLlm(apiKey: string, evidence: unknown): Promise<{ risks: LlmR
   }
 }
 
-function validateRisk(r: LlmRisk, agent: Agent, deployedRuleIds: Set<string>) {
+function validateRisk(
+  r: LlmRisk,
+  agent: Agent,
+  deployedRuleIds: Set<string>,
+  toolStats: Record<string, { calls: number; errors: number }>,
+) {
   if (!r || typeof r !== 'object') return null;
   const pp = r.proposed_policy;
   if (!pp || !pp.match || typeof pp.match !== 'object') return null;
@@ -228,11 +233,27 @@ function validateRisk(r: LlmRisk, agent: Agent, deployedRuleIds: Set<string>) {
   const ruleId = (pp.rule_id ?? `guardian-${Date.now().toString(36)}`).toString().slice(0, 80);
   if (deployedRuleIds.has(ruleId)) return null;
   const enforceableNow = pp.enforceable_now === true;
+
+  // Server-side small-sample safety net: if the proposed match targets a single
+  // tool and that tool has <5 calls in the window, cap score/confidence; drop
+  // error_spike entirely when absolute errors are <3.
+  let score = clamp(r.score, 0, 100, 50);
+  let confidence = clamp(r.confidence, 0, 100, 50);
+  const tName = (pp.match as Record<string, unknown>).tool_name;
+  if (typeof tName === 'string' && toolStats[tName]) {
+    const { calls, errors } = toolStats[tName];
+    if (calls < SMALL_SAMPLE_THRESHOLD) {
+      if (category === 'error_spike' && errors < 3) return null;
+      score = Math.min(score, 40);
+      confidence = Math.min(confidence, 50);
+    }
+  }
+
   return {
     title: (r.title ?? 'Security risk').toString().slice(0, 200),
     category,
-    score: clamp(r.score, 0, 100, 50),
-    confidence: clamp(r.confidence, 0, 100, 50),
+    score,
+    confidence,
     rationale: (r.rationale ?? '').toString().slice(0, 2000),
     objective: (r.objective ?? '').toString().slice(0, 1000),
     surface_type: surfaceType,
