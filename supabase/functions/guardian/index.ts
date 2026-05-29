@@ -237,6 +237,13 @@ function validateRisk(r: LlmRisk, agent: Agent, deployedRuleIds: Set<string>) {
 
 type Validated = NonNullable<ReturnType<typeof validateRisk>>;
 
+function sigOf(title: string, action: string, match: unknown): string {
+  return `${title.trim().toLowerCase()}|${action}|${JSON.stringify(match)}`;
+}
+function titleActionKey(title: string, action: string): string {
+  return `${title.trim().toLowerCase()}|${action}`;
+}
+
 async function filterAlreadySuggested(
   supabase: ReturnType<typeof createClient>,
   agentId: string,
@@ -246,12 +253,29 @@ async function filterAlreadySuggested(
   const since = new Date(Date.now() - DEDUPE_DAYS * 86_400_000).toISOString();
   const { data: existing } = await supabase
     .from('suggestions')
-    .select('proposed_match')
+    .select('title, proposed_action, proposed_match')
     .eq('agent_id', agentId)
     .in('status', ['pending', 'accepted'])
     .gt('generated_at', since);
-  const seen = new Set((existing ?? []).map((r) => JSON.stringify((r as { proposed_match: unknown }).proposed_match)));
-  return candidates.filter((c) => !seen.has(JSON.stringify(c.proposed_policy.match)));
+  const seenFull = new Set<string>();
+  const seenTitleAction = new Set<string>();
+  for (const r of existing ?? []) {
+    const row = r as { title: string; proposed_action: string; proposed_match: unknown };
+    seenFull.add(sigOf(row.title, row.proposed_action, row.proposed_match));
+    seenTitleAction.add(titleActionKey(row.title, row.proposed_action));
+  }
+  // Filter: drop if exact signature OR same (title, action) already pending.
+  // Also dedupe within the current batch.
+  const batchTitleAction = new Set<string>();
+  return candidates.filter((c) => {
+    const ta = titleActionKey(c.title, c.proposed_policy.action);
+    const full = sigOf(c.title, c.proposed_policy.action, c.proposed_policy.match);
+    if (seenFull.has(full)) return false;
+    if (seenTitleAction.has(ta)) return false;
+    if (batchTitleAction.has(ta)) return false;
+    batchTitleAction.add(ta);
+    return true;
+  });
 }
 
 async function runGuardian() {
