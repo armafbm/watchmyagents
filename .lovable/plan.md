@@ -1,76 +1,42 @@
-# Brancher l'UI /dashboard/* sur le backend Fortress
+# Fix the "page tampon" flash on Fortress sub-pages
 
-## Constat
+## Symptom (vu dans la vidéo)
+Quand on clique **Watch · Monitoring** ou **Shield · Policies** depuis la sidebar de Fortress, la page s'affiche d'abord vide pendant ~1 s :
+- Les `Stat` cards montrent `0`
+- Le panneau "Agents under watch" affiche **"No agent registered yet · Register your first agent"** alors que 3 agents existent
+- La carte **Fleet status** en bas de la sidebar reste sur **"loading…"**
 
-Il existe aujourd'hui **deux familles de pages** dans l'espace authentifié :
+Puis les vraies données apparaissent. C'est ce flash qu'on perçoit comme un "écran tampon".
 
-| Famille | URLs | Design | Données |
-|---|---|---|---|
-| Dashboard (existant) | `/dashboard`, `/dashboard/watch`, `/dashboard/guardian`, `/dashboard/shield`, `/dashboard/legions`, `/dashboard/reports` | Beau, finalisé, sidebar WMA | **100 % mockées (hardcodées dans le fichier)** |
-| Fortress (prompt #3) | `/today`, `/loop`, `/policies`, `/suggestions`, `/settings/keys`, `/onboarding` | Plus brut | **Connectées Supabase + RLS + Realtime** |
+## Cause
+Toutes ces pages (`dashboard.watch.tsx`, `dashboard.shield.tsx`, `dashboard.guardian.tsx`) chargent leurs données via `useEffect` + `setState`, et le rendu initial utilise l'état par défaut (`[]`, `0`, `null`) — qui se confond avec un état "vide légitime". Aucune distinction entre *"on charge"* et *"il n'y a rien"*.
 
-Donc ce que tu vois sur `/dashboard/legions` est joli mais **n'est pas relié à la base**. Les vraies données vivent sur les routes `/today`, `/policies`, etc.
+`dashboard.watch.tsx` n'a même pas de flag `loading`. `DashboardLayout` → `FleetStatusCard` a le même problème.
 
-Ta consigne : garder l'arborescence `/dashboard/*` et y brancher la vraie logique.
+## Fix
 
-## Mapping cible
+### 1. `src/routes/_authenticated/dashboard.watch.tsx`
+- Ajouter `const [loading, setLoading] = useState(true)` et le passer à `false` à la fin du `useEffect`.
+- Stats : pendant `loading`, afficher `—` (ou un mini skeleton) au lieu de `String(agents.length)` qui vaut `0`.
+- Panel "Agents under watch" : ne montrer le CTA *"No agent registered yet"* QUE si `!loading && agents.length === 0`. Sinon, afficher 3 lignes de skeleton (`<tr>` avec `<div className="h-4 bg-muted/40 rounded animate-pulse" />`).
+- Panel "Signal tail" : même logique — skeleton de 4 lignes pendant le load, message "No signals yet" seulement si `!loading`.
 
-| URL conservée | Source backend | Rôle |
-|---|---|---|
-| `/dashboard` (index) | vue `dashboard_today_v` + table `decisions` (Realtime) | KPIs du jour + timeline live des décisions |
-| `/dashboard/watch` | tables `agents` + `signals` | Liste des agents sous surveillance + signaux récents |
-| `/dashboard/guardian` | table `suggestions` | Inbox des suggestions Guardian (Accept → crée une `policy`) |
-| `/dashboard/shield` | table `policies` (CRUD) | Création / édition / activation des policies |
-| `/dashboard/legions` | vue `loop_overview_v` | Diagramme Watch → Guardian → Shield par agent |
-| `/dashboard/reports` | table `decisions` (historique agrégé) | Historique + export |
-| `/dashboard/settings/keys` | table `api_keys` | Gestion des clés d'API |
-| `/onboarding` | inchangé | Reste à la racine (premier login) |
+### 2. `src/routes/_authenticated/dashboard.shield.tsx`
+- Le flag `loading` existe déjà mais les `Stat` rendent `activeCount` / `draftCount` / `guardianCount` calculés sur `list = []` → ils flashent `0`.
+- Pendant `loading`, passer `value="—"` aux 4 `Stat` cards (au lieu des valeurs calculées).
+- Le `Loader2` existant dans le `Panel` est OK, le garder.
 
-## Travaux
+### 3. `src/routes/_authenticated/dashboard.guardian.tsx`
+- Même traitement : pendant `loading`, les compteurs (Pending risks, Average risk score, Categories) doivent afficher `—` au lieu de `0` / `0/100`.
 
-### 1. Re-câblage des pages dashboard existantes
+### 4. `src/components/dashboard/DashboardLayout.tsx` — `FleetStatusCard`
+- Aujourd'hui : tant que `stats === null`, affiche `…` + `loading…`. C'est ce qu'on voit dans la vidéo.
+- Remplacer par un mini skeleton (deux barres `animate-pulse` à la place de "…" et "loading…") pour que la sidebar ne paraisse pas "cassée" pendant la transition.
 
-Pour chacune des 6 pages `dashboard.*.tsx` :
-- Conserver `DashboardLayout`, `PageHeader`, `Panel`, `Stat`, `SevBadge` et la mise en page actuelle.
-- Remplacer les tableaux `const fleets = [...]`, `const agents = [...]`, etc. par des appels Supabase via `useQuery` (TanStack Query) sur les tables / vues correspondantes.
-- Ajouter un état vide propre quand l'utilisateur n'a pas encore d'agent / de policy (CTA vers `/onboarding` ou `/dashboard/shield`).
-- Sur `/dashboard` (index) : abonnement Realtime `postgres_changes` sur `decisions` pour la timeline live.
-- Sur `/dashboard/guardian` : bouton **Accept** sur une suggestion → insert dans `policies` + update du `status` de la suggestion (logique déjà présente dans `suggestions.tsx`, à porter).
-- Sur `/dashboard/shield` : éditeur de policy (réutiliser `PolicyEditor.tsx` existant).
-- Sur `/dashboard/settings/keys` : créer le fichier `dashboard.settings.keys.tsx` qui reprend `settings.keys.tsx`.
+## Hors scope
+- Pas de migration vers TanStack Query / loaders de route (changement plus lourd, à faire séparément).
+- Aucun changement de logique business, de schéma DB, d'edge function ou de navigation. Pur frontend / présentation.
+- Le `GuardianChatWidget`, le `Nav`, et la page `pricing.tsx` ne sont pas touchés.
 
-### 2. Suppression des routes Fortress doublons
-
-Une fois la logique portée dans `/dashboard/*`, supprimer :
-- `src/routes/_authenticated/today.tsx`
-- `src/routes/_authenticated/loop.tsx`
-- `src/routes/_authenticated/policies.tsx`
-- `src/routes/_authenticated/suggestions.tsx`
-- `src/routes/_authenticated/settings.keys.tsx`
-
-Conservés tels quels : `onboarding.tsx`, `post-login.tsx`, `signin.tsx`.
-
-### 3. Mise à jour de la navigation
-
-- `post-login.tsx` : rediriger vers `/dashboard` au lieu de `/today` quand l'utilisateur a déjà au moins un agent.
-- Vérifier que la sidebar `DashboardLayout` pointe bien vers les URLs `/dashboard/*` (déjà le cas).
-- Supprimer `FortressShell.tsx` (n'est plus utilisé après la suppression des routes Fortress).
-
-### 4. RLS & auth
-
-Aucune modif. Toutes les requêtes utilisent le client browser Supabase déjà authentifié — RLS `customer_id = auth.uid()` s'applique automatiquement. Les `insert` (policies, api_keys, agents) continuent de remplir `customer_id` explicitement.
-
-## Notes techniques
-
-- Pas de modif du schéma DB, pas de modif de l'Edge Function `guardian`, pas de modif du cron.
-- Pas de `createServerFn` nécessaire : tout passe par le client Supabase browser sous RLS, ce qui colle au pattern déjà en place dans les routes Fortress actuelles.
-- Le design system (`DashboardLayout`, primitives, tokens `oklch` de `src/styles.css`) est intégralement conservé.
-
-## Résultat attendu
-
-Après implémentation :
-- `/dashboard/legions` affichera tes vraies legions / agents (vides au début, peuplés via `/onboarding`).
-- `/dashboard` montrera les vraies décisions en temps réel (vérifiable en insérant une ligne dans `decisions` depuis SQL).
-- `/dashboard/guardian` listera les vraies suggestions générées par l'Edge Function toutes les 15 min.
-- `/dashboard/shield` permettra de créer de vraies policies persistées.
-- Les URLs `/today`, `/loop`, etc. n'existent plus — une seule arborescence cohérente.
+## Vérification
+Après le fix, naviguer Fortress → Watch → Shield → Guardian → Legions en chaîne : on doit voir des skeletons pulsants à chaque transition, jamais le faux message "No agent registered yet" ni des zéros sur des comptes qui ne sont pas réellement à zéro.
