@@ -214,27 +214,30 @@ function GuardianPage() {
 
         <TabsContent value="risks" className="mt-0">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <Stat label="Pending risks" value={String(stats.count)} icon={AlertTriangle} tone="warning" />
+            <Stat label="Pending risks" value={loading ? "—" : String(stats.count)} icon={AlertTriangle} tone="warning" />
             <Stat
               label="Average risk score"
-              value={`${stats.avg}/100`}
+              value={loading ? "—" : `${stats.avg}/100`}
               icon={Target}
               tone={stats.avg >= 70 ? "danger" : stats.avg >= 40 ? "warning" : "success"}
             />
             <Stat
               label="Categories"
-              value={String(Object.keys(stats.byCategory).length)}
+              value={loading ? "—" : String(Object.keys(stats.byCategory).length)}
               icon={Shield}
               tone="primary"
               delta={
-                Object.entries(stats.byCategory)
-                  .sort((a, b) => b[1] - a[1])
-                  .slice(0, 3)
-                  .map(([k, v]) => `${k}:${v}`)
-                  .join("  ") || undefined
+                loading
+                  ? undefined
+                  : Object.entries(stats.byCategory)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 3)
+                      .map(([k, v]) => `${k}:${v}`)
+                      .join("  ") || undefined
               }
             />
           </div>
+
 
           <div className="grid lg:grid-cols-[1fr_320px] gap-4">
             <Panel title="Validation queue" icon={Brain} tag={`${list.length} pending`}>

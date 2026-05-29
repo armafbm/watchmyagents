@@ -442,12 +442,20 @@ function FleetStatusCard() {
           Fleet status
         </span>
       </div>
-      <div className={`font-display text-sm font-bold ${tone}`}>
-        {stats ? label : "…"}
-      </div>
-      <div className="font-mono text-[10px] text-muted-foreground mt-1">
-        {stats ? `${total} agent${total === 1 ? "" : "s"} · ${active} active` : "loading…"}
-      </div>
+      {stats ? (
+        <>
+          <div className={`font-display text-sm font-bold ${tone}`}>{label}</div>
+          <div className="font-mono text-[10px] text-muted-foreground mt-1">
+            {`${total} agent${total === 1 ? "" : "s"} · ${active} active`}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="h-4 w-20 rounded bg-muted/40 animate-pulse" />
+          <div className="h-3 w-28 rounded bg-muted/30 animate-pulse mt-2" />
+        </>
+      )}
     </div>
   );
 }
+

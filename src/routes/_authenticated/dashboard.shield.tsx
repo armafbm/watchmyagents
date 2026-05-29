@@ -85,11 +85,12 @@ function ShieldPage() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Stat label="Active policies" value={String(activeCount)} icon={Shield} tone="success" />
-        <Stat label="Disabled / draft" value={String(draftCount)} icon={GitPullRequest} tone="warning" />
-        <Stat label="From Guardian" value={String(guardianCount)} icon={Lock} />
-        <Stat label="Total" value={String(list.length)} />
+        <Stat label="Active policies" value={loading ? "—" : String(activeCount)} icon={Shield} tone="success" />
+        <Stat label="Disabled / draft" value={loading ? "—" : String(draftCount)} icon={GitPullRequest} tone="warning" />
+        <Stat label="From Guardian" value={loading ? "—" : String(guardianCount)} icon={Lock} />
+        <Stat label="Total" value={loading ? "—" : String(list.length)} />
       </div>
+
 
       <Panel title="Policies" icon={Lock} tag={`${list.length} rule${list.length === 1 ? "" : "s"}`}>
         {loading ? (
