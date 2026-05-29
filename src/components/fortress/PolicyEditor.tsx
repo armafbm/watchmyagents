@@ -136,6 +136,53 @@ export function PolicyEditor({
             </div>
           </div>
           <div className="space-y-1.5">
+            <Label>Deploy surface</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["agent", "type", "fleet"] as const).map((s) => (
+                <label key={s}>
+                  <input
+                    type="radio"
+                    name="surface"
+                    value={s}
+                    checked={surfaceType === s}
+                    onChange={() => setSurfaceType(s)}
+                    className="sr-only peer"
+                  />
+                  <div className="cursor-pointer text-center py-2 rounded-md border border-border peer-checked:border-primary peer-checked:bg-primary/10 text-sm font-mono uppercase tracking-widest">
+                    {s === "agent" ? "This agent" : s === "type" ? "Same type" : "Whole fleet"}
+                  </div>
+                </label>
+              ))}
+            </div>
+            {surfaceType === "agent" && (
+              <Select value={agentId ?? ""} onValueChange={(v) => setAgentId(v || null)}>
+                <SelectTrigger><SelectValue placeholder="Pick an agent…" /></SelectTrigger>
+                <SelectContent>
+                  {agentOpts.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.display_name}{a.agent_type ? ` · ${a.agent_type}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {surfaceType === "type" && (
+              <Select value={surfaceRef} onValueChange={setSurfaceRef}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {AGENT_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Created as <b>pending</b> — toggle Enabled in the table to deploy. The
+              global-baseline floors always apply on top.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor="rationale">Rationale</Label>
             <Textarea id="rationale" rows={2} value={rationale} onChange={(e) => setRationale(e.target.value)} />
           </div>
