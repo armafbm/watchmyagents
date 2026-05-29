@@ -304,24 +304,24 @@ async function filterAlreadySuggested(
   supabase: ReturnType<typeof createClient>,
   agentId: string,
   candidates: Validated[],
-  deployedSigs: Set<string>,
+  deployedStructuralSigs: Set<string>,
 ): Promise<Validated[]> {
   if (candidates.length === 0) return candidates;
 
-  // 1. Block forever against open (pending/accepted) suggestions for this agent.
+  // 1. Open (pending/accepted) suggestions for this agent → block forever.
   const { data: openRows } = await supabase
     .from('suggestions')
     .select('risk_category, proposed_match, proposed_action')
     .eq('agent_id', agentId)
     .in('status', ['pending', 'accepted']);
 
-  const blockedSigs = new Set<string>(deployedSigs);
+  const blockedSemantic = new Set<string>();
   for (const r of openRows ?? []) {
     const row = r as { risk_category: string | null; proposed_match: Record<string, unknown> | null; proposed_action: string };
-    blockedSigs.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
+    blockedSemantic.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
   }
 
-  // 2. Respect recent rejections (cooldown window).
+  // 2. Rejections within cooldown window → respect user's no.
   const cooldownSince = new Date(Date.now() - REJECT_COOLDOWN_DAYS * 86_400_000).toISOString();
   const { data: rejectedRows } = await supabase
     .from('suggestions')
@@ -331,16 +331,18 @@ async function filterAlreadySuggested(
     .gt('resolved_at', cooldownSince);
   for (const r of rejectedRows ?? []) {
     const row = r as { risk_category: string | null; proposed_match: Record<string, unknown> | null; proposed_action: string };
-    blockedSigs.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
+    blockedSemantic.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
   }
 
   // 3. Within-batch dedup: collapse same-sig candidates, keep highest risk_score.
   const bestBySig = new Map<string, Validated>();
   for (const c of candidates) {
-    const sig = sigForValidated(c, agentId);
-    if (blockedSigs.has(sig)) continue;
-    const prev = bestBySig.get(sig);
-    if (!prev || c.score > prev.score) bestBySig.set(sig, c);
+    const semSig = sigForValidated(c, agentId);
+    if (blockedSemantic.has(semSig)) continue;
+    const structSig = structuralSig(agentId, c.proposed_policy.match as Record<string, unknown>, c.proposed_policy.action);
+    if (deployedStructuralSigs.has(structSig)) continue;
+    const prev = bestBySig.get(semSig);
+    if (!prev || c.score > prev.score) bestBySig.set(semSig, c);
   }
   return [...bestBySig.values()];
 }
