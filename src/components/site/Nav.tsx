@@ -104,6 +104,12 @@ export function Nav() {
               </DropdownMenuContent>
             </DropdownMenu>
           </li>
+          <li>
+            <Link to="/pricing" className="hover:text-primary transition-colors">
+              Pricing
+            </Link>
+          </li>
+
         </ul>
 
         <div className="flex items-center gap-3">
