@@ -252,45 +252,84 @@ function validateRisk(r: LlmRisk, agent: Agent, deployedRuleIds: Set<string>) {
 
 type Validated = NonNullable<ReturnType<typeof validateRisk>>;
 
-function sigOf(title: string, action: string, match: unknown): string {
-  return `${title.trim().toLowerCase()}|${action}|${JSON.stringify(match)}`;
+// Semantic signature for a risk: identifies the SAME underlying threat even
+// when the LLM invents a new rule_id/title/message every run.
+// Shape: agent|category|action_type|toolKey|status|action
+function toolKeyOf(match: Record<string, unknown> | null | undefined): string {
+  const t = match?.tool_name as unknown;
+  if (t == null) return '';
+  if (typeof t === 'string') return t;
+  if (typeof t === 'object') {
+    const obj = t as { not_in?: unknown; in?: unknown };
+    if (Array.isArray(obj.not_in)) {
+      return 'not_in:' + [...obj.not_in].map(String).sort().join(',');
+    }
+    if (Array.isArray(obj.in)) {
+      return 'in:' + [...obj.in].map(String).sort().join(',');
+    }
+  }
+  return JSON.stringify(t);
 }
-function titleActionKey(title: string, action: string): string {
-  return `${title.trim().toLowerCase()}|${action}`;
+
+function semanticSig(
+  agentId: string,
+  category: string,
+  match: Record<string, unknown> | null | undefined,
+  action: string,
+): string {
+  const m = (match ?? {}) as Record<string, unknown>;
+  const actionType = (m.action_type as string | undefined) ?? '';
+  const status = (m.status as string | undefined) ?? '';
+  return `${agentId}|${category}|${actionType}|${toolKeyOf(m)}|${status}|${action}`;
+}
+
+function sigForValidated(v: Validated, agentId: string): string {
+  return semanticSig(agentId, v.category, v.proposed_policy.match as Record<string, unknown>, v.proposed_policy.action);
 }
 
 async function filterAlreadySuggested(
   supabase: ReturnType<typeof createClient>,
   agentId: string,
   candidates: Validated[],
+  deployedSigs: Set<string>,
 ): Promise<Validated[]> {
   if (candidates.length === 0) return candidates;
-  const since = new Date(Date.now() - DEDUPE_DAYS * 86_400_000).toISOString();
-  const { data: existing } = await supabase
+
+  // 1. Block forever against open (pending/accepted) suggestions for this agent.
+  const { data: openRows } = await supabase
     .from('suggestions')
-    .select('title, proposed_action, proposed_match')
+    .select('risk_category, proposed_match, proposed_action')
     .eq('agent_id', agentId)
-    .in('status', ['pending', 'accepted'])
-    .gt('generated_at', since);
-  const seenFull = new Set<string>();
-  const seenTitleAction = new Set<string>();
-  for (const r of existing ?? []) {
-    const row = r as { title: string; proposed_action: string; proposed_match: unknown };
-    seenFull.add(sigOf(row.title, row.proposed_action, row.proposed_match));
-    seenTitleAction.add(titleActionKey(row.title, row.proposed_action));
+    .in('status', ['pending', 'accepted']);
+
+  const blockedSigs = new Set<string>(deployedSigs);
+  for (const r of openRows ?? []) {
+    const row = r as { risk_category: string | null; proposed_match: Record<string, unknown> | null; proposed_action: string };
+    blockedSigs.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
   }
-  // Filter: drop if exact signature OR same (title, action) already pending.
-  // Also dedupe within the current batch.
-  const batchTitleAction = new Set<string>();
-  return candidates.filter((c) => {
-    const ta = titleActionKey(c.title, c.proposed_policy.action);
-    const full = sigOf(c.title, c.proposed_policy.action, c.proposed_policy.match);
-    if (seenFull.has(full)) return false;
-    if (seenTitleAction.has(ta)) return false;
-    if (batchTitleAction.has(ta)) return false;
-    batchTitleAction.add(ta);
-    return true;
-  });
+
+  // 2. Respect recent rejections (cooldown window).
+  const cooldownSince = new Date(Date.now() - REJECT_COOLDOWN_DAYS * 86_400_000).toISOString();
+  const { data: rejectedRows } = await supabase
+    .from('suggestions')
+    .select('risk_category, proposed_match, proposed_action')
+    .eq('agent_id', agentId)
+    .eq('status', 'rejected')
+    .gt('resolved_at', cooldownSince);
+  for (const r of rejectedRows ?? []) {
+    const row = r as { risk_category: string | null; proposed_match: Record<string, unknown> | null; proposed_action: string };
+    blockedSigs.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
+  }
+
+  // 3. Within-batch dedup: collapse same-sig candidates, keep highest risk_score.
+  const bestBySig = new Map<string, Validated>();
+  for (const c of candidates) {
+    const sig = sigForValidated(c, agentId);
+    if (blockedSigs.has(sig)) continue;
+    const prev = bestBySig.get(sig);
+    if (!prev || c.score > prev.score) bestBySig.set(sig, c);
+  }
+  return [...bestBySig.values()];
 }
 
 async function runGuardian() {
