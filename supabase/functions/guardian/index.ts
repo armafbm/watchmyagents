@@ -115,7 +115,13 @@ Respond with STRICT JSON only:
     }
   ]
 }
-If there is no meaningful risk, return {"risks": []}.`;
+If there is no meaningful risk, return {"risks": []}.
+
+SMALL-SAMPLE DISCOUNTING (CRITICAL): Error rates from tiny samples are NOT
+reliable. If a tool was called fewer than 5 times in the window, treat it as a
+WEAK signal: cap risk_score at 40 (never CRITICAL), cap confidence at 50, and
+say so explicitly in the rationale. Do NOT raise an 'error_spike' risk when the
+absolute error count is below 3, regardless of the percentage.`;
 
 function clamp(n: unknown, lo: number, hi: number, def: number) {
   const v = typeof n === 'number' && Number.isFinite(n) ? Math.round(n) : def;
