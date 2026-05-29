@@ -184,11 +184,13 @@ function WatchPage() {
                   <th className="text-left p-3 font-mono">Agent</th>
                   <th className="text-left p-3 font-mono">Anthropic ID</th>
                   <th className="text-left p-3 font-mono">Shield</th>
+                  <th className="text-left p-3 font-mono">Typology</th>
                   <th className="text-right p-3 font-mono">Signals (recent)</th>
                   <th className="text-left p-3 font-mono">Severity</th>
                   <th className="text-left p-3 font-mono">Last seen</th>
                   <th className="p-3" />
                 </tr>
+
               </thead>
               <tbody>
                 {agents.map((a) => (
