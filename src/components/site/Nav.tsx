@@ -21,12 +21,12 @@ export function Nav() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <a href="#top" className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3">
           <img src={logo} alt="WatchMyAgents" className="h-9 w-9 rounded-md" />
           <span className="font-display font-bold tracking-wider text-sm">
             WATCH<span className="text-primary">MY</span>AGENTS
           </span>
-        </a>
+        </Link>
         <ul className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
           <li>
             <DropdownMenu>
@@ -36,70 +36,70 @@ export function Nav() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-64">
                 <DropdownMenuItem asChild>
-                  <a href="#problem" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="problem" className="flex items-center gap-2 cursor-pointer">
                     <AlertTriangle className="h-5 w-5 text-primary icon-neon-glow" />
                     Threats
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#recursive-fractal" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="recursive-fractal" className="flex items-center gap-2 cursor-pointer">
                     <Cpu className="h-5 w-5 text-primary icon-neon-glow" />
                     Our technology
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#watch" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="watch" className="flex items-center gap-2 cursor-pointer">
                     <img src={watchIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Watch
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#guardian" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="guardian" className="flex items-center gap-2 cursor-pointer">
                     <img src={guardianIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Guardian AI
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#shield" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="shield" className="flex items-center gap-2 cursor-pointer">
                     <img src={shieldIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Shield
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="/dashboard/legions" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/dashboard/legions" className="flex items-center gap-2 cursor-pointer">
                     <img src={legionsImg} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Legions
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#fractal" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="fractal" className="flex items-center gap-2 cursor-pointer">
                     <RefreshCw className="h-5 w-5 text-primary icon-neon-glow" />
                     How it works
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#dashboard" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="dashboard" className="flex items-center gap-2 cursor-pointer">
                     <img src={fortressIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
                     Fortress
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#install" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="install" className="flex items-center gap-2 cursor-pointer">
                     <Download className="h-5 w-5 text-primary icon-neon-glow" />
                     How to install
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#privacy" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="privacy" className="flex items-center gap-2 cursor-pointer">
                     <Lock className="h-5 w-5 text-primary icon-neon-glow" />
                     Privacy by design
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#cta" className="flex items-center gap-2 cursor-pointer">
+                  <Link to="/" hash="cta" className="flex items-center gap-2 cursor-pointer">
                     <Rocket className="h-5 w-5 text-primary icon-neon-glow" />
                     Early access
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -123,18 +123,18 @@ export function Nav() {
             </Link>
           ) : (
             <>
-              <a
-                href="/auth/signin"
+              <Link
+                to="/auth/signin"
                 className="hidden sm:inline text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
               >
                 Sign in
-              </a>
-              <a
-                href="/auth/signup"
+              </Link>
+              <Link
+                to="/auth/signup"
                 className="text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
               >
                 Sign up
-              </a>
+              </Link>
             </>
           )}
         </div>
