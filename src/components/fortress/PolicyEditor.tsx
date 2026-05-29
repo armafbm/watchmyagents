@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,9 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 export type PolicyDraft = {
   id?: string;
+  rule_id?: string;
+  name?: string;
+  rationale?: string;
+  action?: string;
+  message?: string;
+  match?: string; // JSON string
+  surface_type?: "agent" | "type" | "fleet";
+  surface_ref?: string | null;
+  agent_id?: string | null;
+};
+
+const AGENT_TYPES = [
+  "coding","devops_infra","data_rag","customer_facing","browser_web",
+  "orchestrator","workflow_backoffice","personal_assistant",
+  "transactional_financial","generic",
+] as const;
+
   rule_id?: string;
   name?: string;
   rationale?: string;
