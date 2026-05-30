@@ -35,6 +35,7 @@ type AgentMini = {
   id: string;
   display_name: string;
   agent_type: string | null;
+  provider: string | null;
 };
 
 type SurfaceFilter = "all" | "fleet" | "type" | "agent";
