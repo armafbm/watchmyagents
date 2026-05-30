@@ -121,9 +121,9 @@ serve(async (req) => {
   catch { return json(400, { error: 'body is not valid JSON' }); }
   const v = validateBody(bodyJson);
   if (!v.ok) return json(400, { error: v.error });
-  const { anthropic_agent_id, display_name, window_start, window_end, payload, classification } = v.data!;
+  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification } = v.data!;
 
-  // Resolve or auto-register the agent
+  // Resolve or auto-register the agent — keyed on (customer, provider, native_agent_id)
   let agentId: string;
   let registeredNew = false;
   let existingAgentType: string | null = null;
@@ -131,7 +131,8 @@ serve(async (req) => {
   const { data: existing } = await supabase
     .from('agents').select('id, agent_type, agent_type_stage')
     .eq('customer_id', customerId)
-    .eq('anthropic_agent_id', anthropic_agent_id)
+    .eq('provider', provider)
+    .eq('native_agent_id', native_agent_id)
     .maybeSingle();
   if (existing) {
     agentId = (existing as { id: string; agent_type: string | null; agent_type_stage: string | null }).id;
@@ -141,8 +142,11 @@ serve(async (req) => {
     const { data: created, error: insertErr } = await supabase
       .from('agents').insert({
         customer_id: customerId,
-        anthropic_agent_id,
-        display_name: display_name || anthropic_agent_id,
+        provider,
+        native_agent_id,
+        // Keep the legacy column consistent for Anthropic agents
+        anthropic_agent_id: provider === 'anthropic-managed' ? native_agent_id : null,
+        display_name: display_name || native_agent_id,
       }).select('id').single();
     if (insertErr) { console.error('[ingest-signals] agent auto-register:', insertErr); return json(500, { error: 'internal error' }); }
     agentId = (created as { id: string }).id;
