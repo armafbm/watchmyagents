@@ -10,6 +10,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
+export type PolicySurface = "agent" | "subtree" | "type" | "fleet";
+
 export type PolicyDraft = {
   id?: string;
   rule_id?: string;
@@ -18,7 +20,7 @@ export type PolicyDraft = {
   action?: string;
   message?: string;
   match?: string; // JSON string
-  surface_type?: "agent" | "type" | "fleet";
+  surface_type?: PolicySurface;
   surface_ref?: string | null;
   agent_id?: string | null;
 };
@@ -48,7 +50,7 @@ export function PolicyEditor({
   const [action, setAction] = useState<string>(draft.action ?? "deny");
   const [message, setMessage] = useState(draft.message ?? "");
   const [matchStr, setMatchStr] = useState(draft.match ?? `{\n  "tool_name": "*"\n}`);
-  const [surfaceType, setSurfaceType] = useState<"agent" | "type" | "fleet">(
+  const [surfaceType, setSurfaceType] = useState<PolicySurface>(
     draft.surface_type ?? (draft.agent_id ? "agent" : "fleet"),
   );
   const [surfaceRef, setSurfaceRef] = useState<string>(draft.surface_ref ?? "generic");
@@ -78,8 +80,8 @@ export function PolicyEditor({
       toast.error("Name and rule_id are required");
       return;
     }
-    if (surfaceType === "agent" && !agentId) {
-      toast.error("Pick an agent for surface 'agent'");
+    if ((surfaceType === "agent" || surfaceType === "subtree") && !agentId) {
+      toast.error(`Pick an agent for surface '${surfaceType}'`);
       return;
     }
     if (surfaceType === "type" && !surfaceRef) {
@@ -98,7 +100,10 @@ export function PolicyEditor({
       message: message.trim() || null,
       match: parsed as never,
       surface_type: surfaceType,
-      surface_ref: surfaceType === "type" ? surfaceRef : null,
+      surface_ref:
+        surfaceType === "type" ? surfaceRef :
+        surfaceType === "subtree" ? agentId :
+        null,
       agent_id: surfaceType === "agent" ? agentId : null,
       customer_id,
     };
@@ -137,8 +142,8 @@ export function PolicyEditor({
           </div>
           <div className="space-y-1.5">
             <Label>Deploy surface</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {(["agent", "type", "fleet"] as const).map((s) => (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {(["agent", "subtree", "type", "fleet"] as const).map((s) => (
                 <label key={s}>
                   <input
                     type="radio"
@@ -148,13 +153,21 @@ export function PolicyEditor({
                     onChange={() => setSurfaceType(s)}
                     className="sr-only peer"
                   />
-                  <div className="cursor-pointer text-center py-2 rounded-md border border-border peer-checked:border-primary peer-checked:bg-primary/10 text-sm font-mono uppercase tracking-widest">
-                    {s === "agent" ? "This agent" : s === "type" ? "Same type" : "Whole fleet"}
+                  <div className="cursor-pointer text-center py-2 rounded-md border border-border peer-checked:border-primary peer-checked:bg-primary/10 text-[11px] font-mono uppercase tracking-widest">
+                    {s === "agent" ? "This agent"
+                      : s === "subtree" ? "Subtree"
+                      : s === "type" ? "Same type"
+                      : "Whole fleet"}
                   </div>
                 </label>
               ))}
             </div>
-            {surfaceType === "agent" && (
+            {surfaceType === "subtree" && (
+              <p className="text-[11px] text-muted-foreground">
+                Applies to the chosen agent AND every descendant in its sub-agent tree.
+              </p>
+            )}
+            {(surfaceType === "agent" || surfaceType === "subtree") && (
               <Select value={agentId ?? ""} onValueChange={(v) => setAgentId(v || null)}>
                 <SelectTrigger><SelectValue placeholder="Pick an agent…" /></SelectTrigger>
                 <SelectContent>
