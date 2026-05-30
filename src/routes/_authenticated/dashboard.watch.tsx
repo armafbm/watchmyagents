@@ -168,53 +168,11 @@ function WatchPage() {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto -m-5">
-            <table className="w-full text-sm">
-              <thead className="bg-background/40 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="text-left p-3 font-mono">Agent</th>
-                  <th className="text-left p-3 font-mono">Native ID</th>
-                  <th className="text-left p-3 font-mono">Shield</th>
-                  <th className="text-left p-3 font-mono">Typology</th>
-                  <th className="text-right p-3 font-mono">Signals (recent)</th>
-                  <th className="text-left p-3 font-mono">Severity</th>
-                  <th className="text-left p-3 font-mono">Last seen</th>
-                  <th className="p-3" />
-                </tr>
-
-              </thead>
-              <tbody>
-                {agents.map((a) => (
-                  <tr
-                    key={a.id}
-                    onClick={() => setSelectedAgent(a)}
-                    className="border-t border-border/40 hover:bg-primary/5 cursor-pointer transition"
-                  >
-                    <td className="p-3 font-mono text-primary">
-                      <div className="flex items-center gap-2">
-                        <ProviderBadge provider={a.provider as AgentProvider | null} />
-                        <span>{a.display_name}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 font-mono text-xs text-muted-foreground truncate max-w-[200px]">
-                      {a.native_agent_id ?? a.anthropic_agent_id ?? "—"}
-                    </td>
-                    <td className="p-3 font-mono text-xs text-muted-foreground">
-                      {a.shield_mode_detected ?? "—"}
-                    </td>
-                    <td className="p-3"><TypologyBadge a={a} /></td>
-                    <td className="p-3 text-right font-mono">{signalCountByAgent[a.id] ?? 0}</td>
-                    <td className="p-3"><SevBadge sev={severityFor(a)} /></td>
-
-                    <td className="p-3 font-mono text-xs text-muted-foreground">{relativeTime(a.last_seen_at)}</td>
-                    <td className="p-3 text-muted-foreground">
-                      <ChevronRight className="h-4 w-4" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AgentTree
+            agents={agents}
+            signalCountByAgent={signalCountByAgent}
+            onSelect={setSelectedAgent}
+          />
         )}
       </Panel>
 
