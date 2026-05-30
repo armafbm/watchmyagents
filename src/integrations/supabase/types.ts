@@ -20,12 +20,14 @@ export type Database = {
           agent_type_confidence: number | null
           agent_type_stage: string | null
           agent_type_updated_at: string | null
-          anthropic_agent_id: string
+          anthropic_agent_id: string | null
           created_at: string
           customer_id: string
           display_name: string
           id: string
           last_seen_at: string | null
+          native_agent_id: string
+          provider: string
           shield_mode_detected: string | null
           status: string
           updated_at: string
@@ -35,12 +37,14 @@ export type Database = {
           agent_type_confidence?: number | null
           agent_type_stage?: string | null
           agent_type_updated_at?: string | null
-          anthropic_agent_id: string
+          anthropic_agent_id?: string | null
           created_at?: string
           customer_id: string
           display_name: string
           id?: string
           last_seen_at?: string | null
+          native_agent_id: string
+          provider?: string
           shield_mode_detected?: string | null
           status?: string
           updated_at?: string
@@ -50,12 +54,14 @@ export type Database = {
           agent_type_confidence?: number | null
           agent_type_stage?: string | null
           agent_type_updated_at?: string | null
-          anthropic_agent_id?: string
+          anthropic_agent_id?: string | null
           created_at?: string
           customer_id?: string
           display_name?: string
           id?: string
           last_seen_at?: string | null
+          native_agent_id?: string
+          provider?: string
           shield_mode_detected?: string | null
           status?: string
           updated_at?: string
