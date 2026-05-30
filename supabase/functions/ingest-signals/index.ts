@@ -27,11 +27,28 @@ const STAGE_STRICTNESS: Record<string, number> = {
   cold_start: 0, provisional: 1, stable: 2,
 };
 
+const VALID_PROVIDERS = new Set([
+  'anthropic-managed','openai-agents','langgraph','aws-bedrock-agentcore','crewai','generic',
+]);
+
 function validateBody(b: unknown) {
   if (!b || typeof b !== 'object') return { ok: false, error: 'body must be a JSON object' };
   const o = b as Record<string, unknown>;
-  if (typeof o.anthropic_agent_id !== 'string' || !o.anthropic_agent_id.startsWith('agent_'))
-    return { ok: false, error: 'anthropic_agent_id required (must start with "agent_")' };
+
+  // provider (new canonical, default to anthropic-managed for legacy SDKs)
+  const provider = typeof o.provider === 'string' ? o.provider : 'anthropic-managed';
+  if (!VALID_PROVIDERS.has(provider))
+    return { ok: false, error: `provider invalid (allowed: ${[...VALID_PROVIDERS].join(', ')})` };
+
+  // native_agent_id (new canonical, fallback to anthropic_agent_id)
+  const nativeRaw = typeof o.native_agent_id === 'string'
+    ? o.native_agent_id
+    : (typeof o.anthropic_agent_id === 'string' ? o.anthropic_agent_id : null);
+  if (!nativeRaw || typeof nativeRaw !== 'string' || nativeRaw.length < 1 || nativeRaw.length > 256)
+    return { ok: false, error: 'native_agent_id required (or legacy anthropic_agent_id)' };
+  if (provider === 'anthropic-managed' && !nativeRaw.startsWith('agent_'))
+    return { ok: false, error: 'anthropic-managed native_agent_id must start with "agent_"' };
+
   if (typeof o.window_start !== 'string' || typeof o.window_end !== 'string')
     return { ok: false, error: 'window_start and window_end (ISO strings) required' };
   if (!o.payload || typeof o.payload !== 'object')
@@ -56,7 +73,8 @@ function validateBody(b: unknown) {
   return {
     ok: true,
     data: {
-      anthropic_agent_id: o.anthropic_agent_id,
+      provider,
+      native_agent_id: nativeRaw,
       display_name: typeof o.display_name === 'string' ? o.display_name : null,
       window_start: o.window_start,
       window_end: o.window_end,
