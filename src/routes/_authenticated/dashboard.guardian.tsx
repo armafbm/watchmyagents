@@ -61,8 +61,15 @@ function actionTone(a: string) {
   return "bg-success/15 text-success border-success/40";
 }
 
+type AgentMini = AgentTypology & {
+  id: string;
+  display_name: string;
+  anthropic_agent_id: string;
+};
+
 function GuardianPage() {
   const [list, setList] = useState<Suggestion[]>([]);
+  const [agents, setAgents] = useState<Record<string, AgentMini>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
@@ -70,13 +77,21 @@ function GuardianPage() {
 
   const reload = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("suggestions")
-      .select("*")
-      .eq("status", "pending")
-      .order("risk_score", { ascending: false, nullsFirst: false })
-      .order("generated_at", { ascending: false });
+    const [{ data }, { data: ag }] = await Promise.all([
+      supabase
+        .from("suggestions")
+        .select("*")
+        .eq("status", "pending")
+        .order("risk_score", { ascending: false, nullsFirst: false })
+        .order("generated_at", { ascending: false }),
+      supabase
+        .from("agents")
+        .select("id, display_name, anthropic_agent_id, agent_type, agent_type_stage, agent_type_confidence"),
+    ]);
     setList((data as unknown as Suggestion[] | null) ?? []);
+    const map: Record<string, AgentMini> = {};
+    ((ag as AgentMini[] | null) ?? []).forEach((a) => { map[a.id] = a; });
+    setAgents(map);
     setLoading(false);
   };
 
