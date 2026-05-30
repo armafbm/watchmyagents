@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, Activity, Plus, X, ChevronRight, Radio } from "lucide-react";
+import { Eye, Activity, Plus, X, ChevronRight, Radio, ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat, SevBadge } from "@/components/dashboard/primitives";
 import { TypologyBadge } from "@/components/fortress/TypologyBadge";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
+import { CompositionBadge } from "@/components/fortress/CompositionBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
@@ -24,6 +25,8 @@ type Agent = {
   agent_type: string | null;
   agent_type_confidence: number | null;
   agent_type_stage: string | null;
+  parent_agent_id: string | null;
+  composition_pattern: string | null;
 };
 
 
