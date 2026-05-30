@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Shield, GitPullRequest, Lock, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Shield, GitPullRequest, Lock, Plus, Pencil, Trash2, Loader2, Globe, Layers, User } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
@@ -25,7 +25,18 @@ type Policy = {
   enabled: boolean;
   priority: number;
   suggested_by_guardian: boolean;
+  surface_type: string | null;
+  surface_ref: string | null;
+  agent_id: string | null;
 };
+
+type AgentMini = {
+  id: string;
+  display_name: string;
+  agent_type: string | null;
+};
+
+type SurfaceFilter = "all" | "fleet" | "type" | "agent";
 
 function actionTone(a: string) {
   if (a === "deny" || a === "block") return "bg-danger/15 text-danger border-danger/30";
@@ -33,15 +44,57 @@ function actionTone(a: string) {
   return "bg-success/15 text-success border-success/30";
 }
 
+function AppliesToBadge({
+  p,
+  agents,
+}: {
+  p: Policy;
+  agents: AgentMini[];
+}) {
+  // back-compat: rows with NULL surface_type
+  const surface = p.surface_type ?? (p.agent_id ? "agent" : "fleet");
+
+  if (surface === "fleet") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.55_0.2_290_/_0.15)] text-[oklch(0.75_0.2_290)] border-[oklch(0.55_0.2_290_/_0.4)]">
+        <Globe className="h-3 w-3" /> All agents · fleet
+      </span>
+    );
+  }
+  if (surface === "type") {
+    const ref = p.surface_ref ?? "—";
+    const count = agents.filter((a) => a.agent_type === ref).length;
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.55_0.18_240_/_0.15)] text-[oklch(0.75_0.18_240)] border-[oklch(0.55_0.18_240_/_0.4)]">
+        <Layers className="h-3 w-3" /> All {ref} agents · {count}
+      </span>
+    );
+  }
+  // agent
+  const a = agents.find((x) => x.id === p.agent_id);
+  const label = a?.display_name ?? (p.agent_id ? `${p.agent_id.slice(0, 8)}…` : "—");
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.6_0.18_50_/_0.15)] text-[oklch(0.78_0.18_50)] border-[oklch(0.6_0.18_50_/_0.4)]">
+      <User className="h-3 w-3" /> {label}
+    </span>
+  );
+}
+
 function ShieldPage() {
   const [list, setList] = useState<Policy[]>([]);
+  const [agents, setAgents] = useState<AgentMini[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<PolicyDraft | null>(null);
+  const [filter, setFilter] = useState<SurfaceFilter>("all");
 
   const reload = async () => {
     setLoading(true);
-    const { data } = await supabase.from("policies").select("*").order("priority");
-    setList((data as Policy[] | null) ?? []);
+    const [{ data: pData }, { data: aData }] = await Promise.all([
+      supabase.from("policies").select("*").order("priority"),
+      supabase.from("agents").select("id, display_name, agent_type"),
+    ]);
+    setList((pData as Policy[] | null) ?? []);
+    setAgents((aData as AgentMini[] | null) ?? []);
     setLoading(false);
   };
   useEffect(() => {
@@ -66,9 +119,24 @@ function ShieldPage() {
     reload();
   };
 
+  const filtered = useMemo(() => {
+    if (filter === "all") return list;
+    return list.filter((p) => {
+      const s = p.surface_type ?? (p.agent_id ? "agent" : "fleet");
+      return s === filter;
+    });
+  }, [list, filter]);
+
   const activeCount = list.filter((p) => p.enabled).length;
   const draftCount = list.filter((p) => !p.enabled).length;
   const guardianCount = list.filter((p) => p.suggested_by_guardian).length;
+
+  const FILTER_CHIPS: { id: SurfaceFilter; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "fleet", label: "Fleet" },
+    { id: "type", label: "By type" },
+    { id: "agent", label: "By agent" },
+  ];
 
   return (
     <DashboardLayout breadcrumb="Shield · Defense">
@@ -91,22 +159,46 @@ function ShieldPage() {
         <Stat label="Total" value={loading ? "—" : String(list.length)} />
       </div>
 
+      <Panel title="Policies" icon={Lock} tag={`${filtered.length} / ${list.length}`}>
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {FILTER_CHIPS.map((c) => {
+            const active = filter === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setFilter(c.id)}
+                className={`px-3 py-1 rounded-full border font-mono text-[10px] uppercase tracking-widest transition ${
+                  active
+                    ? "bg-primary/15 text-primary border-primary/40"
+                    : "bg-background/60 text-muted-foreground border-border/60 hover:text-foreground"
+                }`}
+              >
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
 
-      <Panel title="Policies" icon={Lock} tag={`${list.length} rule${list.length === 1 ? "" : "s"}`}>
         {loading ? (
           <div className="p-8 flex items-center justify-center text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
           </div>
-        ) : list.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="p-10 text-center">
             <Shield className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-            <div className="font-display text-lg font-bold mb-1">No policy yet</div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Create one manually or accept a Guardian suggestion.
-            </p>
-            <Button onClick={() => setEditing({} as PolicyDraft)}>
-              <Plus className="h-4 w-4 mr-2" /> Create your first policy
-            </Button>
+            <div className="font-display text-lg font-bold mb-1">
+              {list.length === 0 ? "No policy yet" : "No policy matches this filter"}
+            </div>
+            {list.length === 0 && (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create one manually or accept a Guardian suggestion.
+                </p>
+                <Button onClick={() => setEditing({} as PolicyDraft)}>
+                  <Plus className="h-4 w-4 mr-2" /> Create your first policy
+                </Button>
+              </>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto -m-5">
@@ -115,13 +207,14 @@ function ShieldPage() {
                 <tr>
                   <th className="text-left p-3 font-mono">Rule ID</th>
                   <th className="text-left p-3 font-mono">Name</th>
+                  <th className="text-left p-3 font-mono">Applies to</th>
                   <th className="text-left p-3 font-mono">Action</th>
                   <th className="text-left p-3 font-mono">Enabled</th>
                   <th className="text-right p-3 font-mono">·</th>
                 </tr>
               </thead>
               <tbody>
-                {list.map((p) => (
+                {filtered.map((p) => (
                   <tr key={p.id} className="border-t border-border/40 hover:bg-primary/5">
                     <td className="p-3 font-mono text-xs">
                       <span className="px-2 py-0.5 rounded border border-border/60 bg-background/60">
@@ -136,6 +229,7 @@ function ShieldPage() {
                         </div>
                       )}
                     </td>
+                    <td className="p-3"><AppliesToBadge p={p} agents={agents} /></td>
                     <td className="p-3">
                       <span
                         className={`px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-widest ${actionTone(p.action)}`}
@@ -158,6 +252,9 @@ function ShieldPage() {
                               action: p.action,
                               message: p.message ?? "",
                               match: JSON.stringify(p.match ?? {}, null, 2),
+                              surface_type: (p.surface_type as "agent" | "type" | "fleet" | undefined) ?? undefined,
+                              surface_ref: p.surface_ref ?? undefined,
+                              agent_id: p.agent_id ?? undefined,
                             })
                           }
                           className="p-2 rounded hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
