@@ -353,6 +353,7 @@ function TreeNode({
   );
 }
 
+function SignalCard({ signal, agentName }: { signal: SignalRow; agentName: string }) {
   const [open, setOpen] = useState(false);
   const sev = severityOfSignal(signal.payload);
   const kind = kindOf(signal.payload);
