@@ -170,7 +170,7 @@ function WatchPage() {
               <thead className="bg-background/40 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="text-left p-3 font-mono">Agent</th>
-                  <th className="text-left p-3 font-mono">Anthropic ID</th>
+                  <th className="text-left p-3 font-mono">Native ID</th>
                   <th className="text-left p-3 font-mono">Shield</th>
                   <th className="text-left p-3 font-mono">Typology</th>
                   <th className="text-right p-3 font-mono">Signals (recent)</th>
