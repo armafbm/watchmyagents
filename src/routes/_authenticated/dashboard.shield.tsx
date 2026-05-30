@@ -76,8 +76,11 @@ function AppliesToBadge({
   const a = agents.find((x) => x.id === p.agent_id);
   const label = a?.display_name ?? (p.agent_id ? `${p.agent_id.slice(0, 8)}…` : "—");
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.6_0.18_50_/_0.15)] text-[oklch(0.78_0.18_50)] border-[oklch(0.6_0.18_50_/_0.4)]">
-      <User className="h-3 w-3" /> {label}
+    <span className="inline-flex items-center gap-1.5">
+      <ProviderBadge provider={(a?.provider as AgentProvider | null) ?? null} />
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.6_0.18_50_/_0.15)] text-[oklch(0.78_0.18_50)] border-[oklch(0.6_0.18_50_/_0.4)]">
+        <User className="h-3 w-3" /> {label}
+      </span>
     </span>
   );
 }
