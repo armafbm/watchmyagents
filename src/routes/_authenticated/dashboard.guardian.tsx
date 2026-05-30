@@ -306,13 +306,15 @@ function GuardianPage() {
                           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                             // source agent
                           </span>
+                          <ProviderBadge provider={agent?.provider as AgentProvider | null | undefined} />
                           <span className="font-semibold text-sm text-foreground">
                             {agent?.display_name ?? "Unknown agent"}
                           </span>
                           <code className="font-mono text-[10px] text-muted-foreground">
-                            {agent?.anthropic_agent_id
-                              ? `${agent.anthropic_agent_id.slice(0, 14)}…`
-                              : `${s.agent_id.slice(0, 8)}…`}
+                            {(() => {
+                              const id = agent?.native_agent_id ?? agent?.anthropic_agent_id;
+                              return id ? `${id.slice(0, 14)}…` : `${s.agent_id.slice(0, 8)}…`;
+                            })()}
                           </code>
                           {agent && <TypologyBadge a={agent} />}
                         </div>
