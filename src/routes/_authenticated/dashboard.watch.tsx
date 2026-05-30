@@ -341,9 +341,12 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
         <header className="flex items-start justify-between gap-4 p-5 border-b border-border/40">
           <div className="min-w-0">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-1">// Agent detail</p>
-            <h2 className="font-display text-xl font-bold truncate">{agent.display_name}</h2>
+            <div className="flex items-center gap-2 mb-1">
+              <ProviderBadge provider={agent.provider as AgentProvider | null} />
+              <h2 className="font-display text-xl font-bold truncate">{agent.display_name}</h2>
+            </div>
             <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
-              {agent.anthropic_agent_id}
+              {agent.native_agent_id ?? agent.anthropic_agent_id ?? "—"}
             </p>
             <div className="mt-2"><TypologyBadge a={agent} /></div>
           </div>
