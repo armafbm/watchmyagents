@@ -15,7 +15,9 @@ export const Route = createFileRoute("/_authenticated/dashboard/watch")({
 type Agent = {
   id: string;
   display_name: string;
-  anthropic_agent_id: string;
+  anthropic_agent_id: string | null;
+  native_agent_id: string;
+  provider: string | null;
   status: string;
   last_seen_at: string | null;
   shield_mode_detected: string | null;
