@@ -17,7 +17,7 @@ function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [agentId, setAgentId] = useState("");
-  const [agentRow, setAgentRow] = useState<{ anthropic_agent_id: string } | null>(null);
+  const [agentRow, setAgentRow] = useState<{ anthropic_agent_id: string | null; native_agent_id: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -33,9 +33,16 @@ function Onboarding() {
     setLoading(true);
     const { data: u } = await supabase.auth.getUser();
     const customer_id = u.user!.id;
+    const native = agentId.trim();
     const { data, error } = await supabase
       .from("agents")
-      .insert({ anthropic_agent_id: agentId.trim(), display_name: agentId.trim(), customer_id })
+      .insert({
+        provider: "anthropic-managed",
+        native_agent_id: native,
+        anthropic_agent_id: native,
+        display_name: native,
+        customer_id,
+      })
       .select()
       .single();
     setLoading(false);
@@ -46,6 +53,7 @@ function Onboarding() {
     setAgentRow(data);
     setStep(2);
   };
+
 
   const generateKey = async () => {
     setLoading(true);
