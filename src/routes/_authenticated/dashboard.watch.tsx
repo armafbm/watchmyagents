@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat, SevBadge } from "@/components/dashboard/primitives";
 import { TypologyBadge } from "@/components/fortress/TypologyBadge";
+import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
