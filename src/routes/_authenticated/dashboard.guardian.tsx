@@ -64,7 +64,9 @@ function actionTone(a: string) {
 type AgentMini = AgentTypology & {
   id: string;
   display_name: string;
-  anthropic_agent_id: string;
+  anthropic_agent_id: string | null;
+  native_agent_id: string;
+  provider: string | null;
 };
 
 function GuardianPage() {
