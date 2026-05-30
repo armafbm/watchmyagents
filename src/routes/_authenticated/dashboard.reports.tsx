@@ -55,18 +55,25 @@ function toCsv(rows: Decision[]) {
 
 function ReportsPage() {
   const [rows, setRows] = useState<Decision[]>([]);
+  const [agents, setAgents] = useState<Record<string, AgentMini>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from("decisions")
-      .select("id,decided_at,decision,tool_name,action_type,message,decided_in_ms")
-      .order("decided_at", { ascending: false })
-      .limit(500)
-      .then(({ data }) => {
-        setRows((data as Decision[] | null) ?? []);
-        setLoading(false);
-      });
+    (async () => {
+      const [{ data: d }, { data: a }] = await Promise.all([
+        supabase
+          .from("decisions")
+          .select("id,decided_at,decision,tool_name,action_type,message,decided_in_ms,agent_id")
+          .order("decided_at", { ascending: false })
+          .limit(500),
+        supabase.from("agents").select("id, display_name, provider"),
+      ]);
+      setRows((d as Decision[] | null) ?? []);
+      const map: Record<string, AgentMini> = {};
+      ((a as AgentMini[] | null) ?? []).forEach((x) => { map[x.id] = x; });
+      setAgents(map);
+      setLoading(false);
+    })();
   }, []);
 
   const stats = useMemo(() => {
