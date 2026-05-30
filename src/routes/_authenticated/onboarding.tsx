@@ -74,7 +74,7 @@ function Onboarding() {
   const installCmd = `npm install -g watchmyagents
 export ANTHROPIC_API_KEY="sk-ant-..."
 export WMA_API_KEY="${apiKey ?? "<key-from-step-2>"}"
-wma-shield --agent-id ${agentRow?.anthropic_agent_id ?? "<agent-id>"}`;
+wma-shield --agent-id ${agentRow?.native_agent_id ?? agentRow?.anthropic_agent_id ?? "<agent-id>"}`;
 
   return (
     <div className="min-h-screen bg-background grid-bg flex items-center justify-center px-4 py-12">
