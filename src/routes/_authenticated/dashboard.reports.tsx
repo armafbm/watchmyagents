@@ -137,6 +137,7 @@ function ReportsPage() {
                 <tr>
                   <th className="text-left p-3 font-mono">·</th>
                   <th className="text-left p-3 font-mono">When</th>
+                  <th className="text-left p-3 font-mono">Agent</th>
                   <th className="text-left p-3 font-mono">Decision</th>
                   <th className="text-left p-3 font-mono">Tool</th>
                   <th className="text-left p-3 font-mono">Message</th>
@@ -144,20 +145,31 @@ function ReportsPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
-                    <td className="p-3">{decisionIcon(r.decision)}</td>
-                    <td className="p-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(r.decided_at).toLocaleString()}
-                    </td>
-                    <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
-                    <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
-                    <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
-                    <td className="p-3 text-right font-mono text-xs">
-                      {r.decided_in_ms != null ? `${r.decided_in_ms}ms` : "—"}
-                    </td>
-                  </tr>
-                ))}
+                {rows.map((r) => {
+                  const ag = agents[r.agent_id];
+                  return (
+                    <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
+                      <td className="p-3">{decisionIcon(r.decision)}</td>
+                      <td className="p-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(r.decided_at).toLocaleString()}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <ProviderBadge provider={(ag?.provider as AgentProvider | null) ?? null} />
+                          <span className="font-mono text-xs text-foreground/90">
+                            {ag?.display_name ?? `${r.agent_id.slice(0, 8)}…`}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
+                      <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
+                      <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
+                      <td className="p-3 text-right font-mono text-xs">
+                        {r.decided_in_ms != null ? `${r.decided_in_ms}ms` : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
