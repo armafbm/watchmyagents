@@ -70,6 +70,21 @@ function validateBody(b: unknown) {
     classification = { agent_type: c.agent_type, confidence: c.confidence, stage: c.stage };
   }
 
+  // Optional sub-agent hierarchy
+  let parent_agent_id: string | null = null;
+  if (typeof o.parent_agent_id === 'string' && o.parent_agent_id.length > 0) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(o.parent_agent_id))
+      return { ok: false, error: 'parent_agent_id must be a UUID' };
+    parent_agent_id = o.parent_agent_id;
+  }
+  const VALID_COMPOSITION = new Set(['solo','hierarchy','graph','peer']);
+  let composition_pattern = 'solo';
+  if (typeof o.composition_pattern === 'string') {
+    if (!VALID_COMPOSITION.has(o.composition_pattern))
+      return { ok: false, error: 'composition_pattern invalid' };
+    composition_pattern = o.composition_pattern;
+  }
+
   return {
     ok: true,
     data: {
@@ -80,6 +95,8 @@ function validateBody(b: unknown) {
       window_end: o.window_end,
       payload: o.payload,
       classification,
+      parent_agent_id,
+      composition_pattern,
     },
   };
 }
