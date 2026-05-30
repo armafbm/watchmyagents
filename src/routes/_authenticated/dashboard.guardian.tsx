@@ -181,8 +181,8 @@ function GuardianPage() {
         priority: pp.priority ?? 100,
         suggested_by_guardian: true,
         suggestion_id: s.id,
-        // Human gate: PENDING until user flips the switch in Shield.
-        enabled: false,
+        // User click IS the human gate — deploy immediately.
+        enabled: true,
       })
       .select()
       .single();
