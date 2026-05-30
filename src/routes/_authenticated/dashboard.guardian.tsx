@@ -204,7 +204,7 @@ function GuardianPage() {
       toast.error(e2.message);
       return;
     }
-    toast.success(`Policy created (pending) on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}. Enable it in Shield to deploy.`);
+    toast.success(`Policy deployed on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}.`);
     reload();
   };
 
