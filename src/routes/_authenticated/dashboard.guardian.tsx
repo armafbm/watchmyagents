@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GuardianChatPanel } from "@/components/dashboard/GuardianChatPanel";
 import { TypologyBadge, type AgentTypology } from "@/components/fortress/TypologyBadge";
+import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/guardian")({
@@ -64,7 +65,9 @@ function actionTone(a: string) {
 type AgentMini = AgentTypology & {
   id: string;
   display_name: string;
-  anthropic_agent_id: string;
+  anthropic_agent_id: string | null;
+  native_agent_id: string;
+  provider: string | null;
 };
 
 function GuardianPage() {
@@ -86,7 +89,7 @@ function GuardianPage() {
         .order("generated_at", { ascending: false }),
       supabase
         .from("agents")
-        .select("id, display_name, anthropic_agent_id, agent_type, agent_type_stage, agent_type_confidence"),
+        .select("id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence"),
     ]);
     setList((data as unknown as Suggestion[] | null) ?? []);
     const map: Record<string, AgentMini> = {};
@@ -303,13 +306,15 @@ function GuardianPage() {
                           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                             // source agent
                           </span>
+                          <ProviderBadge provider={agent?.provider as AgentProvider | null | undefined} />
                           <span className="font-semibold text-sm text-foreground">
                             {agent?.display_name ?? "Unknown agent"}
                           </span>
                           <code className="font-mono text-[10px] text-muted-foreground">
-                            {agent?.anthropic_agent_id
-                              ? `${agent.anthropic_agent_id.slice(0, 14)}…`
-                              : `${s.agent_id.slice(0, 8)}…`}
+                            {(() => {
+                              const id = agent?.native_agent_id ?? agent?.anthropic_agent_id;
+                              return id ? `${id.slice(0, 14)}…` : `${s.agent_id.slice(0, 8)}…`;
+                            })()}
                           </code>
                           {agent && <TypologyBadge a={agent} />}
                         </div>

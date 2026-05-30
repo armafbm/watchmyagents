@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { Button } from "@/components/ui/button";
+import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/reports")({
@@ -19,6 +20,13 @@ type Decision = {
   action_type: string | null;
   message: string | null;
   decided_in_ms: number | null;
+  agent_id: string;
+};
+
+type AgentMini = {
+  id: string;
+  display_name: string;
+  provider: string | null;
 };
 
 function decisionIcon(d: string) {
@@ -47,18 +55,25 @@ function toCsv(rows: Decision[]) {
 
 function ReportsPage() {
   const [rows, setRows] = useState<Decision[]>([]);
+  const [agents, setAgents] = useState<Record<string, AgentMini>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from("decisions")
-      .select("id,decided_at,decision,tool_name,action_type,message,decided_in_ms")
-      .order("decided_at", { ascending: false })
-      .limit(500)
-      .then(({ data }) => {
-        setRows((data as Decision[] | null) ?? []);
-        setLoading(false);
-      });
+    (async () => {
+      const [{ data: d }, { data: a }] = await Promise.all([
+        supabase
+          .from("decisions")
+          .select("id,decided_at,decision,tool_name,action_type,message,decided_in_ms,agent_id")
+          .order("decided_at", { ascending: false })
+          .limit(500),
+        supabase.from("agents").select("id, display_name, provider"),
+      ]);
+      setRows((d as Decision[] | null) ?? []);
+      const map: Record<string, AgentMini> = {};
+      ((a as AgentMini[] | null) ?? []).forEach((x) => { map[x.id] = x; });
+      setAgents(map);
+      setLoading(false);
+    })();
   }, []);
 
   const stats = useMemo(() => {
@@ -122,6 +137,7 @@ function ReportsPage() {
                 <tr>
                   <th className="text-left p-3 font-mono">·</th>
                   <th className="text-left p-3 font-mono">When</th>
+                  <th className="text-left p-3 font-mono">Agent</th>
                   <th className="text-left p-3 font-mono">Decision</th>
                   <th className="text-left p-3 font-mono">Tool</th>
                   <th className="text-left p-3 font-mono">Message</th>
@@ -129,20 +145,31 @@ function ReportsPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
-                    <td className="p-3">{decisionIcon(r.decision)}</td>
-                    <td className="p-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(r.decided_at).toLocaleString()}
-                    </td>
-                    <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
-                    <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
-                    <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
-                    <td className="p-3 text-right font-mono text-xs">
-                      {r.decided_in_ms != null ? `${r.decided_in_ms}ms` : "—"}
-                    </td>
-                  </tr>
-                ))}
+                {rows.map((r) => {
+                  const ag = agents[r.agent_id];
+                  return (
+                    <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
+                      <td className="p-3">{decisionIcon(r.decision)}</td>
+                      <td className="p-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(r.decided_at).toLocaleString()}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <ProviderBadge provider={(ag?.provider as AgentProvider | null) ?? null} />
+                          <span className="font-mono text-xs text-foreground/90">
+                            {ag?.display_name ?? `${r.agent_id.slice(0, 8)}…`}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
+                      <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
+                      <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
+                      <td className="p-3 text-right font-mono text-xs">
+                        {r.decided_in_ms != null ? `${r.decided_in_ms}ms` : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

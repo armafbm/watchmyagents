@@ -27,11 +27,28 @@ const STAGE_STRICTNESS: Record<string, number> = {
   cold_start: 0, provisional: 1, stable: 2,
 };
 
+const VALID_PROVIDERS = new Set([
+  'anthropic-managed','openai-agents','langgraph','aws-bedrock-agentcore','crewai','generic',
+]);
+
 function validateBody(b: unknown) {
   if (!b || typeof b !== 'object') return { ok: false, error: 'body must be a JSON object' };
   const o = b as Record<string, unknown>;
-  if (typeof o.anthropic_agent_id !== 'string' || !o.anthropic_agent_id.startsWith('agent_'))
-    return { ok: false, error: 'anthropic_agent_id required (must start with "agent_")' };
+
+  // provider (new canonical, default to anthropic-managed for legacy SDKs)
+  const provider = typeof o.provider === 'string' ? o.provider : 'anthropic-managed';
+  if (!VALID_PROVIDERS.has(provider))
+    return { ok: false, error: `provider invalid (allowed: ${[...VALID_PROVIDERS].join(', ')})` };
+
+  // native_agent_id (new canonical, fallback to anthropic_agent_id)
+  const nativeRaw = typeof o.native_agent_id === 'string'
+    ? o.native_agent_id
+    : (typeof o.anthropic_agent_id === 'string' ? o.anthropic_agent_id : null);
+  if (!nativeRaw || typeof nativeRaw !== 'string' || nativeRaw.length < 1 || nativeRaw.length > 256)
+    return { ok: false, error: 'native_agent_id required (or legacy anthropic_agent_id)' };
+  if (provider === 'anthropic-managed' && !nativeRaw.startsWith('agent_'))
+    return { ok: false, error: 'anthropic-managed native_agent_id must start with "agent_"' };
+
   if (typeof o.window_start !== 'string' || typeof o.window_end !== 'string')
     return { ok: false, error: 'window_start and window_end (ISO strings) required' };
   if (!o.payload || typeof o.payload !== 'object')
@@ -56,7 +73,8 @@ function validateBody(b: unknown) {
   return {
     ok: true,
     data: {
-      anthropic_agent_id: o.anthropic_agent_id,
+      provider,
+      native_agent_id: nativeRaw,
       display_name: typeof o.display_name === 'string' ? o.display_name : null,
       window_start: o.window_start,
       window_end: o.window_end,
@@ -103,9 +121,9 @@ serve(async (req) => {
   catch { return json(400, { error: 'body is not valid JSON' }); }
   const v = validateBody(bodyJson);
   if (!v.ok) return json(400, { error: v.error });
-  const { anthropic_agent_id, display_name, window_start, window_end, payload, classification } = v.data!;
+  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification } = v.data!;
 
-  // Resolve or auto-register the agent
+  // Resolve or auto-register the agent — keyed on (customer, provider, native_agent_id)
   let agentId: string;
   let registeredNew = false;
   let existingAgentType: string | null = null;
@@ -113,7 +131,8 @@ serve(async (req) => {
   const { data: existing } = await supabase
     .from('agents').select('id, agent_type, agent_type_stage')
     .eq('customer_id', customerId)
-    .eq('anthropic_agent_id', anthropic_agent_id)
+    .eq('provider', provider)
+    .eq('native_agent_id', native_agent_id)
     .maybeSingle();
   if (existing) {
     agentId = (existing as { id: string; agent_type: string | null; agent_type_stage: string | null }).id;
@@ -123,8 +142,11 @@ serve(async (req) => {
     const { data: created, error: insertErr } = await supabase
       .from('agents').insert({
         customer_id: customerId,
-        anthropic_agent_id,
-        display_name: display_name || anthropic_agent_id,
+        provider,
+        native_agent_id,
+        // Keep the legacy column consistent for Anthropic agents
+        anthropic_agent_id: provider === 'anthropic-managed' ? native_agent_id : null,
+        display_name: display_name || native_agent_id,
       }).select('id').single();
     if (insertErr) { console.error('[ingest-signals] agent auto-register:', insertErr); return json(500, { error: 'internal error' }); }
     agentId = (created as { id: string }).id;

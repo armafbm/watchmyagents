@@ -7,6 +7,7 @@ import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PolicyEditor, type PolicyDraft } from "@/components/fortress/PolicyEditor";
+import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/shield")({
@@ -34,6 +35,7 @@ type AgentMini = {
   id: string;
   display_name: string;
   agent_type: string | null;
+  provider: string | null;
 };
 
 type SurfaceFilter = "all" | "fleet" | "type" | "agent";
@@ -74,8 +76,11 @@ function AppliesToBadge({
   const a = agents.find((x) => x.id === p.agent_id);
   const label = a?.display_name ?? (p.agent_id ? `${p.agent_id.slice(0, 8)}…` : "—");
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.6_0.18_50_/_0.15)] text-[oklch(0.78_0.18_50)] border-[oklch(0.6_0.18_50_/_0.4)]">
-      <User className="h-3 w-3" /> {label}
+    <span className="inline-flex items-center gap-1.5">
+      <ProviderBadge provider={(a?.provider as AgentProvider | null) ?? null} />
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.6_0.18_50_/_0.15)] text-[oklch(0.78_0.18_50)] border-[oklch(0.6_0.18_50_/_0.4)]">
+        <User className="h-3 w-3" /> {label}
+      </span>
     </span>
   );
 }
@@ -91,7 +96,7 @@ function ShieldPage() {
     setLoading(true);
     const [{ data: pData }, { data: aData }] = await Promise.all([
       supabase.from("policies").select("*").order("priority"),
-      supabase.from("agents").select("id, display_name, agent_type"),
+      supabase.from("agents").select("id, display_name, agent_type, provider"),
     ]);
     setList((pData as Policy[] | null) ?? []);
     setAgents((aData as AgentMini[] | null) ?? []);

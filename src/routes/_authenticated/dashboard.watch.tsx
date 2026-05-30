@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat, SevBadge } from "@/components/dashboard/primitives";
 import { TypologyBadge } from "@/components/fortress/TypologyBadge";
+import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
@@ -14,7 +15,9 @@ export const Route = createFileRoute("/_authenticated/dashboard/watch")({
 type Agent = {
   id: string;
   display_name: string;
-  anthropic_agent_id: string;
+  anthropic_agent_id: string | null;
+  native_agent_id: string;
+  provider: string | null;
   status: string;
   last_seen_at: string | null;
   shield_mode_detected: string | null;
@@ -167,7 +170,7 @@ function WatchPage() {
               <thead className="bg-background/40 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="text-left p-3 font-mono">Agent</th>
-                  <th className="text-left p-3 font-mono">Anthropic ID</th>
+                  <th className="text-left p-3 font-mono">Native ID</th>
                   <th className="text-left p-3 font-mono">Shield</th>
                   <th className="text-left p-3 font-mono">Typology</th>
                   <th className="text-right p-3 font-mono">Signals (recent)</th>
@@ -184,9 +187,14 @@ function WatchPage() {
                     onClick={() => setSelectedAgent(a)}
                     className="border-t border-border/40 hover:bg-primary/5 cursor-pointer transition"
                   >
-                    <td className="p-3 font-mono text-primary">{a.display_name}</td>
+                    <td className="p-3 font-mono text-primary">
+                      <div className="flex items-center gap-2">
+                        <ProviderBadge provider={a.provider as AgentProvider | null} />
+                        <span>{a.display_name}</span>
+                      </div>
+                    </td>
                     <td className="p-3 font-mono text-xs text-muted-foreground truncate max-w-[200px]">
-                      {a.anthropic_agent_id}
+                      {a.native_agent_id ?? a.anthropic_agent_id ?? "—"}
                     </td>
                     <td className="p-3 font-mono text-xs text-muted-foreground">
                       {a.shield_mode_detected ?? "—"}
@@ -333,9 +341,12 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
         <header className="flex items-start justify-between gap-4 p-5 border-b border-border/40">
           <div className="min-w-0">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-1">// Agent detail</p>
-            <h2 className="font-display text-xl font-bold truncate">{agent.display_name}</h2>
+            <div className="flex items-center gap-2 mb-1">
+              <ProviderBadge provider={agent.provider as AgentProvider | null} />
+              <h2 className="font-display text-xl font-bold truncate">{agent.display_name}</h2>
+            </div>
             <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
-              {agent.anthropic_agent_id}
+              {agent.native_agent_id ?? agent.anthropic_agent_id ?? "—"}
             </p>
             <div className="mt-2"><TypologyBadge a={agent} /></div>
           </div>
