@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GuardianChatPanel } from "@/components/dashboard/GuardianChatPanel";
+import { TypologyBadge, type AgentTypology } from "@/components/fortress/TypologyBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/guardian")({
@@ -60,8 +61,15 @@ function actionTone(a: string) {
   return "bg-success/15 text-success border-success/40";
 }
 
+type AgentMini = AgentTypology & {
+  id: string;
+  display_name: string;
+  anthropic_agent_id: string;
+};
+
 function GuardianPage() {
   const [list, setList] = useState<Suggestion[]>([]);
+  const [agents, setAgents] = useState<Record<string, AgentMini>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
@@ -69,13 +77,21 @@ function GuardianPage() {
 
   const reload = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("suggestions")
-      .select("*")
-      .eq("status", "pending")
-      .order("risk_score", { ascending: false, nullsFirst: false })
-      .order("generated_at", { ascending: false });
+    const [{ data }, { data: ag }] = await Promise.all([
+      supabase
+        .from("suggestions")
+        .select("*")
+        .eq("status", "pending")
+        .order("risk_score", { ascending: false, nullsFirst: false })
+        .order("generated_at", { ascending: false }),
+      supabase
+        .from("agents")
+        .select("id, display_name, anthropic_agent_id, agent_type, agent_type_stage, agent_type_confidence"),
+    ]);
     setList((data as unknown as Suggestion[] | null) ?? []);
+    const map: Record<string, AgentMini> = {};
+    ((ag as AgentMini[] | null) ?? []).forEach((a) => { map[a.id] = a; });
+    setAgents(map);
     setLoading(false);
   };
 
@@ -165,8 +181,8 @@ function GuardianPage() {
         priority: pp.priority ?? 100,
         suggested_by_guardian: true,
         suggestion_id: s.id,
-        // Human gate: PENDING until user flips the switch in Shield.
-        enabled: false,
+        // User click IS the human gate — deploy immediately.
+        enabled: true,
       })
       .select()
       .single();
@@ -188,7 +204,7 @@ function GuardianPage() {
       toast.error(e2.message);
       return;
     }
-    toast.success(`Policy created (pending) on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}. Enable it in Shield to deploy.`);
+    toast.success(`Policy deployed on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}.`);
     reload();
   };
 
@@ -277,11 +293,26 @@ function GuardianPage() {
                     const pp = s.proposed_policy;
                     const surface = surfaceOverride[s.id] ?? s.surface_type ?? "agent";
                     const enforceable = pp?.enforceable_now === true;
+                    const agent = agents[s.agent_id];
                     return (
                       <div
                         key={s.id}
                         className={`rounded-xl border ${sev.border} bg-background/40 p-4`}
                       >
+                        <div className="flex flex-wrap items-center gap-2 pb-3 mb-3 border-b border-border/40">
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                            // source agent
+                          </span>
+                          <span className="font-semibold text-sm text-foreground">
+                            {agent?.display_name ?? "Unknown agent"}
+                          </span>
+                          <code className="font-mono text-[10px] text-muted-foreground">
+                            {agent?.anthropic_agent_id
+                              ? `${agent.anthropic_agent_id.slice(0, 14)}…`
+                              : `${s.agent_id.slice(0, 8)}…`}
+                          </code>
+                          {agent && <TypologyBadge a={agent} />}
+                        </div>
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-start gap-3">
                             <div

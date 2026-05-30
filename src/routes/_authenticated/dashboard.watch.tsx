@@ -3,6 +3,7 @@ import { Eye, Activity, Plus, X, ChevronRight, Radio } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat, SevBadge } from "@/components/dashboard/primitives";
+import { TypologyBadge } from "@/components/fortress/TypologyBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
@@ -22,24 +23,8 @@ type Agent = {
   agent_type_stage: string | null;
 };
 
-function TypologyBadge({ a }: { a: Agent }) {
-  const t = a.agent_type;
-  const dim = !t || t === "generic" || !a.agent_type_stage;
-  const conf = a.agent_type_confidence != null ? Math.round(a.agent_type_confidence * 100) : null;
-  return (
-    <span
-      className={`px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest ${
-        dim ? "bg-muted/40 text-muted-foreground border-border/40"
-            : "bg-primary/10 text-primary border-primary/30"
-      }`}
-      title="Detected agent typology"
-    >
-      {t ?? "unknown"}
-      {a.agent_type_stage ? ` · ${a.agent_type_stage}` : ""}
-      {conf != null ? ` · ${conf}%` : ""}
-    </span>
-  );
-}
+
+
 
 
 type SignalRow = {
@@ -352,6 +337,7 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
             <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
               {agent.anthropic_agent_id}
             </p>
+            <div className="mt-2"><TypologyBadge a={agent} /></div>
           </div>
           <button
             onClick={onClose}
