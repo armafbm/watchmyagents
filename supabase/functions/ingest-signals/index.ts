@@ -138,37 +138,61 @@ serve(async (req) => {
   catch { return json(400, { error: 'body is not valid JSON' }); }
   const v = validateBody(bodyJson);
   if (!v.ok) return json(400, { error: v.error });
-  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification } = v.data!;
+  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification, parent_agent_id, composition_pattern } = v.data!;
+
+  // Resolve parent_agent_id within this tenant (race-safe: leave NULL if not found yet)
+  let resolvedParentId: string | null = null;
+  if (parent_agent_id) {
+    const { data: parentRow } = await supabase
+      .from('agents').select('id')
+      .eq('customer_id', customerId)
+      .eq('id', parent_agent_id)
+      .maybeSingle();
+    if (parentRow) resolvedParentId = (parentRow as { id: string }).id;
+  }
 
   // Resolve or auto-register the agent — keyed on (customer, provider, native_agent_id)
   let agentId: string;
   let registeredNew = false;
   let existingAgentType: string | null = null;
   let existingAgentStage: string | null = null;
+  let existingParentId: string | null = null;
   const { data: existing } = await supabase
-    .from('agents').select('id, agent_type, agent_type_stage')
+    .from('agents').select('id, agent_type, agent_type_stage, parent_agent_id')
     .eq('customer_id', customerId)
     .eq('provider', provider)
     .eq('native_agent_id', native_agent_id)
     .maybeSingle();
   if (existing) {
-    agentId = (existing as { id: string; agent_type: string | null; agent_type_stage: string | null }).id;
+    agentId = (existing as { id: string }).id;
     existingAgentType = (existing as { agent_type: string | null }).agent_type;
     existingAgentStage = (existing as { agent_type_stage: string | null }).agent_type_stage;
+    existingParentId = (existing as { parent_agent_id: string | null }).parent_agent_id;
   } else {
     const { data: created, error: insertErr } = await supabase
       .from('agents').insert({
         customer_id: customerId,
         provider,
         native_agent_id,
-        // Keep the legacy column consistent for Anthropic agents
         anthropic_agent_id: provider === 'anthropic-managed' ? native_agent_id : null,
         display_name: display_name || native_agent_id,
+        parent_agent_id: resolvedParentId,
+        composition_pattern,
       }).select('id').single();
     if (insertErr) { console.error('[ingest-signals] agent auto-register:', insertErr); return json(500, { error: 'internal error' }); }
     agentId = (created as { id: string }).id;
     registeredNew = true;
   }
+
+  // Always persist composition_pattern; backfill parent_agent_id if newly resolved.
+  const lineageUpdate: Record<string, unknown> = { composition_pattern };
+  if (resolvedParentId && resolvedParentId !== existingParentId) {
+    lineageUpdate.parent_agent_id = resolvedParentId;
+  }
+  if (existing) {
+    await supabase.from('agents').update(lineageUpdate).eq('id', agentId);
+  }
+
 
   // Upsert typology if provided (Modèle C: never touches policies)
   if (classification) {
