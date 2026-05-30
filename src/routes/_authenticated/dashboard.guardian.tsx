@@ -293,11 +293,26 @@ function GuardianPage() {
                     const pp = s.proposed_policy;
                     const surface = surfaceOverride[s.id] ?? s.surface_type ?? "agent";
                     const enforceable = pp?.enforceable_now === true;
+                    const agent = agents[s.agent_id];
                     return (
                       <div
                         key={s.id}
                         className={`rounded-xl border ${sev.border} bg-background/40 p-4`}
                       >
+                        <div className="flex flex-wrap items-center gap-2 pb-3 mb-3 border-b border-border/40">
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                            // source agent
+                          </span>
+                          <span className="font-semibold text-sm text-foreground">
+                            {agent?.display_name ?? "Unknown agent"}
+                          </span>
+                          <code className="font-mono text-[10px] text-muted-foreground">
+                            {agent?.anthropic_agent_id
+                              ? `${agent.anthropic_agent_id.slice(0, 14)}…`
+                              : `${s.agent_id.slice(0, 8)}…`}
+                          </code>
+                          {agent && <TypologyBadge a={agent} />}
+                        </div>
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-start gap-3">
                             <div
