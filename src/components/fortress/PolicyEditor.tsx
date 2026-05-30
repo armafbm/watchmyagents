@@ -54,7 +54,9 @@ export function PolicyEditor({
     draft.surface_type ?? (draft.agent_id ? "agent" : "fleet"),
   );
   const [surfaceRef, setSurfaceRef] = useState<string>(draft.surface_ref ?? "generic");
-  const [agentId, setAgentId] = useState<string | null>(draft.agent_id ?? null);
+  const [agentId, setAgentId] = useState<string | null>(
+    draft.agent_id ?? (draft.surface_type === "subtree" ? draft.surface_ref ?? null : null),
+  );
   const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null }>>([]);
   const [saving, setSaving] = useState(false);
 
