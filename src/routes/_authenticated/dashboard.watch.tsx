@@ -337,6 +337,7 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
             <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
               {agent.anthropic_agent_id}
             </p>
+            <div className="mt-2"><TypologyBadge a={agent} /></div>
           </div>
           <button
             onClick={onClose}
