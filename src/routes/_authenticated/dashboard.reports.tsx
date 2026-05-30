@@ -27,6 +27,7 @@ type AgentMini = {
   id: string;
   display_name: string;
   provider: string | null;
+  parent_agent_id: string | null;
 };
 
 function decisionIcon(d: string) {
@@ -66,7 +67,7 @@ function ReportsPage() {
           .select("id,decided_at,decision,tool_name,action_type,message,decided_in_ms,agent_id")
           .order("decided_at", { ascending: false })
           .limit(500),
-        supabase.from("agents").select("id, display_name, provider"),
+        supabase.from("agents").select("id, display_name, provider, parent_agent_id"),
       ]);
       setRows((d as Decision[] | null) ?? []);
       const map: Record<string, AgentMini> = {};
