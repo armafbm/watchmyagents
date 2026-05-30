@@ -148,6 +148,15 @@ function ReportsPage() {
               <tbody>
                 {rows.map((r) => {
                   const ag = agents[r.agent_id];
+                  // Build lineage path: root › … › this agent (cap depth 10)
+                  const chain: AgentMini[] = [];
+                  let cursor: AgentMini | undefined = ag;
+                  const seen = new Set<string>();
+                  while (cursor && !seen.has(cursor.id) && chain.length < 10) {
+                    chain.unshift(cursor);
+                    seen.add(cursor.id);
+                    cursor = cursor.parent_agent_id ? agents[cursor.parent_agent_id] : undefined;
+                  }
                   return (
                     <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
                       <td className="p-3">{decisionIcon(r.decision)}</td>
@@ -161,6 +170,11 @@ function ReportsPage() {
                             {ag?.display_name ?? `${r.agent_id.slice(0, 8)}…`}
                           </span>
                         </div>
+                        {chain.length > 1 && (
+                          <div className="font-mono text-[10px] text-muted-foreground mt-0.5 truncate max-w-[280px]">
+                            {chain.map((n) => n.display_name).join(" › ")}
+                          </div>
+                        )}
                       </td>
                       <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
                       <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
