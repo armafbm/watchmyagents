@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { Button } from "@/components/ui/button";
+import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/reports")({
@@ -19,6 +20,13 @@ type Decision = {
   action_type: string | null;
   message: string | null;
   decided_in_ms: number | null;
+  agent_id: string;
+};
+
+type AgentMini = {
+  id: string;
+  display_name: string;
+  provider: string | null;
 };
 
 function decisionIcon(d: string) {
