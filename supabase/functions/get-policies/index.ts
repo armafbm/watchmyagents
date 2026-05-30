@@ -47,12 +47,13 @@ serve(async (req) => {
 
   let agentUuid: string | null = null;
   let agentType: string | null = null;
+  const ancestorIds: string[] = []; // self + parents up the chain
   if (filterAnthropicAgentId) {
     if (!/^agent_[a-zA-Z0-9]+$/.test(filterAnthropicAgentId)) {
       return json(400, { error: 'invalid agent_id format' });
     }
     const { data: agent } = await supabase
-      .from('agents').select('id, agent_type')
+      .from('agents').select('id, agent_type, parent_agent_id')
       .eq('customer_id', customerId)
       .eq('anthropic_agent_id', filterAnthropicAgentId)
       .maybeSingle();
@@ -61,12 +62,27 @@ serve(async (req) => {
     }
     agentUuid = (agent as { id: string }).id;
     agentType = (agent as { agent_type: string | null }).agent_type;
+
+    // Walk up parent chain (cap depth 10 to prevent loops)
+    ancestorIds.push(agentUuid);
+    let currentParent = (agent as { parent_agent_id: string | null }).parent_agent_id;
+    for (let i = 0; i < 10 && currentParent; i++) {
+      if (ancestorIds.includes(currentParent)) break; // cycle guard
+      ancestorIds.push(currentParent);
+      const { data: parentRow } = await supabase
+        .from('agents').select('parent_agent_id')
+        .eq('customer_id', customerId)
+        .eq('id', currentParent)
+        .maybeSingle();
+      currentParent = parentRow ? (parentRow as { parent_agent_id: string | null }).parent_agent_id : null;
+    }
   }
 
   // Surface-aware resolution.
   //   fleet                          => always applies
   //   agent (this agent)             => surface_type='agent' AND agent_id = this
   //   type  (this agent's type)      => surface_type='type'  AND surface_ref = this.agent_type
+  //   subtree                        => surface_type='subtree' AND surface_ref in ancestor chain
   // Back-compat: rows with NULL surface_type were backfilled (fleet when agent_id null, agent otherwise).
   let query = supabase
     .from('policies')
@@ -76,14 +92,16 @@ serve(async (req) => {
     .order('priority', { ascending: true });
 
   if (agentUuid !== null) {
-    // Build OR clause covering the three surfaces.
     const orParts = [`surface_type.eq.fleet`, `and(surface_type.eq.agent,agent_id.eq.${agentUuid})`];
     if (agentType) orParts.push(`and(surface_type.eq.type,surface_ref.eq.${agentType})`);
+    if (ancestorIds.length > 0) {
+      orParts.push(`and(surface_type.eq.subtree,surface_ref.in.(${ancestorIds.join(',')}))`);
+    }
     query = query.or(orParts.join(','));
   } else {
-    // No agent_id filter -> fleet only.
     query = query.eq('surface_type', 'fleet');
   }
+
 
   const { data: policies, error: policiesErr } = await query;
   if (policiesErr) { console.error('[get-policies] policies lookup:', policiesErr); return json(500, { error: 'internal error' }); }

@@ -21,12 +21,14 @@ export type Database = {
           agent_type_stage: string | null
           agent_type_updated_at: string | null
           anthropic_agent_id: string | null
+          composition_pattern: string
           created_at: string
           customer_id: string
           display_name: string
           id: string
           last_seen_at: string | null
           native_agent_id: string
+          parent_agent_id: string | null
           provider: string
           shield_mode_detected: string | null
           status: string
@@ -38,12 +40,14 @@ export type Database = {
           agent_type_stage?: string | null
           agent_type_updated_at?: string | null
           anthropic_agent_id?: string | null
+          composition_pattern?: string
           created_at?: string
           customer_id: string
           display_name: string
           id?: string
           last_seen_at?: string | null
           native_agent_id: string
+          parent_agent_id?: string | null
           provider?: string
           shield_mode_detected?: string | null
           status?: string
@@ -55,12 +59,14 @@ export type Database = {
           agent_type_stage?: string | null
           agent_type_updated_at?: string | null
           anthropic_agent_id?: string | null
+          composition_pattern?: string
           created_at?: string
           customer_id?: string
           display_name?: string
           id?: string
           last_seen_at?: string | null
           native_agent_id?: string
+          parent_agent_id?: string | null
           provider?: string
           shield_mode_detected?: string | null
           status?: string
@@ -80,6 +86,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "dashboard_today_v"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "agents_parent_agent_id_fkey"
+            columns: ["parent_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agents_parent_agent_id_fkey"
+            columns: ["parent_agent_id"]
+            isOneToOne: false
+            referencedRelation: "loop_overview_v"
+            referencedColumns: ["agent_id"]
           },
         ]
       }

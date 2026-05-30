@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Shield, GitPullRequest, Lock, Plus, Pencil, Trash2, Loader2, Globe, Layers, User } from "lucide-react";
+import { Shield, GitPullRequest, Lock, Plus, Pencil, Trash2, Loader2, Globe, Layers, User, GitBranch } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -38,7 +38,7 @@ type AgentMini = {
   provider: string | null;
 };
 
-type SurfaceFilter = "all" | "fleet" | "type" | "agent";
+type SurfaceFilter = "all" | "fleet" | "type" | "agent" | "subtree";
 
 function actionTone(a: string) {
   if (a === "deny" || a === "block") return "bg-danger/15 text-danger border-danger/30";
@@ -69,6 +69,15 @@ function AppliesToBadge({
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.55_0.18_240_/_0.15)] text-[oklch(0.75_0.18_240)] border-[oklch(0.55_0.18_240_/_0.4)]">
         <Layers className="h-3 w-3" /> All {ref} agents · {count}
+      </span>
+    );
+  }
+  if (surface === "subtree") {
+    const root = agents.find((x) => x.id === p.surface_ref);
+    const label = root?.display_name ?? (p.surface_ref ? `${p.surface_ref.slice(0, 8)}…` : "—");
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.55_0.18_240_/_0.15)] text-[oklch(0.75_0.18_240)] border-[oklch(0.55_0.18_240_/_0.4)]">
+        <GitBranch className="h-3 w-3" /> Subtree · {label}
       </span>
     );
   }
@@ -140,6 +149,7 @@ function ShieldPage() {
     { id: "all", label: "All" },
     { id: "fleet", label: "Fleet" },
     { id: "type", label: "By type" },
+    { id: "subtree", label: "By subtree" },
     { id: "agent", label: "By agent" },
   ];
 
@@ -257,7 +267,7 @@ function ShieldPage() {
                               action: p.action,
                               message: p.message ?? "",
                               match: JSON.stringify(p.match ?? {}, null, 2),
-                              surface_type: (p.surface_type as "agent" | "type" | "fleet" | undefined) ?? undefined,
+                              surface_type: (p.surface_type as "agent" | "subtree" | "type" | "fleet" | undefined) ?? undefined,
                               surface_ref: p.surface_ref ?? undefined,
                               agent_id: p.agent_id ?? undefined,
                             })
