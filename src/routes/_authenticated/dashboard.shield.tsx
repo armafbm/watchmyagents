@@ -93,7 +93,7 @@ function ShieldPage() {
     setLoading(true);
     const [{ data: pData }, { data: aData }] = await Promise.all([
       supabase.from("policies").select("*").order("priority"),
-      supabase.from("agents").select("id, display_name, agent_type"),
+      supabase.from("agents").select("id, display_name, agent_type, provider"),
     ]);
     setList((pData as Policy[] | null) ?? []);
     setAgents((aData as AgentMini[] | null) ?? []);
