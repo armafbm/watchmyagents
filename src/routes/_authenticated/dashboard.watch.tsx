@@ -187,9 +187,14 @@ function WatchPage() {
                     onClick={() => setSelectedAgent(a)}
                     className="border-t border-border/40 hover:bg-primary/5 cursor-pointer transition"
                   >
-                    <td className="p-3 font-mono text-primary">{a.display_name}</td>
+                    <td className="p-3 font-mono text-primary">
+                      <div className="flex items-center gap-2">
+                        <ProviderBadge provider={a.provider as AgentProvider | null} />
+                        <span>{a.display_name}</span>
+                      </div>
+                    </td>
                     <td className="p-3 font-mono text-xs text-muted-foreground truncate max-w-[200px]">
-                      {a.anthropic_agent_id}
+                      {a.native_agent_id ?? a.anthropic_agent_id ?? "—"}
                     </td>
                     <td className="p-3 font-mono text-xs text-muted-foreground">
                       {a.shield_mode_detected ?? "—"}
