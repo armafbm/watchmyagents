@@ -213,7 +213,146 @@ function WatchPage() {
   );
 }
 
-function SignalCard({ signal, agentName }: { signal: SignalRow; agentName: string }) {
+function AgentTree({
+  agents,
+  signalCountByAgent,
+  onSelect,
+}: {
+  agents: Agent[];
+  signalCountByAgent: Record<string, number>;
+  onSelect: (a: Agent) => void;
+}) {
+  const byParent = useMemo(() => {
+    const m = new Map<string | null, Agent[]>();
+    for (const a of agents) {
+      const key = a.parent_agent_id ?? null;
+      const arr = m.get(key) ?? [];
+      arr.push(a);
+      m.set(key, arr);
+    }
+    return m;
+  }, [agents]);
+
+  const agentById = useMemo(() => {
+    const m = new Map<string, Agent>();
+    agents.forEach((a) => m.set(a.id, a));
+    return m;
+  }, [agents]);
+
+  // Roots = no parent OR parent missing in tenant
+  const roots = useMemo(
+    () => agents.filter((a) => !a.parent_agent_id || !agentById.has(a.parent_agent_id)),
+    [agents, agentById],
+  );
+
+  return (
+    <ul className="divide-y divide-border/40">
+      {roots.map((root) => (
+        <TreeNode
+          key={root.id}
+          agent={root}
+          depth={0}
+          byParent={byParent}
+          agentById={agentById}
+          signalCountByAgent={signalCountByAgent}
+          onSelect={onSelect}
+        />
+      ))}
+    </ul>
+  );
+}
+
+function TreeNode({
+  agent,
+  depth,
+  byParent,
+  agentById,
+  signalCountByAgent,
+  onSelect,
+}: {
+  agent: Agent;
+  depth: number;
+  byParent: Map<string | null, Agent[]>;
+  agentById: Map<string, Agent>;
+  signalCountByAgent: Record<string, number>;
+  onSelect: (a: Agent) => void;
+}) {
+  const [open, setOpen] = useState(depth < 1);
+  const children = byParent.get(agent.id) ?? [];
+  const parent = agent.parent_agent_id ? agentById.get(agent.parent_agent_id) : null;
+  const hasChildren = children.length > 0;
+
+  return (
+    <li>
+      <div
+        onClick={() => onSelect(agent)}
+        className="flex items-center gap-3 px-3 py-2.5 hover:bg-primary/5 cursor-pointer transition"
+        style={{ paddingLeft: 12 + depth * 22 }}
+      >
+        <button
+          type="button"
+          aria-label={hasChildren ? (open ? "Collapse" : "Expand") : undefined}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (hasChildren) setOpen((v) => !v);
+          }}
+          className={`h-5 w-5 grid place-items-center rounded text-muted-foreground ${
+            hasChildren ? "hover:bg-secondary/60 hover:text-foreground" : "opacity-30"
+          }`}
+        >
+          {hasChildren ? (
+            open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />
+          ) : (
+            <span className="h-1 w-1 rounded-full bg-current" />
+          )}
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <ProviderBadge provider={agent.provider as AgentProvider | null} />
+            <span className="font-mono text-sm text-primary truncate">{agent.display_name}</span>
+            <TypologyBadge a={agent} />
+            <CompositionBadge pattern={agent.composition_pattern} />
+            {hasChildren && (
+              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                · {children.length} sub-agent{children.length === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
+          {parent && (
+            <div className="font-mono text-[11px] text-muted-foreground mt-0.5 truncate">
+              ↳ sub-agent of <span className="text-foreground/80">{parent.display_name}</span>
+            </div>
+          )}
+        </div>
+        <div className="hidden md:flex items-center gap-3 shrink-0">
+          <SevBadge sev={severityFor(agent)} />
+          <span className="font-mono text-[11px] text-muted-foreground w-20 text-right">
+            {signalCountByAgent[agent.id] ?? 0} sig
+          </span>
+          <span className="font-mono text-[11px] text-muted-foreground w-20 text-right">
+            {relativeTime(agent.last_seen_at)}
+          </span>
+        </div>
+      </div>
+      {open && hasChildren && (
+        <ul className="border-l border-border/30 ml-5">
+          {children.map((c) => (
+            <TreeNode
+              key={c.id}
+              agent={c}
+              depth={depth + 1}
+              byParent={byParent}
+              agentById={agentById}
+              signalCountByAgent={signalCountByAgent}
+              onSelect={onSelect}
+            />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
   const [open, setOpen] = useState(false);
   const sev = severityOfSignal(signal.payload);
   const kind = kindOf(signal.payload);
