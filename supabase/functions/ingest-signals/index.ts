@@ -85,6 +85,15 @@ function validateBody(b: unknown) {
     composition_pattern = o.composition_pattern;
   }
 
+  // Optional enforcement_mode (defaults to sync_confirm for legacy Anthropic clients)
+  const VALID_ENFORCEMENT = new Set(['sync_confirm','sync_interrupt','detect_only']);
+  let enforcement_mode = 'sync_confirm';
+  if (typeof o.enforcement_mode === 'string') {
+    if (!VALID_ENFORCEMENT.has(o.enforcement_mode))
+      return { ok: false, error: 'enforcement_mode invalid' };
+    enforcement_mode = o.enforcement_mode;
+  }
+
   return {
     ok: true,
     data: {
