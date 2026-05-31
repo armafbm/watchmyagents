@@ -177,6 +177,19 @@ function ShieldPage() {
         <Stat label="Total" value={loading ? "—" : String(list.length)} />
       </div>
 
+      {agents.some((a) => isDetectOnly(a.enforcement_mode)) && (
+        <div className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+          <div className="font-semibold mb-0.5 flex items-center gap-2">
+            <Eye className="h-4 w-4" /> Detection-only agents in fleet
+          </div>
+          <p className="text-xs text-warning/90">
+            Shield enforcement is not available for adapters reporting <code className="font-mono">detect_only</code>. WMA
+            will surface findings in Reports &amp; Audit but cannot block actions in real time. Policies targeting these
+            agents are kept in monitor mode.
+          </p>
+        </div>
+      )}
+
       <Panel title="Policies" icon={Lock} tag={`${filtered.length} / ${list.length}`}>
         <div className="flex flex-wrap items-center gap-2 mb-4">
           {FILTER_CHIPS.map((c) => {
