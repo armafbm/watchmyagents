@@ -42,6 +42,7 @@ type SignalRow = {
   window_start?: string | null;
   window_end?: string | null;
   payload: Record<string, unknown> | null;
+  session_ids?: string[] | null;
 };
 
 function relativeTime(iso: string | null) {
