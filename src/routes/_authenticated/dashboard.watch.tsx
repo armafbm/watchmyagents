@@ -452,7 +452,7 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
             <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
               {agent.native_agent_id ?? agent.anthropic_agent_id ?? "—"}
             </p>
-            <div className="mt-2"><TypologyBadge a={agent} /></div>
+            <div className="mt-2 flex flex-wrap items-center gap-2"><TypologyBadge a={agent} /><EnforcementBadge mode={agent.enforcement_mode} /></div>
           </div>
           <button
             onClick={onClose}
