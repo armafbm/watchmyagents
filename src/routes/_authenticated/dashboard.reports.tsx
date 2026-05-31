@@ -125,13 +125,16 @@ function ReportsPage() {
     a.click();
     URL.revokeObjectURL(url);
     if (includeSessionIds) {
-      // Decisions table itself does not carry session_ids; the toggle audits intent
-      // and is wired so when joined exports are added later they will respect it.
-      await supabase.rpc("log_session_id_access", {
-        p_signal_id: rows[0]?.agent_id ? (rows[0] as unknown as { signal_id?: string }).signal_id ?? "" : "",
-        p_session_id: "(bulk export)",
-        p_action: "export",
-      }).catch(() => undefined);
+      // The decisions CSV itself carries no session_ids today, but we audit the
+      // operator's intent to export them so the policy holds when future
+      // joined exports are added.
+      try {
+        await supabase.rpc("log_session_id_access", {
+          p_signal_id: "00000000-0000-0000-0000-000000000000",
+          p_session_id: "(bulk export request)",
+          p_action: "export",
+        });
+      } catch { /* non-fatal */ }
     }
   };
 
