@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FileText, Download, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { FileText, Download, CheckCircle2, XCircle, AlertTriangle, Eye } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
+import { SessionIdChip } from "@/components/fortress/SessionIdChip";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/reports")({
