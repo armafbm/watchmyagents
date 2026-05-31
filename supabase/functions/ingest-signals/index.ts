@@ -247,6 +247,7 @@ serve(async (req) => {
       customer_id: customerId,
       agent_id: agentId,
       window_start, window_end, payload,
+      session_ids,
     }).select('id').single();
   if (signalErr) { console.error('[ingest-signals] signal insert:', signalErr); return json(500, { error: 'internal error — signal could not be recorded' }); }
 
