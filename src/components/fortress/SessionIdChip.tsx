@@ -66,11 +66,13 @@ export function SessionIdChip({ sessionId, signalId, revealedValue, onRequestRev
       await navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-      await supabase.rpc("log_session_id_access", {
-        p_signal_id: signalId ?? null,
-        p_session_id: value,
-        p_action: "copy",
-      });
+      if (signalId) {
+        await supabase.rpc("log_session_id_access", {
+          p_signal_id: signalId,
+          p_session_id: value,
+          p_action: "copy",
+        });
+      }
     } catch {
       toast.error("Copy failed");
     }
