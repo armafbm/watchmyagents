@@ -368,7 +368,7 @@ async function filterAlreadySuggested(
   return [...bestBySig.values()];
 }
 
-async function runGuardian() {
+async function runGuardian(customerId?: string) {
   const apiKey = Deno.env.get('LOVABLE_API_KEY');
   if (!apiKey) return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: ['LOVABLE_API_KEY missing'] };
 
