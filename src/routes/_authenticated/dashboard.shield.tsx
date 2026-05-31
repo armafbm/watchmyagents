@@ -37,6 +37,7 @@ type AgentMini = {
   display_name: string;
   agent_type: string | null;
   provider: string | null;
+  enforcement_mode: EnforcementMode;
 };
 
 type SurfaceFilter = "all" | "fleet" | "type" | "agent" | "subtree";
