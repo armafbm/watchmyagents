@@ -400,7 +400,10 @@ function SignalCard({ signal, agentName }: { signal: SignalRow; agentName: strin
         </div>
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t border-border/40 bg-background/40">
+        <div className="px-4 pb-4 pt-1 border-t border-border/40 bg-background/40 space-y-3">
+          {signal.session_ids && signal.session_ids.length > 0 && (
+            <SessionIdList sessionIds={signal.session_ids} signalId={signal.id} />
+          )}
           <pre className="font-mono text-[11px] text-muted-foreground whitespace-pre-wrap break-all max-h-72 overflow-y-auto">
             {JSON.stringify(signal.payload, null, 2)}
           </pre>
