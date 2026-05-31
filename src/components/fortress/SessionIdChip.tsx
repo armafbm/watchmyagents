@@ -49,7 +49,7 @@ export function SessionIdChip({ sessionId, signalId, revealedValue, onRequestRev
         // Local-only reveal (e.g. forensic log view where the full id is already authoritative)
         setRevealed(sessionId);
         await supabase.rpc("log_session_id_access", {
-          p_signal_id: signalId ?? null,
+          p_signal_id: signalId ?? undefined,
           p_session_id: sessionId,
           p_action: "reveal",
         });
