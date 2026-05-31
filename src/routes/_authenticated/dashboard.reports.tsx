@@ -34,6 +34,16 @@ type AgentMini = {
   parent_agent_id: string | null;
 };
 
+type AuditRow = {
+  id: string;
+  created_at: string;
+  user_id: string;
+  action: "reveal" | "copy" | "export";
+  session_id: string;
+  signal_id: string | null;
+};
+
+
 function decisionIcon(d: string) {
   if (d === "allow") return <CheckCircle2 className="h-4 w-4 text-success" />;
   if (d === "deny" || d === "block") return <XCircle className="h-4 w-4 text-danger" />;
