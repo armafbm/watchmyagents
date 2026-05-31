@@ -106,6 +106,7 @@ function validateBody(b: unknown) {
       classification,
       parent_agent_id,
       composition_pattern,
+      enforcement_mode,
     },
   };
 }
