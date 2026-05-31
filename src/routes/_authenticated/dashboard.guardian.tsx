@@ -319,6 +319,7 @@ function GuardianPage() {
                             })()}
                           </code>
                           {agent && <TypologyBadge a={agent} />}
+                          {agent && <EnforcementBadge mode={agent.enforcement_mode} />}
                         </div>
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-start gap-3">
