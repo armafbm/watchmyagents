@@ -57,18 +57,34 @@ export function PolicyEditor({
   const [agentId, setAgentId] = useState<string | null>(
     draft.agent_id ?? (draft.surface_type === "subtree" ? draft.surface_ref ?? null : null),
   );
-  const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null }>>([]);
+  const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }>>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     supabase
       .from("agents")
-      .select("id, display_name, agent_type")
+      .select("id, display_name, agent_type, enforcement_mode")
       .order("display_name")
       .then(({ data }) => {
-        setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null }> | null) ?? []));
+        setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }> | null) ?? []));
       });
   }, []);
+
+  const selectedAgent = agentId ? agentOpts.find((a) => a.id === agentId) : null;
+  const selectedEnforcement = selectedAgent?.enforcement_mode ?? "sync_confirm";
+  const isDetectOnlyAgent =
+    (surfaceType === "agent" || surfaceType === "subtree") && selectedEnforcement === "detect_only";
+  const availableActions: readonly string[] =
+    (surfaceType === "agent" || surfaceType === "subtree") && selectedEnforcement === "sync_interrupt"
+      ? (["allow", "interrupt"] as const)
+      : ACTIONS;
+
+  // If the current action is no longer available, snap to a safe default
+  useEffect(() => {
+    if (!availableActions.includes(action)) {
+      setAction(availableActions[0] ?? "allow");
+    }
+  }, [availableActions, action]);
 
   const save = async () => {
     let parsed: unknown;
