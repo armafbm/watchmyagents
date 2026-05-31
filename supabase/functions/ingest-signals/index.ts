@@ -188,14 +188,15 @@ serve(async (req) => {
         display_name: display_name || native_agent_id,
         parent_agent_id: resolvedParentId,
         composition_pattern,
+        enforcement_mode,
       }).select('id').single();
     if (insertErr) { console.error('[ingest-signals] agent auto-register:', insertErr); return json(500, { error: 'internal error' }); }
     agentId = (created as { id: string }).id;
     registeredNew = true;
   }
 
-  // Always persist composition_pattern; backfill parent_agent_id if newly resolved.
-  const lineageUpdate: Record<string, unknown> = { composition_pattern };
+  // Always persist composition_pattern + enforcement_mode; backfill parent_agent_id if newly resolved.
+  const lineageUpdate: Record<string, unknown> = { composition_pattern, enforcement_mode };
   if (resolvedParentId && resolvedParentId !== existingParentId) {
     lineageUpdate.parent_agent_id = resolvedParentId;
   }
