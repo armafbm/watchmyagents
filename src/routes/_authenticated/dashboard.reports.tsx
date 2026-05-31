@@ -124,18 +124,8 @@ function ReportsPage() {
     a.download = `fortress-decisions-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    if (includeSessionIds) {
-      // The decisions CSV itself carries no session_ids today, but we audit the
-      // operator's intent to export them so the policy holds when future
-      // joined exports are added.
-      try {
-        await supabase.rpc("log_session_id_access", {
-          p_signal_id: "00000000-0000-0000-0000-000000000000",
-          p_session_id: "(bulk export request)",
-          p_action: "export",
-        });
-      } catch { /* non-fatal */ }
-    }
+    // Default-export hygiene: decisions CSV never carries session_ids[].
+    // The include_session_ids toggle is reserved for future joined exports.
   };
 
   const filteredAudit = (auditRows ?? []).filter(
