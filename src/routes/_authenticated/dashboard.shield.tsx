@@ -249,14 +249,46 @@ function ShieldPage() {
                     </td>
                     <td className="p-3"><AppliesToBadge p={p} agents={agents} /></td>
                     <td className="p-3">
-                      <span
-                        className={`px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-widest ${actionTone(p.action)}`}
-                      >
-                        {p.action}
-                      </span>
+                      {(() => {
+                        const targetAgent =
+                          p.surface_type === "agent" || (!p.surface_type && p.agent_id)
+                            ? agents.find((x) => x.id === p.agent_id)
+                            : null;
+                        const detectOnly = targetAgent ? isDetectOnly(targetAgent.enforcement_mode) : false;
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-widest w-fit ${
+                                detectOnly ? "bg-muted text-muted-foreground border-border line-through" : actionTone(p.action)
+                              }`}
+                              title={detectOnly ? "Adapter is detect-only — enforcement disabled, rule runs in monitor mode." : undefined}
+                            >
+                              {p.action}
+                            </span>
+                            {detectOnly && (
+                              <span className="font-mono text-[10px] uppercase tracking-widest text-warning">
+                                monitor-only
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="p-3">
-                      <Switch checked={p.enabled} onCheckedChange={(v) => toggle(p, v)} />
+                      {(() => {
+                        const targetAgent =
+                          p.surface_type === "agent" || (!p.surface_type && p.agent_id)
+                            ? agents.find((x) => x.id === p.agent_id)
+                            : null;
+                        const detectOnly = targetAgent ? isDetectOnly(targetAgent.enforcement_mode) : false;
+                        return (
+                          <Switch
+                            checked={p.enabled}
+                            disabled={detectOnly}
+                            onCheckedChange={(v) => toggle(p, v)}
+                          />
+                        );
+                      })()}
                     </td>
                     <td className="p-3 text-right">
                       <div className="inline-flex gap-1">
