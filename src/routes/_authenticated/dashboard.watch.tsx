@@ -7,6 +7,7 @@ import { TypologyBadge } from "@/components/fortress/TypologyBadge";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { CompositionBadge } from "@/components/fortress/CompositionBadge";
 import { EnforcementBadge, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
+import { SessionIdList } from "@/components/fortress/SessionIdChip";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
