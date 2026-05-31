@@ -209,7 +209,12 @@ function GuardianPage() {
       toast.error(e2.message);
       return;
     }
-    toast.success(`Policy deployed on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}.`);
+    const detectOnly = isDetectOnly(agents[s.agent_id]?.enforcement_mode);
+    toast.success(
+      detectOnly
+        ? "Saved as monitor-only rule (adapter is detect-only — no real-time enforcement)."
+        : `Policy deployed on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}.`,
+    );
     reload();
   };
 
