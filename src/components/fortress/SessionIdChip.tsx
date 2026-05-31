@@ -45,14 +45,15 @@ export function SessionIdChip({ sessionId, signalId, revealedValue, onRequestRev
           const match = arr.find((s) => s === sessionId || maskSessionId(s) === sessionId);
           setRevealed(match ?? arr[0] ?? sessionId);
         }
-      } else {
-        // Local-only reveal (e.g. forensic log view where the full id is already authoritative)
+      } else if (signalId) {
         setRevealed(sessionId);
         await supabase.rpc("log_session_id_access", {
-          p_signal_id: signalId ?? undefined,
+          p_signal_id: signalId,
           p_session_id: sessionId,
           p_action: "reveal",
         });
+      } else {
+        setRevealed(sessionId);
       }
     } finally {
       setBusy(false);
