@@ -25,6 +25,7 @@ export type Database = {
           created_at: string
           customer_id: string
           display_name: string
+          enforcement_mode: string
           id: string
           last_seen_at: string | null
           native_agent_id: string
@@ -44,6 +45,7 @@ export type Database = {
           created_at?: string
           customer_id: string
           display_name: string
+          enforcement_mode?: string
           id?: string
           last_seen_at?: string | null
           native_agent_id: string
@@ -63,6 +65,7 @@ export type Database = {
           created_at?: string
           customer_id?: string
           display_name?: string
+          enforcement_mode?: string
           id?: string
           last_seen_at?: string | null
           native_agent_id?: string

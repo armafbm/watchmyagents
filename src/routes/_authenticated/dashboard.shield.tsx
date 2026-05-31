@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Shield, GitPullRequest, Lock, Plus, Pencil, Trash2, Loader2, Globe, Layers, User, GitBranch } from "lucide-react";
+import { Shield, GitPullRequest, Lock, Plus, Pencil, Trash2, Loader2, Globe, Layers, User, GitBranch, Eye } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PolicyEditor, type PolicyDraft } from "@/components/fortress/PolicyEditor";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
+import { EnforcementBadge, isDetectOnly, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/shield")({
@@ -36,6 +37,7 @@ type AgentMini = {
   display_name: string;
   agent_type: string | null;
   provider: string | null;
+  enforcement_mode: EnforcementMode;
 };
 
 type SurfaceFilter = "all" | "fleet" | "type" | "agent" | "subtree";
@@ -85,11 +87,12 @@ function AppliesToBadge({
   const a = agents.find((x) => x.id === p.agent_id);
   const label = a?.display_name ?? (p.agent_id ? `${p.agent_id.slice(0, 8)}…` : "—");
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex items-center gap-1.5 flex-wrap">
       <ProviderBadge provider={(a?.provider as AgentProvider | null) ?? null} />
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-[oklch(0.6_0.18_50_/_0.15)] text-[oklch(0.78_0.18_50)] border-[oklch(0.6_0.18_50_/_0.4)]">
         <User className="h-3 w-3" /> {label}
       </span>
+      {a && <EnforcementBadge mode={a.enforcement_mode} />}
     </span>
   );
 }
@@ -105,7 +108,7 @@ function ShieldPage() {
     setLoading(true);
     const [{ data: pData }, { data: aData }] = await Promise.all([
       supabase.from("policies").select("*").order("priority"),
-      supabase.from("agents").select("id, display_name, agent_type, provider"),
+      supabase.from("agents").select("id, display_name, agent_type, provider, enforcement_mode"),
     ]);
     setList((pData as Policy[] | null) ?? []);
     setAgents((aData as AgentMini[] | null) ?? []);
@@ -173,6 +176,19 @@ function ShieldPage() {
         <Stat label="From Guardian" value={loading ? "—" : String(guardianCount)} icon={Lock} />
         <Stat label="Total" value={loading ? "—" : String(list.length)} />
       </div>
+
+      {agents.some((a) => isDetectOnly(a.enforcement_mode)) && (
+        <div className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+          <div className="font-semibold mb-0.5 flex items-center gap-2">
+            <Eye className="h-4 w-4" /> Detection-only agents in fleet
+          </div>
+          <p className="text-xs text-warning/90">
+            Shield enforcement is not available for adapters reporting <code className="font-mono">detect_only</code>. WMA
+            will surface findings in Reports &amp; Audit but cannot block actions in real time. Policies targeting these
+            agents are kept in monitor mode.
+          </p>
+        </div>
+      )}
 
       <Panel title="Policies" icon={Lock} tag={`${filtered.length} / ${list.length}`}>
         <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -246,14 +262,46 @@ function ShieldPage() {
                     </td>
                     <td className="p-3"><AppliesToBadge p={p} agents={agents} /></td>
                     <td className="p-3">
-                      <span
-                        className={`px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-widest ${actionTone(p.action)}`}
-                      >
-                        {p.action}
-                      </span>
+                      {(() => {
+                        const targetAgent =
+                          p.surface_type === "agent" || (!p.surface_type && p.agent_id)
+                            ? agents.find((x) => x.id === p.agent_id)
+                            : null;
+                        const detectOnly = targetAgent ? isDetectOnly(targetAgent.enforcement_mode) : false;
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-widest w-fit ${
+                                detectOnly ? "bg-muted text-muted-foreground border-border line-through" : actionTone(p.action)
+                              }`}
+                              title={detectOnly ? "Adapter is detect-only — enforcement disabled, rule runs in monitor mode." : undefined}
+                            >
+                              {p.action}
+                            </span>
+                            {detectOnly && (
+                              <span className="font-mono text-[10px] uppercase tracking-widest text-warning">
+                                monitor-only
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="p-3">
-                      <Switch checked={p.enabled} onCheckedChange={(v) => toggle(p, v)} />
+                      {(() => {
+                        const targetAgent =
+                          p.surface_type === "agent" || (!p.surface_type && p.agent_id)
+                            ? agents.find((x) => x.id === p.agent_id)
+                            : null;
+                        const detectOnly = targetAgent ? isDetectOnly(targetAgent.enforcement_mode) : false;
+                        return (
+                          <Switch
+                            checked={p.enabled}
+                            disabled={detectOnly}
+                            onCheckedChange={(v) => toggle(p, v)}
+                          />
+                        );
+                      })()}
                     </td>
                     <td className="p-3 text-right">
                       <div className="inline-flex gap-1">

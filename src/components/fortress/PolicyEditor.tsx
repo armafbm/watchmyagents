@@ -57,18 +57,34 @@ export function PolicyEditor({
   const [agentId, setAgentId] = useState<string | null>(
     draft.agent_id ?? (draft.surface_type === "subtree" ? draft.surface_ref ?? null : null),
   );
-  const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null }>>([]);
+  const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }>>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     supabase
       .from("agents")
-      .select("id, display_name, agent_type")
+      .select("id, display_name, agent_type, enforcement_mode")
       .order("display_name")
       .then(({ data }) => {
-        setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null }> | null) ?? []));
+        setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }> | null) ?? []));
       });
   }, []);
+
+  const selectedAgent = agentId ? agentOpts.find((a) => a.id === agentId) : null;
+  const selectedEnforcement = selectedAgent?.enforcement_mode ?? "sync_confirm";
+  const isDetectOnlyAgent =
+    (surfaceType === "agent" || surfaceType === "subtree") && selectedEnforcement === "detect_only";
+  const availableActions: readonly string[] =
+    (surfaceType === "agent" || surfaceType === "subtree") && selectedEnforcement === "sync_interrupt"
+      ? (["allow", "interrupt"] as const)
+      : ACTIONS;
+
+  // If the current action is no longer available, snap to a safe default
+  useEffect(() => {
+    if (!availableActions.includes(action)) {
+      setAction(availableActions[0] ?? "allow");
+    }
+  }, [availableActions, action]);
 
   const save = async () => {
     let parsed: unknown;
@@ -201,10 +217,16 @@ export function PolicyEditor({
             <Label htmlFor="rationale">Rationale</Label>
             <Textarea id="rationale" rows={2} value={rationale} onChange={(e) => setRationale(e.target.value)} />
           </div>
-          <div className="space-y-1.5">
+          {isDetectOnlyAgent && (
+            <div className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+              Detection-only agent — Shield enforcement is not available for this adapter. WMA will surface findings
+              in Reports &amp; Audit but cannot block actions in real time. This rule will be saved in monitor mode.
+            </div>
+          )}
+          <div className={`space-y-1.5 ${isDetectOnlyAgent ? "opacity-50 pointer-events-none" : ""}`}>
             <Label>Action</Label>
             <div className="flex gap-2">
-              {ACTIONS.map((a) => (
+              {availableActions.map((a) => (
                 <label key={a} className="flex-1">
                   <input
                     type="radio"
@@ -215,11 +237,17 @@ export function PolicyEditor({
                     className="sr-only peer"
                   />
                   <div className="cursor-pointer text-center py-2 rounded-md border border-border peer-checked:border-primary peer-checked:bg-primary/10 text-sm font-mono uppercase tracking-widest">
-                    {a}
+                    {a === "interrupt" && selectedEnforcement === "sync_interrupt" ? "interrupt" : a}
                   </div>
                 </label>
               ))}
             </div>
+            {selectedEnforcement === "sync_interrupt" && (surfaceType === "agent" || surfaceType === "subtree") && (
+              <p className="text-[11px] text-muted-foreground">
+                Adapter is <code className="font-mono">sync_interrupt</code>: fine-grained confirm is not available —
+                only allow or interrupt.
+              </p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="message">Message (shown to agent on enforcement)</Label>

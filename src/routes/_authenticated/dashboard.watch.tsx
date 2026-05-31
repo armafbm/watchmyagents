@@ -6,6 +6,7 @@ import { PageHeader, Panel, Stat, SevBadge } from "@/components/dashboard/primit
 import { TypologyBadge } from "@/components/fortress/TypologyBadge";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { CompositionBadge } from "@/components/fortress/CompositionBadge";
+import { EnforcementBadge, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
@@ -27,6 +28,7 @@ type Agent = {
   agent_type_stage: string | null;
   parent_agent_id: string | null;
   composition_pattern: string | null;
+  enforcement_mode: EnforcementMode;
 };
 
 
@@ -312,6 +314,7 @@ function TreeNode({
             <span className="font-mono text-sm text-primary truncate">{agent.display_name}</span>
             <TypologyBadge a={agent} />
             <CompositionBadge pattern={agent.composition_pattern} />
+            <EnforcementBadge mode={agent.enforcement_mode} />
             {hasChildren && (
               <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 · {children.length} sub-agent{children.length === 1 ? "" : "s"}
@@ -449,7 +452,7 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
             <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
               {agent.native_agent_id ?? agent.anthropic_agent_id ?? "—"}
             </p>
-            <div className="mt-2"><TypologyBadge a={agent} /></div>
+            <div className="mt-2 flex flex-wrap items-center gap-2"><TypologyBadge a={agent} /><EnforcementBadge mode={agent.enforcement_mode} /></div>
           </div>
           <button
             onClick={onClose}

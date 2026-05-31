@@ -85,6 +85,15 @@ function validateBody(b: unknown) {
     composition_pattern = o.composition_pattern;
   }
 
+  // Optional enforcement_mode (defaults to sync_confirm for legacy Anthropic clients)
+  const VALID_ENFORCEMENT = new Set(['sync_confirm','sync_interrupt','detect_only']);
+  let enforcement_mode = 'sync_confirm';
+  if (typeof o.enforcement_mode === 'string') {
+    if (!VALID_ENFORCEMENT.has(o.enforcement_mode))
+      return { ok: false, error: 'enforcement_mode invalid' };
+    enforcement_mode = o.enforcement_mode;
+  }
+
   return {
     ok: true,
     data: {
@@ -97,6 +106,7 @@ function validateBody(b: unknown) {
       classification,
       parent_agent_id,
       composition_pattern,
+      enforcement_mode,
     },
   };
 }
@@ -138,7 +148,7 @@ serve(async (req) => {
   catch { return json(400, { error: 'body is not valid JSON' }); }
   const v = validateBody(bodyJson);
   if (!v.ok) return json(400, { error: v.error });
-  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification, parent_agent_id, composition_pattern } = v.data!;
+  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification, parent_agent_id, composition_pattern, enforcement_mode } = v.data!;
 
   // Resolve parent_agent_id within this tenant (race-safe: leave NULL if not found yet)
   let resolvedParentId: string | null = null;
@@ -178,14 +188,15 @@ serve(async (req) => {
         display_name: display_name || native_agent_id,
         parent_agent_id: resolvedParentId,
         composition_pattern,
+        enforcement_mode,
       }).select('id').single();
     if (insertErr) { console.error('[ingest-signals] agent auto-register:', insertErr); return json(500, { error: 'internal error' }); }
     agentId = (created as { id: string }).id;
     registeredNew = true;
   }
 
-  // Always persist composition_pattern; backfill parent_agent_id if newly resolved.
-  const lineageUpdate: Record<string, unknown> = { composition_pattern };
+  // Always persist composition_pattern + enforcement_mode; backfill parent_agent_id if newly resolved.
+  const lineageUpdate: Record<string, unknown> = { composition_pattern, enforcement_mode };
   if (resolvedParentId && resolvedParentId !== existingParentId) {
     lineageUpdate.parent_agent_id = resolvedParentId;
   }

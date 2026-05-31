@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GuardianChatPanel } from "@/components/dashboard/GuardianChatPanel";
 import { TypologyBadge, type AgentTypology } from "@/components/fortress/TypologyBadge";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
+import { EnforcementBadge, isDetectOnly, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/guardian")({
@@ -68,6 +69,7 @@ type AgentMini = AgentTypology & {
   anthropic_agent_id: string | null;
   native_agent_id: string;
   provider: string | null;
+  enforcement_mode: EnforcementMode;
 };
 
 function GuardianPage() {
@@ -89,7 +91,7 @@ function GuardianPage() {
         .order("generated_at", { ascending: false }),
       supabase
         .from("agents")
-        .select("id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence"),
+        .select("id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence, enforcement_mode"),
     ]);
     setList((data as unknown as Suggestion[] | null) ?? []);
     const map: Record<string, AgentMini> = {};
@@ -207,7 +209,12 @@ function GuardianPage() {
       toast.error(e2.message);
       return;
     }
-    toast.success(`Policy deployed on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}.`);
+    const detectOnly = isDetectOnly(agents[s.agent_id]?.enforcement_mode);
+    toast.success(
+      detectOnly
+        ? "Saved as monitor-only rule (adapter is detect-only — no real-time enforcement)."
+        : `Policy deployed on ${surface}${surfaceRef ? `: ${surfaceRef}` : ""}.`,
+    );
     reload();
   };
 
@@ -317,6 +324,7 @@ function GuardianPage() {
                             })()}
                           </code>
                           {agent && <TypologyBadge a={agent} />}
+                          {agent && <EnforcementBadge mode={agent.enforcement_mode} />}
                         </div>
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-start gap-3">
@@ -412,7 +420,8 @@ function GuardianPage() {
                           </div>
                           <div className="ml-auto flex gap-2">
                             <Button onClick={() => accept(s)} disabled={busy === s.id || !pp}>
-                              <Check className="h-4 w-4 mr-2" /> Accept & deploy
+                              <Check className="h-4 w-4 mr-2" />
+                              {isDetectOnly(agent?.enforcement_mode) ? "Convert to monitor rule" : "Accept & deploy"}
                             </Button>
                             <Button variant="ghost" onClick={() => reject(s)} disabled={busy === s.id}>
                               <X className="h-4 w-4 mr-2" /> Reject
