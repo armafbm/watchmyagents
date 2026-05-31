@@ -164,7 +164,7 @@ serve(async (req) => {
   catch { return json(400, { error: 'body is not valid JSON' }); }
   const v = validateBody(bodyJson);
   if (!v.ok) return json(400, { error: v.error });
-  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification, parent_agent_id, composition_pattern, enforcement_mode } = v.data!;
+  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification, parent_agent_id, composition_pattern, enforcement_mode, session_ids } = v.data!;
 
   // Resolve parent_agent_id within this tenant (race-safe: leave NULL if not found yet)
   let resolvedParentId: string | null = null;
