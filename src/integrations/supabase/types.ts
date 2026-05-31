@@ -397,6 +397,42 @@ export type Database = {
         }
         Relationships: []
       }
+      guardian_scan_queue: {
+        Row: {
+          customer_id: string
+          last_processed_at: string | null
+          pending_signal_count: number
+          scheduled_at: string
+        }
+        Insert: {
+          customer_id: string
+          last_processed_at?: string | null
+          pending_signal_count?: number
+          scheduled_at: string
+        }
+        Update: {
+          customer_id?: string
+          last_processed_at?: string | null
+          pending_signal_count?: number
+          scheduled_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_scan_queue_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_scan_queue_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
       policies: {
         Row: {
           action: string
