@@ -14,3 +14,7 @@ verify_jwt = false
 
 [functions.ingest-decisions]
 verify_jwt = false
+
+[functions.policies-stream]
+verify_jwt = false
+
