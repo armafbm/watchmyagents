@@ -91,7 +91,7 @@ function GuardianPage() {
         .order("generated_at", { ascending: false }),
       supabase
         .from("agents")
-        .select("id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence"),
+        .select("id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence, enforcement_mode"),
     ]);
     setList((data as unknown as Suggestion[] | null) ?? []);
     const map: Record<string, AgentMini> = {};
