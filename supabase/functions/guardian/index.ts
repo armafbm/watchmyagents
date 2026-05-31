@@ -381,10 +381,13 @@ async function runGuardian() {
   const errors: string[] = [];
   let suggestions_emitted = 0;
 
-  const { data: agents, error: agentsErr } = await supabase
+  let agentsQuery = supabase
     .from('agents').select('id, customer_id, display_name').eq('status', 'active');
+  if (customerId) agentsQuery = agentsQuery.eq('customer_id', customerId);
+  const { data: agents, error: agentsErr } = await agentsQuery;
   if (agentsErr) return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: [agentsErr.message] };
   if (!agents || agents.length === 0) return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: [] };
+
 
   const recentSince = new Date(Date.now() - RECENT_HOURS * 3_600_000).toISOString();
   const baselineSince = new Date(Date.now() - BASELINE_DAYS * 86_400_000).toISOString();
