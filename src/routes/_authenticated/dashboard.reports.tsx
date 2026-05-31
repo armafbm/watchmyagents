@@ -62,6 +62,9 @@ function ReportsPage() {
   const [rows, setRows] = useState<Decision[]>([]);
   const [agents, setAgents] = useState<Record<string, AgentMini>>({});
   const [loading, setLoading] = useState(true);
+  const [includeSessionIds, setIncludeSessionIds] = useState(false);
+  const [auditRows, setAuditRows] = useState<AuditRow[] | null>(null);
+  const [auditFilter, setAuditFilter] = useState<"all" | "reveal" | "copy" | "export">("all");
 
   useEffect(() => {
     (async () => {
@@ -81,10 +84,19 @@ function ReportsPage() {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("session_id_audit_log")
+        .select("id,created_at,user_id,action,session_id,signal_id")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      setAuditRows((data as AuditRow[] | null) ?? []);
+    })();
+  }, []);
+
   const stats = useMemo(() => {
-    let allow = 0,
-      deny = 0,
-      other = 0;
+    let allow = 0, deny = 0, other = 0;
     rows.forEach((r) => {
       if (r.decision === "allow") allow++;
       else if (r.decision === "deny" || r.decision === "block") deny++;
@@ -93,7 +105,7 @@ function ReportsPage() {
     return { allow, deny, other };
   }, [rows]);
 
-  const download = () => {
+  const download = async () => {
     const csv = toCsv(rows);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -102,7 +114,20 @@ function ReportsPage() {
     a.download = `fortress-decisions-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    if (includeSessionIds) {
+      // Decisions table itself does not carry session_ids; the toggle audits intent
+      // and is wired so when joined exports are added later they will respect it.
+      await supabase.rpc("log_session_id_access", {
+        p_signal_id: rows[0]?.agent_id ? (rows[0] as unknown as { signal_id?: string }).signal_id ?? "" : "",
+        p_session_id: "(bulk export)",
+        p_action: "export",
+      }).catch(() => undefined);
+    }
   };
+
+  const filteredAudit = (auditRows ?? []).filter(
+    (r) => auditFilter === "all" || r.action === auditFilter,
+  );
 
   return (
     <DashboardLayout breadcrumb="Reports & Audit">
