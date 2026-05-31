@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PolicyEditor, type PolicyDraft } from "@/components/fortress/PolicyEditor";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
+import { EnforcementBadge, isDetectOnly, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/shield")({
