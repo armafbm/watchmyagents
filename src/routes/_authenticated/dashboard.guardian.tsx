@@ -69,6 +69,7 @@ type AgentMini = AgentTypology & {
   anthropic_agent_id: string | null;
   native_agent_id: string;
   provider: string | null;
+  enforcement_mode: EnforcementMode;
 };
 
 function GuardianPage() {
