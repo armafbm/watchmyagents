@@ -7,6 +7,7 @@ import { TypologyBadge } from "@/components/fortress/TypologyBadge";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
 import { CompositionBadge } from "@/components/fortress/CompositionBadge";
 import { EnforcementBadge, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
+import { SessionIdList } from "@/components/fortress/SessionIdChip";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
@@ -42,6 +43,7 @@ type SignalRow = {
   window_start?: string | null;
   window_end?: string | null;
   payload: Record<string, unknown> | null;
+  session_ids?: string[] | null;
 };
 
 function relativeTime(iso: string | null) {
@@ -108,7 +110,7 @@ function WatchPage() {
         supabase.from("agents").select("*").order("created_at", { ascending: false }),
         supabase
           .from("signals")
-          .select("id,ingested_at,agent_id,window_start,window_end,payload")
+          .select("id,ingested_at,agent_id,window_start,window_end,payload,session_ids")
           .order("ingested_at", { ascending: false })
           .limit(50),
       ]);
@@ -398,7 +400,10 @@ function SignalCard({ signal, agentName }: { signal: SignalRow; agentName: strin
         </div>
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t border-border/40 bg-background/40">
+        <div className="px-4 pb-4 pt-1 border-t border-border/40 bg-background/40 space-y-3">
+          {signal.session_ids && signal.session_ids.length > 0 && (
+            <SessionIdList sessionIds={signal.session_ids} signalId={signal.id} />
+          )}
           <pre className="font-mono text-[11px] text-muted-foreground whitespace-pre-wrap break-all max-h-72 overflow-y-auto">
             {JSON.stringify(signal.payload, null, 2)}
           </pre>
@@ -416,7 +421,7 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
     (async () => {
       const { data } = await supabase
         .from("signals")
-        .select("id,ingested_at,agent_id,window_start,window_end,payload")
+        .select("id,ingested_at,agent_id,window_start,window_end,payload,session_ids")
         .eq("agent_id", agent.id)
         .order("ingested_at", { ascending: false })
         .limit(200);

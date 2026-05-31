@@ -379,6 +379,24 @@ export type Database = {
         }
         Relationships: []
       }
+      fortress_settings: {
+        Row: {
+          customer_id: string
+          session_ids_retention_days: number
+          updated_at: string
+        }
+        Insert: {
+          customer_id: string
+          session_ids_retention_days?: number
+          updated_at?: string
+        }
+        Update: {
+          customer_id?: string
+          session_ids_retention_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       policies: {
         Row: {
           action: string
@@ -468,6 +486,44 @@ export type Database = {
           },
         ]
       }
+      session_id_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          customer_id: string
+          id: string
+          session_id: string
+          signal_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          session_id: string
+          signal_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          session_id?: string
+          signal_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_id_audit_log_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shield_templates: {
         Row: {
           archetype: string
@@ -502,6 +558,7 @@ export type Database = {
           id: string
           ingested_at: string
           payload: Json
+          session_ids: string[] | null
           window_end: string
           window_start: string
         }
@@ -511,6 +568,7 @@ export type Database = {
           id?: string
           ingested_at?: string
           payload: Json
+          session_ids?: string[] | null
           window_end: string
           window_start: string
         }
@@ -520,6 +578,7 @@ export type Database = {
           id?: string
           ingested_at?: string
           payload?: Json
+          session_ids?: string[] | null
           window_end?: string
           window_start?: string
         }
@@ -700,6 +759,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       dashboard_today_v: {
@@ -751,6 +831,17 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      log_session_id_access: {
+        Args: { p_action: string; p_session_id: string; p_signal_id: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -760,6 +851,7 @@ export type Database = {
         }
         Returns: number
       }
+      purge_old_session_ids: { Args: never; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -768,9 +860,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reveal_session_ids: { Args: { p_signal_id: string }; Returns: string[] }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "viewer" | "incident_analyst" | "security_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -897,6 +990,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["viewer", "incident_analyst", "security_admin"],
+    },
   },
 } as const

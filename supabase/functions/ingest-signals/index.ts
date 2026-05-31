@@ -94,6 +94,20 @@ function validateBody(b: unknown) {
     enforcement_mode = o.enforcement_mode;
   }
 
+  // Optional opaque vendor session ids (v1.0.2+). Validated, but NEVER logged.
+  let session_ids: string[] | null = null;
+  if (Array.isArray(o.session_ids)) {
+    if (o.session_ids.length > 256)
+      return { ok: false, error: 'session_ids: max 256 entries' };
+    const clean: string[] = [];
+    for (const s of o.session_ids) {
+      if (typeof s !== 'string' || s.length < 1 || s.length > 256)
+        return { ok: false, error: 'session_ids: each entry must be a string of 1..256 chars' };
+      clean.push(s);
+    }
+    session_ids = clean.length > 0 ? clean : null;
+  }
+
   return {
     ok: true,
     data: {
@@ -107,9 +121,11 @@ function validateBody(b: unknown) {
       parent_agent_id,
       composition_pattern,
       enforcement_mode,
+      session_ids,
     },
   };
 }
+
 
 
 serve(async (req) => {
@@ -148,7 +164,7 @@ serve(async (req) => {
   catch { return json(400, { error: 'body is not valid JSON' }); }
   const v = validateBody(bodyJson);
   if (!v.ok) return json(400, { error: v.error });
-  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification, parent_agent_id, composition_pattern, enforcement_mode } = v.data!;
+  const { provider, native_agent_id, display_name, window_start, window_end, payload, classification, parent_agent_id, composition_pattern, enforcement_mode, session_ids } = v.data!;
 
   // Resolve parent_agent_id within this tenant (race-safe: leave NULL if not found yet)
   let resolvedParentId: string | null = null;
@@ -231,6 +247,7 @@ serve(async (req) => {
       customer_id: customerId,
       agent_id: agentId,
       window_start, window_end, payload,
+      session_ids,
     }).select('id').single();
   if (signalErr) { console.error('[ingest-signals] signal insert:', signalErr); return json(500, { error: 'internal error — signal could not be recorded' }); }
 
