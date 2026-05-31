@@ -109,7 +109,7 @@ function WatchPage() {
         supabase.from("agents").select("*").order("created_at", { ascending: false }),
         supabase
           .from("signals")
-          .select("id,ingested_at,agent_id,window_start,window_end,payload")
+          .select("id,ingested_at,agent_id,window_start,window_end,payload,session_ids")
           .order("ingested_at", { ascending: false })
           .limit(50),
       ]);
@@ -417,7 +417,7 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
     (async () => {
       const { data } = await supabase
         .from("signals")
-        .select("id,ingested_at,agent_id,window_start,window_end,payload")
+        .select("id,ingested_at,agent_id,window_start,window_end,payload,session_ids")
         .eq("agent_id", agent.id)
         .order("ingested_at", { ascending: false })
         .limit(200);
