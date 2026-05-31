@@ -28,6 +28,7 @@ type Agent = {
   agent_type_stage: string | null;
   parent_agent_id: string | null;
   composition_pattern: string | null;
+  enforcement_mode: EnforcementMode;
 };
 
 
