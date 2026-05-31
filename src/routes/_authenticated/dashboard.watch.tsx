@@ -314,6 +314,7 @@ function TreeNode({
             <span className="font-mono text-sm text-primary truncate">{agent.display_name}</span>
             <TypologyBadge a={agent} />
             <CompositionBadge pattern={agent.composition_pattern} />
+            <EnforcementBadge mode={agent.enforcement_mode} />
             {hasChildren && (
               <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 · {children.length} sub-agent{children.length === 1 ? "" : "s"}
