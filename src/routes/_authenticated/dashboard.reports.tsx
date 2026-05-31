@@ -137,11 +137,17 @@ function ReportsPage() {
       <PageHeader
         kicker="Intelligence"
         title="Auditable, exportable, court-ready."
-        subtitle="Every Shield decision is traced and exportable for SOC2, ISO 27001 or your CISO."
+        subtitle="Every Shield decision and every session-id access is traced for SOC 2 / ISO 27001."
         actions={
-          <Button onClick={download} disabled={rows.length === 0}>
-            <Download className="h-4 w-4 mr-2" /> Export CSV
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <Switch id="incl-sids" checked={includeSessionIds} onCheckedChange={setIncludeSessionIds} />
+              <Label htmlFor="incl-sids" className="text-muted-foreground">include session_ids</Label>
+            </div>
+            <Button onClick={download} disabled={rows.length === 0}>
+              <Download className="h-4 w-4 mr-2" /> Export CSV
+            </Button>
+          </div>
         }
       />
 
@@ -152,76 +158,161 @@ function ReportsPage() {
         <Stat label="Other" value={String(stats.other)} tone="warning" />
       </div>
 
-      <Panel title="Decision history" icon={FileText} tag="last 500">
-        {loading ? (
-          <div className="py-10 text-center text-muted-foreground text-sm font-mono">Loading…</div>
-        ) : rows.length === 0 ? (
-          <div className="py-12 text-center">
-            <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-            <div className="font-display text-lg font-bold mb-1">No decision recorded yet</div>
-            <p className="text-sm text-muted-foreground">
-              Once your shield enforces policies, every decision will be logged here.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto -m-5">
-            <table className="w-full text-sm">
-              <thead className="bg-background/40 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="text-left p-3 font-mono">·</th>
-                  <th className="text-left p-3 font-mono">When</th>
-                  <th className="text-left p-3 font-mono">Agent</th>
-                  <th className="text-left p-3 font-mono">Decision</th>
-                  <th className="text-left p-3 font-mono">Tool</th>
-                  <th className="text-left p-3 font-mono">Message</th>
-                  <th className="text-right p-3 font-mono">Latency</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => {
-                  const ag = agents[r.agent_id];
-                  // Build lineage path: root › … › this agent (cap depth 10)
-                  const chain: AgentMini[] = [];
-                  let cursor: AgentMini | undefined = ag;
-                  const seen = new Set<string>();
-                  while (cursor && !seen.has(cursor.id) && chain.length < 10) {
-                    chain.unshift(cursor);
-                    seen.add(cursor.id);
-                    cursor = cursor.parent_agent_id ? agents[cursor.parent_agent_id] : undefined;
-                  }
-                  return (
-                    <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
-                      <td className="p-3">{decisionIcon(r.decision)}</td>
-                      <td className="p-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(r.decided_at).toLocaleString()}
-                      </td>
-                      <td className="p-3 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <ProviderBadge provider={(ag?.provider as AgentProvider | null) ?? null} />
-                          <span className="font-mono text-xs text-foreground/90">
-                            {ag?.display_name ?? `${r.agent_id.slice(0, 8)}…`}
-                          </span>
-                        </div>
-                        {chain.length > 1 && (
-                          <div className="font-mono text-[10px] text-muted-foreground mt-0.5 truncate max-w-[280px]">
-                            {chain.map((n) => n.display_name).join(" › ")}
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
-                      <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
-                      <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
-                      <td className="p-3 text-right font-mono text-xs">
-                        {r.decided_in_ms != null ? `${r.decided_in_ms}ms` : "—"}
-                      </td>
+      <Tabs defaultValue="decisions">
+        <TabsList>
+          <TabsTrigger value="decisions">Decision history</TabsTrigger>
+          <TabsTrigger value="forensic">
+            <Eye className="h-3.5 w-3.5 mr-1.5" /> Forensic access log
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="decisions">
+          <Panel title="Decision history" icon={FileText} tag="last 500">
+            {loading ? (
+              <div className="py-10 text-center text-muted-foreground text-sm font-mono">Loading…</div>
+            ) : rows.length === 0 ? (
+              <div className="py-12 text-center">
+                <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+                <div className="font-display text-lg font-bold mb-1">No decision recorded yet</div>
+                <p className="text-sm text-muted-foreground">
+                  Once your shield enforces policies, every decision will be logged here.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto -m-5">
+                <table className="w-full text-sm">
+                  <thead className="bg-background/40 text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="text-left p-3 font-mono">·</th>
+                      <th className="text-left p-3 font-mono">When</th>
+                      <th className="text-left p-3 font-mono">Agent</th>
+                      <th className="text-left p-3 font-mono">Decision</th>
+                      <th className="text-left p-3 font-mono">Tool</th>
+                      <th className="text-left p-3 font-mono">Message</th>
+                      <th className="text-right p-3 font-mono">Latency</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Panel>
+                  </thead>
+                  <tbody>
+                    {rows.map((r) => {
+                      const ag = agents[r.agent_id];
+                      const chain: AgentMini[] = [];
+                      let cursor: AgentMini | undefined = ag;
+                      const seen = new Set<string>();
+                      while (cursor && !seen.has(cursor.id) && chain.length < 10) {
+                        chain.unshift(cursor);
+                        seen.add(cursor.id);
+                        cursor = cursor.parent_agent_id ? agents[cursor.parent_agent_id] : undefined;
+                      }
+                      return (
+                        <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
+                          <td className="p-3">{decisionIcon(r.decision)}</td>
+                          <td className="p-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                            {new Date(r.decided_at).toLocaleString()}
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <ProviderBadge provider={(ag?.provider as AgentProvider | null) ?? null} />
+                              <span className="font-mono text-xs text-foreground/90">
+                                {ag?.display_name ?? `${r.agent_id.slice(0, 8)}…`}
+                              </span>
+                            </div>
+                            {chain.length > 1 && (
+                              <div className="font-mono text-[10px] text-muted-foreground mt-0.5 truncate max-w-[280px]">
+                                {chain.map((n) => n.display_name).join(" › ")}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
+                          <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
+                          <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
+                          <td className="p-3 text-right font-mono text-xs">
+                            {r.decided_in_ms != null ? `${r.decided_in_ms}ms` : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
+        </TabsContent>
+
+        <TabsContent value="forensic">
+          <Panel
+            title="Forensic access log"
+            icon={Eye}
+            tag="append-only · session_ids"
+            actions={
+              <div className="flex gap-1 font-mono text-[10px] uppercase">
+                {(["all", "reveal", "copy", "export"] as const).map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => setAuditFilter(k)}
+                    className={`px-2 py-1 rounded border ${
+                      auditFilter === k
+                        ? "bg-primary/15 border-primary/40 text-primary"
+                        : "border-border/40 text-muted-foreground hover:border-primary/30"
+                    }`}
+                  >
+                    {k}
+                  </button>
+                ))}
+              </div>
+            }
+          >
+            {auditRows === null ? (
+              <div className="py-10 text-center text-muted-foreground text-sm font-mono">Loading…</div>
+            ) : filteredAudit.length === 0 ? (
+              <div className="py-12 text-center">
+                <Eye className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+                <div className="font-display text-lg font-bold mb-1">No forensic access yet</div>
+                <p className="text-sm text-muted-foreground">
+                  When an operator reveals, copies, or exports a session id, it lands here.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto -m-5">
+                <table className="w-full text-sm">
+                  <thead className="bg-background/40 text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="text-left p-3 font-mono">When</th>
+                      <th className="text-left p-3 font-mono">Action</th>
+                      <th className="text-left p-3 font-mono">Session id</th>
+                      <th className="text-left p-3 font-mono">Signal</th>
+                      <th className="text-left p-3 font-mono">User</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAudit.map((r) => (
+                      <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
+                        <td className="p-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(r.created_at).toLocaleString()}
+                        </td>
+                        <td className="p-3">
+                          <span className="font-mono text-[10px] uppercase px-2 py-0.5 rounded bg-warning/15 text-warning border border-warning/30">
+                            {r.action}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <SessionIdChip sessionId={r.session_id} signalId={r.signal_id} />
+                        </td>
+                        <td className="p-3 font-mono text-[11px] text-muted-foreground">
+                          {r.signal_id ? `${r.signal_id.slice(0, 8)}…` : "—"}
+                        </td>
+                        <td className="p-3 font-mono text-[11px] text-muted-foreground">
+                          {r.user_id.slice(0, 8)}…
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
+        </TabsContent>
+      </Tabs>
     </DashboardLayout>
   );
 }
+
