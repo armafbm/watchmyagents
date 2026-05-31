@@ -239,28 +239,22 @@ function ReportsPage() {
         </TabsContent>
 
         <TabsContent value="forensic">
-          <Panel
-            title="Forensic access log"
-            icon={Eye}
-            tag="append-only · session_ids"
-            actions={
-              <div className="flex gap-1 font-mono text-[10px] uppercase">
-                {(["all", "reveal", "copy", "export"] as const).map((k) => (
-                  <button
-                    key={k}
-                    onClick={() => setAuditFilter(k)}
-                    className={`px-2 py-1 rounded border ${
-                      auditFilter === k
-                        ? "bg-primary/15 border-primary/40 text-primary"
-                        : "border-border/40 text-muted-foreground hover:border-primary/30"
-                    }`}
-                  >
-                    {k}
-                  </button>
-                ))}
-              </div>
-            }
-          >
+          <Panel title="Forensic access log" icon={Eye} tag="append-only · session_ids">
+            <div className="flex gap-1 font-mono text-[10px] uppercase mb-4">
+              {(["all", "reveal", "copy", "export"] as const).map((k) => (
+                <button
+                  key={k}
+                  onClick={() => setAuditFilter(k)}
+                  className={`px-2 py-1 rounded border ${
+                    auditFilter === k
+                      ? "bg-primary/15 border-primary/40 text-primary"
+                      : "border-border/40 text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  {k}
+                </button>
+              ))}
+            </div>
             {auditRows === null ? (
               <div className="py-10 text-center text-muted-foreground text-sm font-mono">Loading…</div>
             ) : filteredAudit.length === 0 ? (
