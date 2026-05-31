@@ -505,7 +505,14 @@ serve(async (req) => {
   }
 
   try {
-    const result = await runGuardian();
+    let customerId: string | undefined;
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json();
+        if (body && typeof body.customer_id === 'string') customerId = body.customer_id;
+      } catch { /* empty body ok */ }
+    }
+    const result = await runGuardian(customerId);
     return new Response(JSON.stringify(result, null, 2), {
       headers: { ...corsHeaders, 'content-type': 'application/json' },
     });
