@@ -415,7 +415,8 @@ function GuardianPage() {
                           </div>
                           <div className="ml-auto flex gap-2">
                             <Button onClick={() => accept(s)} disabled={busy === s.id || !pp}>
-                              <Check className="h-4 w-4 mr-2" /> Accept & deploy
+                              <Check className="h-4 w-4 mr-2" />
+                              {isDetectOnly(agent?.enforcement_mode) ? "Convert to monitor rule" : "Accept & deploy"}
                             </Button>
                             <Button variant="ghost" onClick={() => reject(s)} disabled={busy === s.id}>
                               <X className="h-4 w-4 mr-2" /> Reject
