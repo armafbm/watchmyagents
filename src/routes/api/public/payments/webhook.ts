@@ -12,6 +12,9 @@ function getSupabase() {
   }
   return _supabase;
 }
+function subsTable() {
+  return (getSupabase().from('subscriptions') as any);
+}
 
 function isoFromUnix(seconds: number | null | undefined): string | null {
   return seconds ? new Date(seconds * 1000).toISOString() : null;
