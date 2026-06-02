@@ -305,8 +305,20 @@ export const getPoliciesForCustomer = createServerFn({ method: "GET" })
       fetched_at: new Date().toISOString(),
       policies: policies ?? [],
       signing_keys: (keys ?? []).map((k) => {
-        const { revoked_at: _r, ...rest } = k as Record<string, unknown>;
-        return rest;
+        const row = k as {
+          kid: string;
+          pubkey: string;
+          valid_from: string;
+          valid_until: string;
+          signed_by_root: string;
+        };
+        return {
+          kid: row.kid,
+          pubkey: row.pubkey,
+          valid_from: row.valid_from,
+          valid_until: row.valid_until,
+          signed_by_root: row.signed_by_root,
+        };
       }),
     };
   });
