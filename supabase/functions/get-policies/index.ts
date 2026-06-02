@@ -86,7 +86,7 @@ serve(async (req) => {
   // Back-compat: rows with NULL surface_type were backfilled (fleet when agent_id null, agent otherwise).
   let query = supabase
     .from('policies')
-    .select('id, rule_id, name, rationale, match, action, message, priority, agent_id, surface_type, surface_ref')
+    .select('id, rule_id, name, rationale, match, action, message, mode, priority, agent_id, surface_type, surface_ref')
     .eq('customer_id', customerId)
     .eq('enabled', true)
     .order('priority', { ascending: true });

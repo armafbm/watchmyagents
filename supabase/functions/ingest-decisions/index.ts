@@ -16,6 +16,7 @@ function json(status: number, body: unknown) {
 }
 
 const VALID_DECISIONS = new Set(['allow', 'deny', 'interrupt']);
+const VALID_MODES = new Set(['enforce', 'shadow']);
 
 function validateBody(b: unknown) {
   if (!b || typeof b !== 'object') return { ok: false, error: 'body must be a JSON object' };
@@ -25,9 +26,12 @@ function validateBody(b: unknown) {
     return { ok: false, error: 'anthropic_agent_id required' };
   if (typeof o.decision !== 'string' || !VALID_DECISIONS.has(o.decision))
     return { ok: false, error: 'decision must be allow, deny, or interrupt' };
+  if (o.mode !== undefined && (typeof o.mode !== 'string' || !VALID_MODES.has(o.mode)))
+    return { ok: false, error: 'mode must be enforce or shadow' };
   const result = {
     anthropic_agent_id: o.anthropic_agent_id as string,
     decision: o.decision as 'allow' | 'deny' | 'interrupt',
+    mode: (o.mode as 'enforce' | 'shadow' | undefined) ?? 'enforce',
     rule_id: typeof o.rule_id === 'string' ? o.rule_id : null,
     session_hash: typeof o.session_hash === 'string' ? o.session_hash : null,
     event_id_hash: typeof o.event_id_hash === 'string' ? o.event_id_hash : null,
@@ -100,6 +104,7 @@ serve(async (req) => {
       agent_id: agentId,
       policy_id: policyId,
       decision: d.decision,
+      mode: d.mode,
       session_hash: d.session_hash,
       event_id_hash: d.event_id_hash,
       input_hash: d.input_hash,
