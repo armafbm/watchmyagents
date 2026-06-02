@@ -144,7 +144,7 @@ function PricingPage() {
           <div className="max-w-2xl mx-auto mt-16 text-center">
             <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground">
               <Shield className="h-3.5 w-3.5 text-primary" />
-              All paid plans include a 14-day free trial
+              Starter (0–3 agents) is free forever — no trial, no card required
             </div>
             <p className="text-sm text-muted-foreground mt-4">
               Questions? <a href="mailto:sales@watchmyagents.com" className="text-primary hover:underline">Talk to sales</a> or <a href="mailto:hello@watchmyagents.com" className="text-primary hover:underline">schedule a demo</a>.
