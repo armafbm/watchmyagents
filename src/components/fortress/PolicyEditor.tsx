@@ -147,14 +147,60 @@ export function PolicyEditor({
       agent_id: surfaceType === "agent" ? agentId : null,
       customer_id,
     };
-    const { error } = await supabase.from("policies").upsert(payload);
+    const { data: saved, error } = await supabase
+      .from("policies")
+      .upsert(payload)
+      .select("id")
+      .single();
     setSaving(false);
     if (error) {
       toast.error(error.message);
       return;
     }
+    // Best-effort auto-sign: fire-and-forget, never blocks the save.
+    const savedId = (saved as { id: string } | null)?.id ?? draft.id;
+    if (savedId) {
+      autoSign({ data: { policyId: savedId } }).catch((e) => {
+        console.warn("[fortress] auto-sign failed", e);
+      });
+    }
     toast.success(draft.id ? "Policy updated" : "Policy created (pending — enable to deploy)");
     onSaved();
+  };
+
+  // ---- Operator-only signature visibility ----
+  const isOperator = useRole("operator");
+  const autoSign = useServerFn(autoSignOwnPolicy);
+  const fetchSig = useServerFn(getPolicySignature);
+  const reSign = useServerFn(signPolicy);
+  const [sigInfo, setSigInfo] = useState<{
+    signature: string | null;
+    signing_key_id: string | null;
+    signed_at: string | null;
+    valid_until: string | null;
+  } | null>(null);
+  const [resigning, setResigning] = useState(false);
+
+  useEffect(() => {
+    if (!isOperator || !draft.id) return;
+    fetchSig({ data: { policyId: draft.id } })
+      .then((r) => setSigInfo(r))
+      .catch(() => {});
+  }, [isOperator, draft.id, fetchSig]);
+
+  const handleReSign = async () => {
+    if (!draft.id) return;
+    setResigning(true);
+    try {
+      const r = await reSign({ data: { policyId: draft.id } });
+      toast.success(`Re-signed with ${r.kid}`);
+      const fresh = await fetchSig({ data: { policyId: draft.id } });
+      setSigInfo(fresh);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Re-sign failed");
+    } finally {
+      setResigning(false);
+    }
   };
 
 
