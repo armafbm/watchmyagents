@@ -262,10 +262,29 @@ export const listSigningKeys = createServerFn({ method: "GET" })
       .is("signature", null);
 
     return {
-      keys: (keys ?? []).map((k) => ({
-        ...(k as Record<string, unknown>),
-        policy_count: counts.get((k as { kid: string }).kid) ?? 0,
-      })),
+      keys: (keys ?? []).map((k) => {
+        const row = k as {
+          kid: string;
+          pubkey: string;
+          private_key_ref: string;
+          valid_from: string;
+          valid_until: string;
+          signed_by_root: string;
+          created_at: string;
+          revoked_at: string | null;
+        };
+        return {
+          kid: row.kid,
+          pubkey: row.pubkey,
+          private_key_ref: row.private_key_ref,
+          valid_from: row.valid_from,
+          valid_until: row.valid_until,
+          signed_by_root: row.signed_by_root,
+          created_at: row.created_at,
+          revoked_at: row.revoked_at,
+          policy_count: counts.get(row.kid) ?? 0,
+        };
+      }),
       unsigned_policies: unsigned ?? 0,
     };
   });
