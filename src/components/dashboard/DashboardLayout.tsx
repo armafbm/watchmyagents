@@ -13,6 +13,7 @@ import {
   LogOut,
   Swords,
   KeyRound,
+  CreditCard,
   Home,
   type LucideIcon,
 } from "lucide-react";
@@ -44,6 +45,7 @@ type NavItem = {
 const commandChildren: NavItem[] = [
   { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
   { to: "/dashboard/settings/keys", label: "API Keys", icon: KeyRound },
+  { to: "/dashboard/settings/subscription", label: "Subscription", icon: CreditCard },
   { to: "#", label: "Compliance & Conformity", icon: ScrollText, soon: true },
   { to: "#", label: "Threat Intel", icon: Radar, soon: true },
 ];

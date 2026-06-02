@@ -40,6 +40,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as AuthenticatedDashboardSettingsSubscriptionRouteImport } from './routes/_authenticated/dashboard.settings.subscription'
 import { Route as AuthenticatedDashboardSettingsKeysRouteImport } from './routes/_authenticated/dashboard.settings.keys'
 
 const TermsRoute = TermsRouteImport.update({
@@ -206,6 +207,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedDashboardSettingsSubscriptionRoute =
+  AuthenticatedDashboardSettingsSubscriptionRouteImport.update({
+    id: '/settings/subscription',
+    path: '/settings/subscription',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardSettingsKeysRoute =
   AuthenticatedDashboardSettingsKeysRouteImport.update({
     id: '/settings/keys',
@@ -239,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -271,6 +279,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -306,6 +315,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/_authenticated/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/dashboard/'
     | '/dashboard/settings/keys'
+    | '/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/dashboard'
     | '/dashboard/settings/keys'
+    | '/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -407,6 +419,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/settings/keys'
+    | '/_authenticated/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -660,6 +673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/dashboard/settings/subscription': {
+      id: '/_authenticated/dashboard/settings/subscription'
+      path: '/settings/subscription'
+      fullPath: '/dashboard/settings/subscription'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/settings/keys': {
       id: '/_authenticated/dashboard/settings/keys'
       path: '/settings/keys'
@@ -678,6 +698,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardWatchRoute: typeof AuthenticatedDashboardWatchRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDashboardSettingsKeysRoute: typeof AuthenticatedDashboardSettingsKeysRoute
+  AuthenticatedDashboardSettingsSubscriptionRoute: typeof AuthenticatedDashboardSettingsSubscriptionRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
@@ -690,6 +711,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
     AuthenticatedDashboardSettingsKeysRoute:
       AuthenticatedDashboardSettingsKeysRoute,
+    AuthenticatedDashboardSettingsSubscriptionRoute:
+      AuthenticatedDashboardSettingsSubscriptionRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =
@@ -739,3 +762,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
