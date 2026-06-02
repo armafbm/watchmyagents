@@ -268,6 +268,51 @@ export function PolicyEditor({
             )}
           </div>
           <div className="space-y-1.5">
+            <Label>Mode</Label>
+            <div className="flex gap-2">
+              {(["enforce", "shadow"] as const).map((m) => {
+                const active = mode === m;
+                const Icon = m === "enforce" ? Shield : Moon;
+                const tone =
+                  m === "enforce"
+                    ? active
+                      ? "border-success/60 bg-success/10 text-success"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                    : active
+                      ? "border-warning/60 bg-warning/10 text-warning"
+                      : "border-border text-muted-foreground hover:text-foreground";
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    title={
+                      m === "shadow"
+                        ? "Evaluates the rule and logs the decision, but does NOT block the agent. Use this to calibrate a new rule before promoting to Enforce."
+                        : "The rule blocks or interrupts the agent when matched."
+                    }
+                    className={`flex-1 inline-flex items-center justify-center gap-2 py-2 rounded-md border text-sm font-mono uppercase tracking-widest transition ${tone}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {m === "shadow" ? "🌓 shadow" : "enforce"}
+                  </button>
+                );
+              })}
+            </div>
+            {mode === "shadow" && (
+              <div className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-[11px] text-warning/90">
+                Shadow is a staging step. The SDK evaluates the rule and logs the decision, but the agent is not
+                blocked. Promote to Enforce once you trust the signal.
+              </div>
+            )}
+            {isFirstPolicy && mode === "shadow" && (
+              <div className="rounded-md border border-primary/40 bg-primary/5 px-3 py-2 text-[11px] text-primary">
+                Your first rule starts in Shadow so you can see what it would do without risking false positives.
+                Promote when ready.
+              </div>
+            )}
+          </div>
+          <div className="space-y-1.5">
             <Label htmlFor="message">Message (shown to agent on enforcement)</Label>
             <Input id="message" value={message} onChange={(e) => setMessage(e.target.value)} />
           </div>
