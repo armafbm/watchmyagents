@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Loader2, X, Shield, Moon } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, X, Shield, Moon, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useRole } from "@/hooks/useRole";
+import { SignatureChip } from "@/components/policies/SignatureChip";
+import { autoSignOwnPolicy, getPolicySignature, signPolicy } from "@/lib/fortress-signing.functions";
 
 export type PolicySurface = "agent" | "subtree" | "type" | "fleet";
 
