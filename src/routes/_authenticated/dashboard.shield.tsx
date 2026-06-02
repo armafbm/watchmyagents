@@ -279,6 +279,14 @@ function ShieldPage() {
                             >
                               {p.action}
                             </span>
+                            {(p.mode ?? "enforce") === "shadow" && (
+                              <span
+                                title="Shadow mode: rule is evaluated and logged but does NOT block the agent."
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border w-fit font-mono text-[10px] uppercase tracking-widest bg-warning/10 text-warning/90 border-warning/30"
+                              >
+                                🌓 shadow
+                              </span>
+                            )}
                             {detectOnly && (
                               <span className="font-mono text-[10px] uppercase tracking-widest text-warning">
                                 monitor-only
