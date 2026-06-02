@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Shield, Moon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import {
 
 export type PolicySurface = "agent" | "subtree" | "type" | "fleet";
 
+export type PolicyMode = "enforce" | "shadow";
+
 export type PolicyDraft = {
   id?: string;
   rule_id?: string;
@@ -23,6 +25,7 @@ export type PolicyDraft = {
   surface_type?: PolicySurface;
   surface_ref?: string | null;
   agent_id?: string | null;
+  mode?: PolicyMode;
 };
 
 const AGENT_TYPES = [
@@ -58,6 +61,8 @@ export function PolicyEditor({
     draft.agent_id ?? (draft.surface_type === "subtree" ? draft.surface_ref ?? null : null),
   );
   const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }>>([]);
+  const [mode, setMode] = useState<PolicyMode>(draft.mode ?? "enforce");
+  const [isFirstPolicy, setIsFirstPolicy] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -68,7 +73,19 @@ export function PolicyEditor({
       .then(({ data }) => {
         setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }> | null) ?? []));
       });
-  }, []);
+    // Onboarding nudge: if this is a brand-new policy and the customer has no policies yet, default to shadow.
+    if (!draft.id && draft.mode === undefined) {
+      supabase
+        .from("policies")
+        .select("id", { count: "exact", head: true })
+        .then(({ count }) => {
+          if ((count ?? 0) === 0) {
+            setMode("shadow");
+            setIsFirstPolicy(true);
+          }
+        });
+    }
+  }, [draft.id, draft.mode]);
 
   const selectedAgent = agentId ? agentOpts.find((a) => a.id === agentId) : null;
   const selectedEnforcement = selectedAgent?.enforcement_mode ?? "sync_confirm";
