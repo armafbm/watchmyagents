@@ -960,7 +960,7 @@ export type Database = {
       reveal_session_ids: { Args: { p_signal_id: string }; Returns: string[] }
     }
     Enums: {
-      app_role: "viewer" | "incident_analyst" | "security_admin"
+      app_role: "viewer" | "incident_analyst" | "security_admin" | "operator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1088,7 +1088,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["viewer", "incident_analyst", "security_admin"],
+      app_role: ["viewer", "incident_analyst", "security_admin", "operator"],
     },
   },
 } as const
