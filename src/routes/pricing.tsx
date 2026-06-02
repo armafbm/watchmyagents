@@ -35,7 +35,7 @@ type Tier = {
 };
 
 const TIERS: Tier[] = [
-  { name: "Starter", agents: "0 to 3 agents", monthlyPrice: 0, monthlyAnnual: 0, features: ["Basic monitoring", "7-day history", "Community support", "1 workspace"], cta: "Get started", ctaHref: "/auth/signup" },
+  { name: "Starter", agents: "1 to 3 agents", monthlyPrice: 0, monthlyAnnual: 0, features: ["Basic monitoring", "7-day history", "Community support", "1 workspace"], cta: "Get started", ctaHref: "/auth/signup" },
   { name: "Pro", agents: "5 to 10 agents", monthlyPrice: 29, monthlyAnnual: 20.3, priceIdMonthly: "pro_monthly", priceIdYearly: "pro_yearly", features: ["Advanced monitoring", "Smart alerts", "90-day history", "Email support (24h)", "Webhooks"], cta: "Subscribe" },
   { name: "Pro+", agents: "Up to 50 agents", monthlyPrice: 79, monthlyAnnual: 55.3, priceIdMonthly: "pro_plus_monthly", priceIdYearly: "pro_plus_yearly", features: ["Security Score", "Cost Optimization", "1-year history", "Email support (4h)", "Custom rules", "Slack integration"], cta: "Subscribe" },
   { name: "Business", agents: "Up to 500 agents", monthlyPrice: 299, monthlyAnnual: 209.3, priceIdMonthly: "business_monthly", priceIdYearly: "business_yearly", features: ["Guardian AI", "Auto-rollback", "Advanced analytics", "2-year history", "Phone support (2h SLA)", "Slack + webhooks", "5 team members"], cta: "Subscribe", featured: true, badge: "Most popular" },
@@ -144,7 +144,7 @@ function PricingPage() {
           <div className="max-w-2xl mx-auto mt-16 text-center">
             <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground">
               <Shield className="h-3.5 w-3.5 text-primary" />
-              Starter (0–3 agents) is free forever — no trial, no card required
+              Starter (1–3 agents) is free forever — no trial, no card required
             </div>
             <p className="text-sm text-muted-foreground mt-4">
               Questions? <a href="mailto:sales@watchmyagents.com" className="text-primary hover:underline">Talk to sales</a> or <a href="mailto:hello@watchmyagents.com" className="text-primary hover:underline">schedule a demo</a>.
