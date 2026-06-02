@@ -207,11 +207,37 @@ export function PolicyEditor({
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4">
       <div className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
-          <h2 className="font-display text-lg font-bold">
-            {draft.id ? "Edit policy" : "New policy"}
-          </h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <h2 className="font-display text-lg font-bold">
+              {draft.id ? "Edit policy" : "New policy"}
+            </h2>
+            {isOperator && draft.id && sigInfo && (
+              <>
+                <SignatureChip
+                  signature={sigInfo.signature}
+                  signingKeyId={sigInfo.signing_key_id}
+                  signedAt={sigInfo.signed_at}
+                  keyValidUntilByKid={
+                    sigInfo.signing_key_id
+                      ? { [sigInfo.signing_key_id]: sigInfo.valid_until }
+                      : {}
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={handleReSign}
+                  disabled={resigning}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-primary/60 transition disabled:opacity-50"
+                  title="Re-sign with current active signing key"
+                >
+                  {resigning ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  Re-sign
+                </button>
+              </>
+            )}
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0">
             <X className="h-4 w-4" />
           </button>
         </div>
