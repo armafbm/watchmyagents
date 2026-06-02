@@ -327,6 +327,7 @@ function ShieldPage() {
                               surface_type: (p.surface_type as "agent" | "subtree" | "type" | "fleet" | undefined) ?? undefined,
                               surface_ref: p.surface_ref ?? undefined,
                               agent_id: p.agent_id ?? undefined,
+                              mode: (p.mode ?? "enforce") as "enforce" | "shadow",
                             })
                           }
                           className="p-2 rounded hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
