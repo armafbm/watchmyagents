@@ -30,6 +30,7 @@ type Policy = {
   surface_type: string | null;
   surface_ref: string | null;
   agent_id: string | null;
+  mode: "enforce" | "shadow" | null;
 };
 
 type AgentMini = {
