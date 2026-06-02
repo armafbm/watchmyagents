@@ -18,8 +18,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
-import { useEffect, useState, type ReactNode, type ComponentType } from "react";
+import { useEffect, useMemo, useState, type ReactNode, type ComponentType } from "react";
+import { Link as RouterLink } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
+import { useRole } from "@/hooks/useRole";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/fortress-logo.png";
 import legionsImg from "@/assets/wma-legions.png";
