@@ -110,6 +110,7 @@ export function DashboardLayout({
   const { user, signOut } = useAuth();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
+  const isOperator = useRole("operator");
   const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
   const notif = useNotificationCounts();
   const operations: NavItem[] = baseOperations.map((item) =>
