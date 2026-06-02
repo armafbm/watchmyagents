@@ -132,6 +132,7 @@ export function PolicyEditor({
       name: name.trim(),
       rationale: rationale.trim() || null,
       action,
+      mode,
       message: message.trim() || null,
       match: parsed as never,
       surface_type: surfaceType,
