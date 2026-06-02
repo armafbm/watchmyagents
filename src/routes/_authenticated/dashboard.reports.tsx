@@ -20,6 +20,7 @@ type Decision = {
   id: string;
   decided_at: string;
   decision: string;
+  mode: "enforce" | "shadow" | null;
   tool_name: string | null;
   action_type: string | null;
   message: string | null;
@@ -75,13 +76,14 @@ function ReportsPage() {
   const [includeSessionIds, setIncludeSessionIds] = useState(false);
   const [auditRows, setAuditRows] = useState<AuditRow[] | null>(null);
   const [auditFilter, setAuditFilter] = useState<"all" | "reveal" | "copy" | "export">("all");
+  const [modeFilter, setModeFilter] = useState<"all" | "enforce" | "shadow">("all");
 
   useEffect(() => {
     (async () => {
       const [{ data: d }, { data: a }] = await Promise.all([
         supabase
           .from("decisions")
-          .select("id,decided_at,decision,tool_name,action_type,message,decided_in_ms,agent_id")
+          .select("id,decided_at,decision,mode,tool_name,action_type,message,decided_in_ms,agent_id")
           .order("decided_at", { ascending: false })
           .limit(500),
         supabase.from("agents").select("id, display_name, provider, parent_agent_id"),
