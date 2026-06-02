@@ -90,7 +90,6 @@ export const createCheckoutSession = createServerFn({ method: 'POST' })
         mode: isRecurring ? 'subscription' : 'payment',
         ui_mode: 'embedded_page',
         return_url: data.returnUrl,
-        managed_payments: { enabled: true },
         ...(customerId && { customer: customerId }),
         ...(data.userId && { metadata: { userId: data.userId } }),
         ...(isRecurring && {
@@ -99,7 +98,9 @@ export const createCheckoutSession = createServerFn({ method: 'POST' })
             ...(includeTrial && { trial_period_days: 14 }),
           },
         }),
-      });
+        // Stripe API 2026-03-25.dahlia — type defs for SDK 22.x predate this knob.
+        managed_payments: { enabled: true },
+      } as any);
 
       return { clientSecret: session.client_secret ?? '' };
     } catch (error) {
