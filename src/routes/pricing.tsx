@@ -35,10 +35,10 @@ type Tier = {
 };
 
 const TIERS: Tier[] = [
-  { name: "Starter", agents: "1 agent", monthlyPrice: 0, monthlyAnnual: 0, features: ["Basic monitoring", "7-day history", "Community support", "1 workspace"], cta: "Get started", ctaHref: "/auth/signup" },
-  { name: "Pro", agents: "Up to 10 agents", monthlyPrice: 29, monthlyAnnual: 20.3, priceIdMonthly: "pro_monthly", priceIdYearly: "pro_yearly", features: ["Advanced monitoring", "Smart alerts", "90-day history", "Email support (24h)", "Webhooks"], cta: "Start free trial" },
-  { name: "Pro+", agents: "Up to 50 agents", monthlyPrice: 79, monthlyAnnual: 55.3, priceIdMonthly: "pro_plus_monthly", priceIdYearly: "pro_plus_yearly", features: ["Security Score", "Cost Optimization", "1-year history", "Email support (4h)", "Custom rules", "Slack integration"], cta: "Start free trial" },
-  { name: "Business", agents: "Up to 500 agents", monthlyPrice: 299, monthlyAnnual: 209.3, priceIdMonthly: "business_monthly", priceIdYearly: "business_yearly", features: ["Guardian AI", "Auto-rollback", "Advanced analytics", "2-year history", "Phone support (2h SLA)", "Slack + webhooks", "5 team members"], cta: "Start free trial", featured: true, badge: "Most popular" },
+  { name: "Starter", agents: "0 to 3 agents", monthlyPrice: 0, monthlyAnnual: 0, features: ["Basic monitoring", "7-day history", "Community support", "1 workspace"], cta: "Get started", ctaHref: "/auth/signup" },
+  { name: "Pro", agents: "5 to 10 agents", monthlyPrice: 29, monthlyAnnual: 20.3, priceIdMonthly: "pro_monthly", priceIdYearly: "pro_yearly", features: ["Advanced monitoring", "Smart alerts", "90-day history", "Email support (24h)", "Webhooks"], cta: "Subscribe" },
+  { name: "Pro+", agents: "Up to 50 agents", monthlyPrice: 79, monthlyAnnual: 55.3, priceIdMonthly: "pro_plus_monthly", priceIdYearly: "pro_plus_yearly", features: ["Security Score", "Cost Optimization", "1-year history", "Email support (4h)", "Custom rules", "Slack integration"], cta: "Subscribe" },
+  { name: "Business", agents: "Up to 500 agents", monthlyPrice: 299, monthlyAnnual: 209.3, priceIdMonthly: "business_monthly", priceIdYearly: "business_yearly", features: ["Guardian AI", "Auto-rollback", "Advanced analytics", "2-year history", "Phone support (2h SLA)", "Slack + webhooks", "5 team members"], cta: "Subscribe", featured: true, badge: "Most popular" },
   { name: "Advanced", agents: "Unlimited agents", monthlyPrice: 899, monthlyAnnual: 629.3, features: ["Shield security", "Custom integrations", "Compliance ready", "3-year history", "Dedicated Slack (1h SLA)", "15 team members", "Audit logs"], cta: "Contact sales", ctaHref: "mailto:sales@watchmyagents.com" },
   { name: "Enterprise", agents: "Custom deployment", monthlyPrice: null, monthlyAnnual: null, features: ["On-premises option", "Dedicated support", "Custom SLA", "Implementation help", "Training included", "Custom features"], cta: "Contact sales", ctaHref: "mailto:sales@watchmyagents.com" },
 ];
