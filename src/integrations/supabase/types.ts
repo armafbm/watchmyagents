@@ -196,6 +196,7 @@ export type Database = {
           id: string
           input_hash: string | null
           message: string | null
+          mode: string
           policy_id: string | null
           session_hash: string | null
           tool_name: string | null
@@ -211,6 +212,7 @@ export type Database = {
           id?: string
           input_hash?: string | null
           message?: string | null
+          mode?: string
           policy_id?: string | null
           session_hash?: string | null
           tool_name?: string | null
@@ -226,6 +228,7 @@ export type Database = {
           id?: string
           input_hash?: string | null
           message?: string | null
+          mode?: string
           policy_id?: string | null
           session_hash?: string | null
           tool_name?: string | null
@@ -443,6 +446,7 @@ export type Database = {
           id: string
           match: Json
           message: string | null
+          mode: string
           name: string
           priority: number
           rationale: string | null
@@ -462,6 +466,7 @@ export type Database = {
           id?: string
           match: Json
           message?: string | null
+          mode?: string
           name: string
           priority?: number
           rationale?: string | null
@@ -481,6 +486,7 @@ export type Database = {
           id?: string
           match?: Json
           message?: string | null
+          mode?: string
           name?: string
           priority?: number
           rationale?: string | null
