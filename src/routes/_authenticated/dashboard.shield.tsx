@@ -31,6 +31,9 @@ type Policy = {
   surface_ref: string | null;
   agent_id: string | null;
   mode: "enforce" | "shadow" | null;
+  signature: string | null;
+  signing_key_id: string | null;
+  signed_at: string | null;
 };
 
 type AgentMini = {
