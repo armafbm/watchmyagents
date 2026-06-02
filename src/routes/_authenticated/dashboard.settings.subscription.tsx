@@ -39,7 +39,7 @@ function SubscriptionPage() {
 
   return (
     <DashboardLayout breadcrumb="Settings · Subscription">
-      <PageHeader title="Subscription" subtitle="Manage your plan, billing and invoices." />
+      <PageHeader kicker="Billing" title="Subscription" subtitle="Manage your plan, billing and invoices." />
 
       {loading ? (
         <Panel><div className="flex items-center gap-2 text-muted-foreground text-sm py-4"><Loader2 className="h-4 w-4 animate-spin" />Loading subscription…</div></Panel>
