@@ -42,6 +42,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedDashboardSettingsSubscriptionRouteImport } from './routes/_authenticated/dashboard.settings.subscription'
 import { Route as AuthenticatedDashboardSettingsKeysRouteImport } from './routes/_authenticated/dashboard.settings.keys'
+import { Route as AuthenticatedDashboardOperatorSigningKeysRouteImport } from './routes/_authenticated/dashboard.operator.signing-keys'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -219,6 +220,12 @@ const AuthenticatedDashboardSettingsKeysRoute =
     path: '/settings/keys',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardOperatorSigningKeysRoute =
+  AuthenticatedDashboardOperatorSigningKeysRouteImport.update({
+    id: '/operator/signing-keys',
+    path: '/operator/signing-keys',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
   '/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -278,6 +286,7 @@ export interface FileRoutesByTo {
   '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
   '/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -314,6 +323,7 @@ export interface FileRoutesById {
   '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/_authenticated/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
   '/_authenticated/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/api/public/early-access'
     | '/lovable/email/suppression'
     | '/dashboard/'
+    | '/dashboard/operator/signing-keys'
     | '/dashboard/settings/keys'
     | '/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/api/public/early-access'
     | '/lovable/email/suppression'
     | '/dashboard'
+    | '/dashboard/operator/signing-keys'
     | '/dashboard/settings/keys'
     | '/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
@@ -418,6 +430,7 @@ export interface FileRouteTypes {
     | '/api/public/early-access'
     | '/lovable/email/suppression'
     | '/_authenticated/dashboard/'
+    | '/_authenticated/dashboard/operator/signing-keys'
     | '/_authenticated/dashboard/settings/keys'
     | '/_authenticated/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
@@ -687,6 +700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSettingsKeysRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/operator/signing-keys': {
+      id: '/_authenticated/dashboard/operator/signing-keys'
+      path: '/operator/signing-keys'
+      fullPath: '/dashboard/operator/signing-keys'
+      preLoaderRoute: typeof AuthenticatedDashboardOperatorSigningKeysRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
 
@@ -697,6 +717,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardShieldRoute: typeof AuthenticatedDashboardShieldRoute
   AuthenticatedDashboardWatchRoute: typeof AuthenticatedDashboardWatchRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedDashboardOperatorSigningKeysRoute: typeof AuthenticatedDashboardOperatorSigningKeysRoute
   AuthenticatedDashboardSettingsKeysRoute: typeof AuthenticatedDashboardSettingsKeysRoute
   AuthenticatedDashboardSettingsSubscriptionRoute: typeof AuthenticatedDashboardSettingsSubscriptionRoute
 }
@@ -709,6 +730,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardShieldRoute: AuthenticatedDashboardShieldRoute,
     AuthenticatedDashboardWatchRoute: AuthenticatedDashboardWatchRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+    AuthenticatedDashboardOperatorSigningKeysRoute:
+      AuthenticatedDashboardOperatorSigningKeysRoute,
     AuthenticatedDashboardSettingsKeysRoute:
       AuthenticatedDashboardSettingsKeysRoute,
     AuthenticatedDashboardSettingsSubscriptionRoute:

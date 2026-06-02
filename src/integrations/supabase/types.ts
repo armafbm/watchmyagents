@@ -200,6 +200,7 @@ export type Database = {
           policy_id: string | null
           session_hash: string | null
           tool_name: string | null
+          verification_status: string | null
         }
         Insert: {
           action_type?: string | null
@@ -216,6 +217,7 @@ export type Database = {
           policy_id?: string | null
           session_hash?: string | null
           tool_name?: string | null
+          verification_status?: string | null
         }
         Update: {
           action_type?: string | null
@@ -232,6 +234,7 @@ export type Database = {
           policy_id?: string | null
           session_hash?: string | null
           tool_name?: string | null
+          verification_status?: string | null
         }
         Relationships: [
           {
@@ -451,6 +454,9 @@ export type Database = {
           priority: number
           rationale: string | null
           rule_id: string
+          signature: string | null
+          signed_at: string | null
+          signing_key_id: string | null
           suggested_by_guardian: boolean
           suggestion_id: string | null
           surface_ref: string | null
@@ -471,6 +477,9 @@ export type Database = {
           priority?: number
           rationale?: string | null
           rule_id: string
+          signature?: string | null
+          signed_at?: string | null
+          signing_key_id?: string | null
           suggested_by_guardian?: boolean
           suggestion_id?: string | null
           surface_ref?: string | null
@@ -491,6 +500,9 @@ export type Database = {
           priority?: number
           rationale?: string | null
           rule_id?: string
+          signature?: string | null
+          signed_at?: string | null
+          signing_key_id?: string | null
           suggested_by_guardian?: boolean
           suggestion_id?: string | null
           surface_ref?: string | null
@@ -525,6 +537,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "dashboard_today_v"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "policies_signing_key_id_fkey"
+            columns: ["signing_key_id"]
+            isOneToOne: false
+            referencedRelation: "signing_keys"
+            referencedColumns: ["kid"]
+          },
+          {
+            foreignKeyName: "policies_signing_key_id_fkey"
+            columns: ["signing_key_id"]
+            isOneToOne: false
+            referencedRelation: "signing_keys_public"
+            referencedColumns: ["kid"]
           },
         ]
       }
@@ -654,6 +680,39 @@ export type Database = {
             referencedColumns: ["customer_id"]
           },
         ]
+      }
+      signing_keys: {
+        Row: {
+          created_at: string
+          kid: string
+          private_key_ref: string
+          pubkey: string
+          revoked_at: string | null
+          signed_by_root: string
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          created_at?: string
+          kid: string
+          private_key_ref: string
+          pubkey: string
+          revoked_at?: string | null
+          signed_by_root: string
+          valid_from: string
+          valid_until: string
+        }
+        Update: {
+          created_at?: string
+          kid?: string
+          private_key_ref?: string
+          pubkey?: string
+          revoked_at?: string | null
+          signed_by_root?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
@@ -914,6 +973,33 @@ export type Database = {
           },
         ]
       }
+      signing_keys_public: {
+        Row: {
+          kid: string | null
+          pubkey: string | null
+          revoked_at: string | null
+          signed_by_root: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          kid?: string | null
+          pubkey?: string | null
+          revoked_at?: string | null
+          signed_by_root?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          kid?: string | null
+          pubkey?: string | null
+          revoked_at?: string | null
+          signed_by_root?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       delete_email: {
@@ -960,7 +1046,7 @@ export type Database = {
       reveal_session_ids: { Args: { p_signal_id: string }; Returns: string[] }
     }
     Enums: {
-      app_role: "viewer" | "incident_analyst" | "security_admin"
+      app_role: "viewer" | "incident_analyst" | "security_admin" | "operator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1088,7 +1174,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["viewer", "incident_analyst", "security_admin"],
+      app_role: ["viewer", "incident_analyst", "security_admin", "operator"],
     },
   },
 } as const

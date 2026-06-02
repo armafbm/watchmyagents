@@ -1,0 +1,211 @@
+import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, X, Copy, Check } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { mintSigningKey } from "@/lib/fortress-signing.functions";
+
+type Props = {
+  onClose: () => void;
+  onMinted: () => void | Promise<void>;
+};
+
+// Mirror of canonicalize() in src/lib/policy-signing.server.ts so the wizard
+// can show the operator the exact bytes to sign offline.
+function canonicalize(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(canonicalize).join(",") + "]";
+  const obj = value as Record<string, unknown>;
+  return (
+    "{" +
+    Object.keys(obj)
+      .sort()
+      .map((k) => JSON.stringify(k) + ":" + canonicalize(obj[k]))
+      .join(",") +
+    "}"
+  );
+}
+
+export function MintKeyWizard({ onClose, onMinted }: Props) {
+  const call = useServerFn(mintSigningKey);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const defaultEnd = new Date(Date.now() + 90 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+
+  const [kid, setKid] = useState(`sk-${new Date().getFullYear()}-q${Math.floor(new Date().getMonth() / 3) + 1}`);
+  const [validFrom, setValidFrom] = useState(today);
+  const [validUntil, setValidUntil] = useState(defaultEnd);
+  const [pubkey, setPubkey] = useState("");
+  const [signedByRoot, setSignedByRoot] = useState("");
+  const [secretName, setSecretName] = useState("");
+  const [privatePem, setPrivatePem] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const fromIso = validFrom ? new Date(validFrom + "T00:00:00Z").toISOString() : "";
+  const untilIso = validUntil ? new Date(validUntil + "T23:59:59Z").toISOString() : "";
+
+  const canonicalPayload = useMemo(() => {
+    if (!kid || !pubkey || !fromIso || !untilIso) return "";
+    return canonicalize({ kid, pubkey, valid_from: fromIso, valid_until: untilIso });
+  }, [kid, pubkey, fromIso, untilIso]);
+
+  const ceremonySnippet = `// Run on an air-gapped machine. ROOT_PRIVATE_KEY_PEM is the offline root key (§10).
+const { createPrivateKey, generateKeyPairSync, sign } = require('node:crypto');
+
+// 1. Generate the signing keypair
+const kp = generateKeyPairSync('ed25519');
+const pubkey = kp.publicKey.export({ format: 'der', type: 'spki' }).slice(-32).toString('base64');
+const privatePem = kp.privateKey.export({ format: 'pem', type: 'pkcs8' });
+
+// 2. Build canonical payload (must match)
+const payload = ${JSON.stringify(canonicalPayload || "<fill kid, valid_from, valid_until, then paste pubkey above>")};
+
+// 3. Sign with the ROOT private key
+const rootKey = createPrivateKey(\`-----BEGIN PRIVATE KEY-----\\nROOT_PRIVATE_KEY_PEM_HERE\\n-----END PRIVATE KEY-----\`);
+const sig = sign(null, Buffer.from(payload, 'utf8'), rootKey).toString('base64');
+
+console.log('pubkey:        ', pubkey);
+console.log('signed_by_root:', sig);
+console.log('private_pem:\\n' + privatePem);`;
+
+  const copyCeremony = async () => {
+    try {
+      await navigator.clipboard.writeText(ceremonySnippet);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Copy failed");
+    }
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await call({
+        data: {
+          kid,
+          pubkey,
+          valid_from: fromIso,
+          valid_until: untilIso,
+          signed_by_root: signedByRoot,
+          private_key_secret_name: secretName,
+          private_key_pem: privatePem || undefined,
+        },
+      });
+      toast.success(`Signing key ${kid} minted`);
+      await onMinted();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Mint failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4 overflow-y-auto">
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-3xl rounded-2xl border border-border bg-card shadow-2xl my-8"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
+          <div>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">
+              Fortress · Offline ceremony
+            </div>
+            <div className="font-semibold">Mint signing key</div>
+          </div>
+          <button type="button" onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-5">
+          <section className="space-y-3">
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">1. Key identity</div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="kid">kid</Label>
+                <Input id="kid" value={kid} onChange={(e) => setKid(e.target.value)} required />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="vf">Valid from</Label>
+                <Input id="vf" type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} required />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="vu">Valid until</Label>
+                <Input id="vu" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} required />
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                2. Run offline on an air-gapped machine
+              </div>
+              <Button type="button" size="sm" variant="outline" onClick={copyCeremony}>
+                {copied ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
+                Copy snippet
+              </Button>
+            </div>
+            <pre className="text-[11px] font-mono bg-muted/40 border border-border rounded-lg p-3 overflow-x-auto max-h-72 overflow-y-auto whitespace-pre">
+{ceremonySnippet}
+            </pre>
+          </section>
+
+          <section className="space-y-3">
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">
+              3. Paste outputs
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="pk">pubkey (base64 raw 32-byte)</Label>
+              <Input id="pk" value={pubkey} onChange={(e) => setPubkey(e.target.value)} required placeholder="mWNwGoO...==" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="sbr">signed_by_root (base64)</Label>
+              <Input id="sbr" value={signedByRoot} onChange={(e) => setSignedByRoot(e.target.value)} required />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="sn">Vault secret name (private key ref)</Label>
+              <Input
+                id="sn"
+                value={secretName}
+                onChange={(e) => setSecretName(e.target.value)}
+                required
+                placeholder="signing_key_2026_q3"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="pem">Private key PEM (stored in Vault, never logged)</Label>
+              <Textarea
+                id="pem"
+                value={privatePem}
+                onChange={(e) => setPrivatePem(e.target.value)}
+                rows={4}
+                placeholder="-----BEGIN PRIVATE KEY-----..."
+              />
+              <div className="text-[11px] text-muted-foreground">
+                Optional if the secret was already uploaded to Vault under that name.
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div className="px-6 py-4 border-t border-border/60 flex items-center justify-end gap-2">
+          <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={busy}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            Mint key
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
