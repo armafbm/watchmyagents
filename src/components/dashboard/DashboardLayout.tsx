@@ -19,7 +19,9 @@ import {
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
+
 import { useAuth } from "@/hooks/use-auth";
+import { useRole } from "@/hooks/useRole";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/fortress-logo.png";
 import legionsImg from "@/assets/wma-legions.png";
@@ -46,7 +48,6 @@ const commandChildren: NavItem[] = [
   { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
   { to: "/dashboard/settings/keys", label: "API Keys", icon: KeyRound },
   { to: "/dashboard/settings/subscription", label: "Subscription", icon: CreditCard },
-  { to: "/dashboard/operator/signing-keys", label: "Signing Keys (Operator)", icon: KeyRound },
   { to: "#", label: "Compliance & Conformity", icon: ScrollText, soon: true },
   { to: "#", label: "Threat Intel", icon: Radar, soon: true },
 ];
@@ -109,6 +110,7 @@ export function DashboardLayout({
   const { user, signOut } = useAuth();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
+  const isOperator = useRole("operator");
   const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
   const notif = useNotificationCounts();
   const operations: NavItem[] = baseOperations.map((item) =>
@@ -215,13 +217,29 @@ export function DashboardLayout({
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-lg border border-border bg-popover/95 backdrop-blur-xl shadow-xl py-1.5 text-sm">
+                  <div className="absolute right-0 mt-2 w-60 rounded-lg border border-border bg-popover/95 backdrop-blur-xl shadow-xl py-1.5 text-sm">
                     <div className="px-3 py-2 border-b border-border/60">
                       <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                         Signed in as
                       </div>
                       <div className="truncate">{user?.email}</div>
                     </div>
+                    {isOperator && (
+                      <>
+                        <div className="px-3 pt-2 pb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
+                          Admin
+                        </div>
+                        <Link
+                          to="/dashboard/operator/signing-keys"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 hover:bg-secondary/60"
+                        >
+                          <KeyRound className="h-4 w-4 text-muted-foreground" />
+                          Signing Keys
+                        </Link>
+                        <div className="my-1 border-t border-border/60" />
+                      </>
+                    )}
                     <button
                       onClick={() => signOut().then(() => (window.location.href = "/"))}
                       className="w-full flex items-center gap-2 px-3 py-2 hover:bg-secondary/60 text-left text-danger"

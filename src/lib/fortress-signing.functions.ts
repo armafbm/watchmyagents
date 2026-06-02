@@ -161,6 +161,82 @@ export const signPolicy = createServerFn({ method: "POST" })
     return { ok: true, kid: key.kid };
   });
 
+// ---------- autoSignOwnPolicy ----------
+// Customer-callable, best-effort. Verifies ownership then signs server-side.
+// Never throws to the UI — the caller fires & forgets.
+
+const autoSignInput = z.object({ policyId: z.string().uuid() });
+
+export const autoSignOwnPolicy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => autoSignInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: policy, error: pe } = await supabaseAdmin
+      .from("policies")
+      .select("id, customer_id, rule_id, match, action, message, priority, mode")
+      .eq("id", data.policyId)
+      .maybeSingle();
+    if (pe || !policy) return { ok: false, reason: "not_found" as const };
+    if ((policy as { customer_id: string }).customer_id !== context.userId) {
+      return { ok: false, reason: "forbidden" as const };
+    }
+
+    try {
+      const key = await pickActiveSigningKey();
+      const pem = await readVaultSecret(key.private_key_ref);
+      const signature = signEd25519(pem, policySigningPayload(policy));
+      const { error: ue } = await supabaseAdmin
+        .from("policies")
+        .update({
+          signature,
+          signing_key_id: key.kid,
+          signed_at: new Date().toISOString(),
+        })
+        .eq("id", (policy as { id: string }).id);
+      if (ue) return { ok: false, reason: "update_failed" as const };
+      return { ok: true, kid: key.kid };
+    } catch (e) {
+      return {
+        ok: false,
+        reason: "sign_failed" as const,
+        error: e instanceof Error ? e.message : String(e),
+      };
+    }
+  });
+
+// ---------- getPolicySignature (operator UI) ----------
+
+const getSigInput = z.object({ policyId: z.string().uuid() });
+
+export const getPolicySignature = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => getSigInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertOperator(context.userId);
+    const { data: policy, error } = await supabaseAdmin
+      .from("policies")
+      .select("signature, signing_key_id, signed_at")
+      .eq("id", data.policyId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!policy) throw new Error("Policy not found");
+    const row = policy as {
+      signature: string | null;
+      signing_key_id: string | null;
+      signed_at: string | null;
+    };
+    let valid_until: string | null = null;
+    if (row.signing_key_id) {
+      const { data: k } = await supabaseAdmin
+        .from("signing_keys")
+        .select("valid_until")
+        .eq("kid", row.signing_key_id)
+        .maybeSingle();
+      valid_until = (k as { valid_until: string } | null)?.valid_until ?? null;
+    }
+    return { ...row, valid_until };
+  });
+
 // ---------- backfillSignPolicies ----------
 
 export const backfillSignPolicies = createServerFn({ method: "POST" })

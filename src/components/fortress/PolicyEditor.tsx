@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Loader2, X, Shield, Moon } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, X, Shield, Moon, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useRole } from "@/hooks/useRole";
+import { SignatureChip } from "@/components/policies/SignatureChip";
+import { autoSignOwnPolicy, getPolicySignature, signPolicy } from "@/lib/fortress-signing.functions";
 
 export type PolicySurface = "agent" | "subtree" | "type" | "fleet";
 
@@ -143,25 +147,97 @@ export function PolicyEditor({
       agent_id: surfaceType === "agent" ? agentId : null,
       customer_id,
     };
-    const { error } = await supabase.from("policies").upsert(payload);
+    const { data: saved, error } = await supabase
+      .from("policies")
+      .upsert(payload)
+      .select("id")
+      .single();
     setSaving(false);
     if (error) {
       toast.error(error.message);
       return;
     }
+    // Best-effort auto-sign: fire-and-forget, never blocks the save.
+    const savedId = (saved as { id: string } | null)?.id ?? draft.id;
+    if (savedId) {
+      autoSign({ data: { policyId: savedId } }).catch((e) => {
+        console.warn("[fortress] auto-sign failed", e);
+      });
+    }
     toast.success(draft.id ? "Policy updated" : "Policy created (pending — enable to deploy)");
     onSaved();
+  };
+
+  // ---- Operator-only signature visibility ----
+  const isOperator = useRole("operator");
+  const autoSign = useServerFn(autoSignOwnPolicy);
+  const fetchSig = useServerFn(getPolicySignature);
+  const reSign = useServerFn(signPolicy);
+  const [sigInfo, setSigInfo] = useState<{
+    signature: string | null;
+    signing_key_id: string | null;
+    signed_at: string | null;
+    valid_until: string | null;
+  } | null>(null);
+  const [resigning, setResigning] = useState(false);
+
+  useEffect(() => {
+    if (!isOperator || !draft.id) return;
+    fetchSig({ data: { policyId: draft.id } })
+      .then((r) => setSigInfo(r))
+      .catch(() => {});
+  }, [isOperator, draft.id, fetchSig]);
+
+  const handleReSign = async () => {
+    if (!draft.id) return;
+    setResigning(true);
+    try {
+      const r = await reSign({ data: { policyId: draft.id } });
+      toast.success(`Re-signed with ${r.kid}`);
+      const fresh = await fetchSig({ data: { policyId: draft.id } });
+      setSigInfo(fresh);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Re-sign failed");
+    } finally {
+      setResigning(false);
+    }
   };
 
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4">
       <div className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
-          <h2 className="font-display text-lg font-bold">
-            {draft.id ? "Edit policy" : "New policy"}
-          </h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <h2 className="font-display text-lg font-bold">
+              {draft.id ? "Edit policy" : "New policy"}
+            </h2>
+            {isOperator && draft.id && sigInfo && (
+              <>
+                <SignatureChip
+                  signature={sigInfo.signature}
+                  signingKeyId={sigInfo.signing_key_id}
+                  signedAt={sigInfo.signed_at}
+                  keyValidUntilByKid={
+                    sigInfo.signing_key_id
+                      ? { [sigInfo.signing_key_id]: sigInfo.valid_until }
+                      : {}
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={handleReSign}
+                  disabled={resigning}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-primary/60 transition disabled:opacity-50"
+                  title="Re-sign with current active signing key"
+                >
+                  {resigning ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  Re-sign
+                </button>
+              </>
+            )}
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0">
             <X className="h-4 w-4" />
           </button>
         </div>
