@@ -20,6 +20,7 @@ type Decision = {
   id: string;
   decided_at: string;
   decision: string;
+  mode: "enforce" | "shadow" | null;
   tool_name: string | null;
   action_type: string | null;
   message: string | null;
@@ -75,13 +76,14 @@ function ReportsPage() {
   const [includeSessionIds, setIncludeSessionIds] = useState(false);
   const [auditRows, setAuditRows] = useState<AuditRow[] | null>(null);
   const [auditFilter, setAuditFilter] = useState<"all" | "reveal" | "copy" | "export">("all");
+  const [modeFilter, setModeFilter] = useState<"all" | "enforce" | "shadow">("all");
 
   useEffect(() => {
     (async () => {
       const [{ data: d }, { data: a }] = await Promise.all([
         supabase
           .from("decisions")
-          .select("id,decided_at,decision,tool_name,action_type,message,decided_in_ms,agent_id")
+          .select("id,decided_at,decision,mode,tool_name,action_type,message,decided_in_ms,agent_id")
           .order("decided_at", { ascending: false })
           .limit(500),
         supabase.from("agents").select("id, display_name, provider, parent_agent_id"),
@@ -132,6 +134,16 @@ function ReportsPage() {
     (r) => auditFilter === "all" || r.action === auditFilter,
   );
 
+  const filteredRows = useMemo(
+    () =>
+      rows.filter((r) => {
+        if (modeFilter === "all") return true;
+        const m = r.mode ?? "enforce";
+        return m === modeFilter;
+      }),
+    [rows, modeFilter],
+  );
+
   return (
     <DashboardLayout breadcrumb="Reports & Audit">
       <PageHeader
@@ -168,15 +180,44 @@ function ReportsPage() {
 
         <TabsContent value="decisions">
           <Panel title="Decision history" icon={FileText} tag="last 500">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mr-1">Mode:</span>
+              {(["all", "enforce", "shadow"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setModeFilter(m)}
+                  className={`px-3 py-1 rounded-full border font-mono text-[10px] uppercase tracking-widest transition ${
+                    modeFilter === m
+                      ? m === "shadow"
+                        ? "bg-warning/15 text-warning border-warning/40"
+                        : m === "enforce"
+                          ? "bg-success/15 text-success border-success/40"
+                          : "bg-primary/15 text-primary border-primary/40"
+                      : "bg-background/60 text-muted-foreground border-border/60 hover:text-foreground"
+                  }`}
+                >
+                  {m === "all" ? "All" : m === "enforce" ? "Enforce only" : "🌓 Shadow only"}
+                </button>
+              ))}
+            </div>
+            {modeFilter === "shadow" && (
+              <div className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-warning">
+                Showing rules that would have blocked but didn't. Promote them to Enforce once you trust the signal.
+              </div>
+            )}
             {loading ? (
               <div className="py-10 text-center text-muted-foreground text-sm font-mono">Loading…</div>
-            ) : rows.length === 0 ? (
+            ) : filteredRows.length === 0 ? (
               <div className="py-12 text-center">
                 <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-                <div className="font-display text-lg font-bold mb-1">No decision recorded yet</div>
-                <p className="text-sm text-muted-foreground">
-                  Once your shield enforces policies, every decision will be logged here.
-                </p>
+                <div className="font-display text-lg font-bold mb-1">
+                  {rows.length === 0 ? "No decision recorded yet" : "No decision matches this filter"}
+                </div>
+                {rows.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Once your shield enforces policies, every decision will be logged here.
+                  </p>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto -m-5">
@@ -193,7 +234,7 @@ function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((r) => {
+                    {filteredRows.map((r) => {
                       const ag = agents[r.agent_id];
                       const chain: AgentMini[] = [];
                       let cursor: AgentMini | undefined = ag;
@@ -203,6 +244,7 @@ function ReportsPage() {
                         seen.add(cursor.id);
                         cursor = cursor.parent_agent_id ? agents[cursor.parent_agent_id] : undefined;
                       }
+                      const isShadow = (r.mode ?? "enforce") === "shadow";
                       return (
                         <tr key={r.id} className="border-t border-border/40 hover:bg-primary/5">
                           <td className="p-3">{decisionIcon(r.decision)}</td>
@@ -222,7 +264,19 @@ function ReportsPage() {
                               </div>
                             )}
                           </td>
-                          <td className="p-3 font-mono text-xs uppercase">{r.decision}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-mono text-xs uppercase">{r.decision}</span>
+                              {isShadow && (
+                                <span
+                                  title="Shadow mode: the rule matched and was logged, but the agent was NOT blocked."
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest bg-warning/10 text-warning/90 border-warning/30"
+                                >
+                                  🌓 shadow
+                                </span>
+                              )}
+                            </div>
+                          </td>
                           <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
                           <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
                           <td className="p-3 text-right font-mono text-xs">

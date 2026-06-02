@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Shield, Moon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import {
 
 export type PolicySurface = "agent" | "subtree" | "type" | "fleet";
 
+export type PolicyMode = "enforce" | "shadow";
+
 export type PolicyDraft = {
   id?: string;
   rule_id?: string;
@@ -23,6 +25,7 @@ export type PolicyDraft = {
   surface_type?: PolicySurface;
   surface_ref?: string | null;
   agent_id?: string | null;
+  mode?: PolicyMode;
 };
 
 const AGENT_TYPES = [
@@ -58,6 +61,8 @@ export function PolicyEditor({
     draft.agent_id ?? (draft.surface_type === "subtree" ? draft.surface_ref ?? null : null),
   );
   const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }>>([]);
+  const [mode, setMode] = useState<PolicyMode>(draft.mode ?? "enforce");
+  const [isFirstPolicy, setIsFirstPolicy] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -68,7 +73,19 @@ export function PolicyEditor({
       .then(({ data }) => {
         setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }> | null) ?? []));
       });
-  }, []);
+    // Onboarding nudge: if this is a brand-new policy and the customer has no policies yet, default to shadow.
+    if (!draft.id && draft.mode === undefined) {
+      supabase
+        .from("policies")
+        .select("id", { count: "exact", head: true })
+        .then(({ count }) => {
+          if ((count ?? 0) === 0) {
+            setMode("shadow");
+            setIsFirstPolicy(true);
+          }
+        });
+    }
+  }, [draft.id, draft.mode]);
 
   const selectedAgent = agentId ? agentOpts.find((a) => a.id === agentId) : null;
   const selectedEnforcement = selectedAgent?.enforcement_mode ?? "sync_confirm";
@@ -115,6 +132,7 @@ export function PolicyEditor({
       name: name.trim(),
       rationale: rationale.trim() || null,
       action,
+      mode,
       message: message.trim() || null,
       match: parsed as never,
       surface_type: surfaceType,
@@ -247,6 +265,51 @@ export function PolicyEditor({
                 Adapter is <code className="font-mono">sync_interrupt</code>: fine-grained confirm is not available —
                 only allow or interrupt.
               </p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Mode</Label>
+            <div className="flex gap-2">
+              {(["enforce", "shadow"] as const).map((m) => {
+                const active = mode === m;
+                const Icon = m === "enforce" ? Shield : Moon;
+                const tone =
+                  m === "enforce"
+                    ? active
+                      ? "border-success/60 bg-success/10 text-success"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                    : active
+                      ? "border-warning/60 bg-warning/10 text-warning"
+                      : "border-border text-muted-foreground hover:text-foreground";
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    title={
+                      m === "shadow"
+                        ? "Evaluates the rule and logs the decision, but does NOT block the agent. Use this to calibrate a new rule before promoting to Enforce."
+                        : "The rule blocks or interrupts the agent when matched."
+                    }
+                    className={`flex-1 inline-flex items-center justify-center gap-2 py-2 rounded-md border text-sm font-mono uppercase tracking-widest transition ${tone}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {m === "shadow" ? "🌓 shadow" : "enforce"}
+                  </button>
+                );
+              })}
+            </div>
+            {mode === "shadow" && (
+              <div className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-[11px] text-warning/90">
+                Shadow is a staging step. The SDK evaluates the rule and logs the decision, but the agent is not
+                blocked. Promote to Enforce once you trust the signal.
+              </div>
+            )}
+            {isFirstPolicy && mode === "shadow" && (
+              <div className="rounded-md border border-primary/40 bg-primary/5 px-3 py-2 text-[11px] text-primary">
+                Your first rule starts in Shadow so you can see what it would do without risking false positives.
+                Promote when ready.
+              </div>
             )}
           </div>
           <div className="space-y-1.5">
