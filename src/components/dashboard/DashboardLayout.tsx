@@ -245,7 +245,8 @@ export function DashboardLayout({
                     >
                       <Settings className="h-4 w-4 text-muted-foreground" />
                       Settings
-                    </div>
+                    </Link>
+                    <div className="my-1 border-t border-border/60" />
                     {isOperator && (
                       <>
                         <div className="px-3 pt-2 pb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
