@@ -196,9 +196,13 @@ export function DashboardLayout({
                   </span>
                 )}
               </IconBtn>
-              <IconBtn>
+              <Link
+                to="/dashboard/settings"
+                className="relative h-9 w-9 grid place-items-center rounded-md border border-border/60 bg-card/40 text-muted-foreground hover:text-foreground hover:border-primary/60 transition"
+                aria-label="Settings"
+              >
                 <Settings className="h-4 w-4" />
-              </IconBtn>
+              </Link>
 
               <div className="relative">
                 <button
