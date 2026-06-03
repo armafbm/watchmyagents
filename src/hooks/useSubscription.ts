@@ -68,16 +68,25 @@ export function useSubscription() {
     })();
 
     const load = async () => {
-      const { data } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('environment', env)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const tryEnv = async (e: string) => {
+        const { data } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('environment', e)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        return (data as SubscriptionRow | null) ?? null;
+      };
+      let row = await tryEnv(env);
+      if (!row || !isActiveStatus(row)) {
+        const other = env === 'live' ? 'sandbox' : 'live';
+        const fallback = await tryEnv(other);
+        if (fallback) row = fallback;
+      }
       if (cancelled) return;
-      setSubscription((data as SubscriptionRow | null) ?? null);
+      setSubscription(row);
       setLoading(false);
     };
 
