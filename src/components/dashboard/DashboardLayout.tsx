@@ -15,6 +15,7 @@ import {
   KeyRound,
   CreditCard,
   Home,
+  UserCircle2,
   type LucideIcon,
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
