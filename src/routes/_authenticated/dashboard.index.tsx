@@ -47,6 +47,14 @@ type Decision = {
   message: string | null;
 };
 
+type AgentRow = {
+  id: string;
+  display_name: string;
+  status: string;
+  provider: string;
+  last_seen_at: string | null;
+};
+
 function fmt(n: number | null | undefined) {
   return (n ?? 0).toLocaleString();
 }
@@ -60,13 +68,14 @@ function decisionIcon(d: string) {
 function CommandCenter() {
   const [today, setToday] = useState<TodayRow | null>(null);
   const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [agents, setAgents] = useState<AgentRow[]>([]);
 
   useEffect(() => {
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     (async () => {
-      const [{ data: userRes }, { data: t }, { data: d }] = await Promise.all([
+      const [{ data: userRes }, { data: t }, { data: d }, { data: a }] = await Promise.all([
         supabase.auth.getUser(),
         supabase.from("dashboard_today_v").select("*").maybeSingle(),
         supabase
@@ -74,10 +83,16 @@ function CommandCenter() {
           .select("id,decided_at,decision,tool_name,message")
           .order("decided_at", { ascending: false })
           .limit(8),
+        supabase
+          .from("agents")
+          .select("id,display_name,status,provider,last_seen_at")
+          .order("last_seen_at", { ascending: false, nullsFirst: false })
+          .limit(20),
       ]);
       if (!mounted) return;
       setToday((t as TodayRow | null) ?? { agents_active: 0, tokens_24h: 0, actions_24h: 0, blocked_24h: 0, suggestions_pending: 0 });
       setDecisions((d as Decision[] | null) ?? []);
+      setAgents((a as AgentRow[] | null) ?? []);
 
       const uid = userRes?.user?.id;
       if (!uid) return;
@@ -207,29 +222,38 @@ function CommandCenter() {
         </Panel>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-4">
-        <Panel
-          title="Live timeline"
-          icon={Activity}
-          tag="realtime"
-          className="lg:col-span-2"
-        >
-          {decisions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No decisions yet. Once your shield runs, decisions appear here in realtime.
-            </p>
+      <div className="grid lg:grid-cols-3 gap-4 mb-6">
+        <Panel title="Protected agents" icon={Bot} tag={`${agents.length}`} className="lg:col-span-2">
+          {agents.length === 0 ? (
+            <div className="text-center py-8 space-y-3">
+              <p className="text-sm text-muted-foreground">No agent registered yet.</p>
+              <Link
+                to="/onboarding"
+                className="inline-flex items-center gap-2 px-4 h-9 rounded-md bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90"
+              >
+                Register an agent →
+              </Link>
+            </div>
           ) : (
             <ul className="divide-y divide-border/40 -my-2">
-              {decisions.map((d) => (
-                <li key={d.id} className="py-3 grid grid-cols-[auto_80px_1fr] gap-3 items-center">
-                  {decisionIcon(d.decision)}
-                  <span className="font-mono text-[11px] text-muted-foreground">
-                    {new Date(d.decided_at).toLocaleTimeString()}
-                  </span>
-                  <div className="min-w-0">
-                    <span className="font-mono text-xs text-primary">{d.tool_name ?? "—"}</span>
-                    <span className="text-sm text-muted-foreground"> · {d.message ?? d.decision}</span>
+              {agents.map((a) => (
+                <li key={a.id} className="py-3 flex items-center gap-3">
+                  <span
+                    className={`h-2 w-2 rounded-full ${a.status === "active" ? "bg-success animate-blink" : "bg-muted-foreground/50"}`}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate">{a.display_name}</div>
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {a.provider} · {a.status}
+                      {a.last_seen_at ? ` · last seen ${new Date(a.last_seen_at).toLocaleString()}` : " · never seen"}
+                    </div>
                   </div>
+                  <Link
+                    to="/dashboard/watch"
+                    className="font-mono text-[10px] uppercase tracking-widest text-primary hover:underline"
+                  >
+                    view →
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -253,6 +277,29 @@ function CommandCenter() {
           </div>
         </Panel>
       </div>
+
+      <Panel title="Live timeline" icon={Activity} tag="realtime">
+        {decisions.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            No decisions yet. Once your shield runs, decisions appear here in realtime.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border/40 -my-2">
+            {decisions.map((d) => (
+              <li key={d.id} className="py-3 grid grid-cols-[auto_80px_1fr] gap-3 items-center">
+                {decisionIcon(d.decision)}
+                <span className="font-mono text-[11px] text-muted-foreground">
+                  {new Date(d.decided_at).toLocaleTimeString()}
+                </span>
+                <div className="min-w-0">
+                  <span className="font-mono text-xs text-primary">{d.tool_name ?? "—"}</span>
+                  <span className="text-sm text-muted-foreground"> · {d.message ?? d.decision}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
 
       <div className="mt-6">
         <div className="flex items-end justify-between mb-3">
