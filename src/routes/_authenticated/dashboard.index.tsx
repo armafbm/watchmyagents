@@ -47,6 +47,14 @@ type Decision = {
   message: string | null;
 };
 
+type AgentRow = {
+  id: string;
+  display_name: string;
+  status: string;
+  provider: string;
+  last_seen_at: string | null;
+};
+
 function fmt(n: number | null | undefined) {
   return (n ?? 0).toLocaleString();
 }
