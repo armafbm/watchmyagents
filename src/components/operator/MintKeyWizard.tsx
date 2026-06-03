@@ -153,10 +153,16 @@ console.log('private_pem:\\n' + privatePem);`;
               <div className="space-y-1">
                 <Label htmlFor="vf">Valid from</Label>
                 <Input id="vf" type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} required />
+                <div className="text-[10px] font-mono text-muted-foreground truncate" title={fromIso}>
+                  → {fromIso || "—"}
+                </div>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="vu">Valid until</Label>
                 <Input id="vu" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} required />
+                <div className="text-[10px] font-mono text-muted-foreground truncate" title={untilIso}>
+                  → {untilIso || "—"}
+                </div>
               </div>
             </div>
           </section>
