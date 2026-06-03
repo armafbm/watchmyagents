@@ -68,13 +68,14 @@ function decisionIcon(d: string) {
 function CommandCenter() {
   const [today, setToday] = useState<TodayRow | null>(null);
   const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [agents, setAgents] = useState<AgentRow[]>([]);
 
   useEffect(() => {
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     (async () => {
-      const [{ data: userRes }, { data: t }, { data: d }] = await Promise.all([
+      const [{ data: userRes }, { data: t }, { data: d }, { data: a }] = await Promise.all([
         supabase.auth.getUser(),
         supabase.from("dashboard_today_v").select("*").maybeSingle(),
         supabase
@@ -82,10 +83,16 @@ function CommandCenter() {
           .select("id,decided_at,decision,tool_name,message")
           .order("decided_at", { ascending: false })
           .limit(8),
+        supabase
+          .from("agents")
+          .select("id,display_name,status,provider,last_seen_at")
+          .order("last_seen_at", { ascending: false, nullsFirst: false })
+          .limit(20),
       ]);
       if (!mounted) return;
       setToday((t as TodayRow | null) ?? { agents_active: 0, tokens_24h: 0, actions_24h: 0, blocked_24h: 0, suggestions_pending: 0 });
       setDecisions((d as Decision[] | null) ?? []);
+      setAgents((a as AgentRow[] | null) ?? []);
 
       const uid = userRes?.user?.id;
       if (!uid) return;
