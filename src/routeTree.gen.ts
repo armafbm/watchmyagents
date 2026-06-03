@@ -34,6 +34,7 @@ import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
 import { Route as AuthenticatedDashboardLegionsRouteImport } from './routes/_authenticated/dashboard.legions'
 import { Route as AuthenticatedDashboardGuardianRouteImport } from './routes/_authenticated/dashboard.guardian'
+import { Route as AuthenticatedDashboardSettingsIndexRouteImport } from './routes/_authenticated/dashboard.settings.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -41,6 +42,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedDashboardSettingsSubscriptionRouteImport } from './routes/_authenticated/dashboard.settings.subscription'
+import { Route as AuthenticatedDashboardSettingsProfileRouteImport } from './routes/_authenticated/dashboard.settings.profile'
 import { Route as AuthenticatedDashboardSettingsKeysRouteImport } from './routes/_authenticated/dashboard.settings.keys'
 import { Route as AuthenticatedDashboardOperatorSigningKeysRouteImport } from './routes/_authenticated/dashboard.operator.signing-keys'
 
@@ -174,6 +176,12 @@ const AuthenticatedDashboardGuardianRoute =
     path: '/guardian',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardSettingsIndexRoute =
+  AuthenticatedDashboardSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -212,6 +220,12 @@ const AuthenticatedDashboardSettingsSubscriptionRoute =
   AuthenticatedDashboardSettingsSubscriptionRouteImport.update({
     id: '/settings/subscription',
     path: '/settings/subscription',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardSettingsProfileRoute =
+  AuthenticatedDashboardSettingsProfileRouteImport.update({
+    id: '/settings/profile',
+    path: '/settings/profile',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const AuthenticatedDashboardSettingsKeysRoute =
@@ -254,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/dashboard/settings/profile': typeof AuthenticatedDashboardSettingsProfileRoute
   '/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -261,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/dashboard/settings/': typeof AuthenticatedDashboardSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -288,6 +304,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/dashboard/settings/profile': typeof AuthenticatedDashboardSettingsProfileRoute
   '/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -295,6 +312,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/dashboard/settings': typeof AuthenticatedDashboardSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -325,6 +343,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/_authenticated/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
+  '/_authenticated/dashboard/settings/profile': typeof AuthenticatedDashboardSettingsProfileRoute
   '/_authenticated/dashboard/settings/subscription': typeof AuthenticatedDashboardSettingsSubscriptionRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -332,6 +351,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/dashboard/settings/': typeof AuthenticatedDashboardSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -362,6 +382,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/operator/signing-keys'
     | '/dashboard/settings/keys'
+    | '/dashboard/settings/profile'
     | '/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -369,6 +390,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/dashboard/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -396,6 +418,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/operator/signing-keys'
     | '/dashboard/settings/keys'
+    | '/dashboard/settings/profile'
     | '/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -403,6 +426,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/dashboard/settings'
   id:
     | '__root__'
     | '/'
@@ -432,6 +456,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/operator/signing-keys'
     | '/_authenticated/dashboard/settings/keys'
+    | '/_authenticated/dashboard/settings/profile'
     | '/_authenticated/dashboard/settings/subscription'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -439,6 +464,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/dashboard/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -644,6 +670,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardGuardianRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/settings/': {
+      id: '/_authenticated/dashboard/settings/'
+      path: '/settings'
+      fullPath: '/dashboard/settings/'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -693,6 +726,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSettingsSubscriptionRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/settings/profile': {
+      id: '/_authenticated/dashboard/settings/profile'
+      path: '/settings/profile'
+      fullPath: '/dashboard/settings/profile'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsProfileRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/settings/keys': {
       id: '/_authenticated/dashboard/settings/keys'
       path: '/settings/keys'
@@ -719,7 +759,9 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDashboardOperatorSigningKeysRoute: typeof AuthenticatedDashboardOperatorSigningKeysRoute
   AuthenticatedDashboardSettingsKeysRoute: typeof AuthenticatedDashboardSettingsKeysRoute
+  AuthenticatedDashboardSettingsProfileRoute: typeof AuthenticatedDashboardSettingsProfileRoute
   AuthenticatedDashboardSettingsSubscriptionRoute: typeof AuthenticatedDashboardSettingsSubscriptionRoute
+  AuthenticatedDashboardSettingsIndexRoute: typeof AuthenticatedDashboardSettingsIndexRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
@@ -734,8 +776,12 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
       AuthenticatedDashboardOperatorSigningKeysRoute,
     AuthenticatedDashboardSettingsKeysRoute:
       AuthenticatedDashboardSettingsKeysRoute,
+    AuthenticatedDashboardSettingsProfileRoute:
+      AuthenticatedDashboardSettingsProfileRoute,
     AuthenticatedDashboardSettingsSubscriptionRoute:
       AuthenticatedDashboardSettingsSubscriptionRoute,
+    AuthenticatedDashboardSettingsIndexRoute:
+      AuthenticatedDashboardSettingsIndexRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =

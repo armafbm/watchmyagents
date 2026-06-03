@@ -15,6 +15,7 @@ import {
   KeyRound,
   CreditCard,
   Home,
+  UserCircle2,
   type LucideIcon,
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
@@ -46,6 +47,7 @@ type NavItem = {
 
 const commandChildren: NavItem[] = [
   { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
+  { to: "/dashboard/settings/profile", label: "Profile", icon: UserCircle2 },
   { to: "/dashboard/settings/keys", label: "API Keys", icon: KeyRound },
   { to: "/dashboard/settings/subscription", label: "Subscription", icon: CreditCard },
   { to: "#", label: "Compliance & Conformity", icon: ScrollText, soon: true },
@@ -194,9 +196,13 @@ export function DashboardLayout({
                   </span>
                 )}
               </IconBtn>
-              <IconBtn>
+              <Link
+                to="/dashboard/settings"
+                className="relative h-9 w-9 grid place-items-center rounded-md border border-border/60 bg-card/40 text-muted-foreground hover:text-foreground hover:border-primary/60 transition"
+                aria-label="Settings"
+              >
                 <Settings className="h-4 w-4" />
-              </IconBtn>
+              </Link>
 
               <div className="relative">
                 <button
@@ -224,6 +230,23 @@ export function DashboardLayout({
                       </div>
                       <div className="truncate">{user?.email}</div>
                     </div>
+                    <Link
+                      to="/dashboard/settings/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-secondary/60"
+                    >
+                      <UserCircle2 className="h-4 w-4 text-muted-foreground" />
+                      Profile
+                    </Link>
+                    <Link
+                      to="/dashboard/settings"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-secondary/60"
+                    >
+                      <Settings className="h-4 w-4 text-muted-foreground" />
+                      Settings
+                    </Link>
+                    <div className="my-1 border-t border-border/60" />
                     {isOperator && (
                       <>
                         <div className="px-3 pt-2 pb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
