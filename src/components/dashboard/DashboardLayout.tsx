@@ -230,6 +230,22 @@ export function DashboardLayout({
                       </div>
                       <div className="truncate">{user?.email}</div>
                     </div>
+                    <Link
+                      to="/dashboard/settings/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-secondary/60"
+                    >
+                      <UserCircle2 className="h-4 w-4 text-muted-foreground" />
+                      Profile
+                    </Link>
+                    <Link
+                      to="/dashboard/settings"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-secondary/60"
+                    >
+                      <Settings className="h-4 w-4 text-muted-foreground" />
+                      Settings
+                    </div>
                     {isOperator && (
                       <>
                         <div className="px-3 pt-2 pb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
