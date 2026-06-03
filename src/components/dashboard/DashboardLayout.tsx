@@ -47,6 +47,7 @@ type NavItem = {
 
 const commandChildren: NavItem[] = [
   { to: "/dashboard/reports", label: "Reports & Audit", icon: FileText },
+  { to: "/dashboard/settings/profile", label: "Profile", icon: UserCircle2 },
   { to: "/dashboard/settings/keys", label: "API Keys", icon: KeyRound },
   { to: "/dashboard/settings/subscription", label: "Subscription", icon: CreditCard },
   { to: "#", label: "Compliance & Conformity", icon: ScrollText, soon: true },
