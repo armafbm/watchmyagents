@@ -20,10 +20,12 @@ import {
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
+import { useServerFn } from "@tanstack/react-start";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/useRole";
 import { supabase } from "@/integrations/supabase/client";
+import { getDashboardSidebarState } from "@/lib/dashboard.functions";
 import logo from "@/assets/fortress-logo.png";
 import legionsImg from "@/assets/wma-legions.png";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
@@ -64,6 +66,7 @@ const baseOperations: Omit<NavItem, "badge">[] = [
 function useNotificationCounts() {
   const { user } = useAuth();
   const [counts, setCounts] = useState({ shield: 0, total: 0 });
+  const fetchSidebarState = useServerFn(getDashboardSidebarState);
 
   useEffect(() => {
     if (!user) {
@@ -73,13 +76,14 @@ function useNotificationCounts() {
     let cancelled = false;
 
     const load = async () => {
-      const { count } = await supabase
-        .from("suggestions")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending");
+      try {
+        const state = await fetchSidebarState();
+        if (cancelled) return;
+        setCounts(state.notifications);
+      } catch {
+        if (!cancelled) setCounts({ shield: 0, total: 0 });
+      }
       if (cancelled) return;
-      const shield = count ?? 0;
-      setCounts({ shield, total: shield });
     };
 
     load();
@@ -433,18 +437,19 @@ function IconBtn({ children }: { children: ReactNode }) {
 function FleetStatusCard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<{ total: number; active: number } | null>(null);
+  const fetchSidebarState = useServerFn(getDashboardSidebarState);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     const load = async () => {
-      const { data, error } = await supabase
-        .from("agents")
-        .select("id,status");
-      if (cancelled || error || !data) return;
-      const total = data.length;
-      const active = data.filter((a) => a.status === "active").length;
-      setStats({ total, active });
+      try {
+        const state = await fetchSidebarState();
+        if (cancelled) return;
+        setStats(state.fleet);
+      } catch {
+        if (!cancelled) setStats({ total: 0, active: 0 });
+      }
     };
     load();
 
