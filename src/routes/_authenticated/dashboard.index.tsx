@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import mascot from "@/assets/wma-shield-logo.png";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Panel, PageHeader, Stat } from "@/components/dashboard/primitives";
+import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
@@ -66,26 +67,31 @@ function decisionIcon(d: string) {
 }
 
 function CommandCenter() {
+  const { user } = useAuth();
   const [today, setToday] = useState<TodayRow | null>(null);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [agents, setAgents] = useState<AgentRow[]>([]);
 
   useEffect(() => {
+    if (!user) return;
+
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     (async () => {
-      const [{ data: userRes }, { data: t }, { data: d }, { data: a }] = await Promise.all([
-        supabase.auth.getUser(),
-        supabase.from("dashboard_today_v").select("*").maybeSingle(),
+      const uid = user.id;
+      const [{ data: t }, { data: d }, { data: a }] = await Promise.all([
+        supabase.from("dashboard_today_v").select("*").eq("customer_id", uid).maybeSingle(),
         supabase
           .from("decisions")
           .select("id,decided_at,decision,tool_name,message")
+          .eq("customer_id", uid)
           .order("decided_at", { ascending: false })
           .limit(8),
         supabase
           .from("agents")
           .select("id,display_name,status,provider,last_seen_at")
+          .eq("customer_id", uid)
           .order("last_seen_at", { ascending: false, nullsFirst: false })
           .limit(20),
       ]);
@@ -93,9 +99,6 @@ function CommandCenter() {
       setToday((t as TodayRow | null) ?? { agents_active: 0, tokens_24h: 0, actions_24h: 0, blocked_24h: 0, suggestions_pending: 0 });
       setDecisions((d as Decision[] | null) ?? []);
       setAgents((a as AgentRow[] | null) ?? []);
-
-      const uid = userRes?.user?.id;
-      if (!uid) return;
 
       channel = supabase
         .channel(`user:${uid}`, { config: { private: true } })
@@ -113,7 +116,7 @@ function CommandCenter() {
       mounted = false;
       if (channel) supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   const agentsActive = today?.agents_active ?? 0;
   const blocked = today?.blocked_24h ?? 0;
