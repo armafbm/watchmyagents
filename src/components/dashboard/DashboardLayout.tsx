@@ -20,10 +20,12 @@ import {
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
+import { useServerFn } from "@tanstack/react-start";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/useRole";
 import { supabase } from "@/integrations/supabase/client";
+import { getDashboardSidebarState } from "@/lib/dashboard.functions";
 import logo from "@/assets/fortress-logo.png";
 import legionsImg from "@/assets/wma-legions.png";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
@@ -61,25 +63,37 @@ const baseOperations: Omit<NavItem, "badge">[] = [
   { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
 ];
 
-function useNotificationCounts() {
+function useDashboardSidebarState() {
   const { user } = useAuth();
-  const [counts, setCounts] = useState({ shield: 0, total: 0 });
+  const [state, setState] = useState({
+    notifications: { shield: 0, total: 0 },
+    fleet: { total: 0, active: 0 },
+  });
+  const fetchSidebarState = useServerFn(getDashboardSidebarState);
 
   useEffect(() => {
     if (!user) {
-      setCounts({ shield: 0, total: 0 });
+      setState({
+        notifications: { shield: 0, total: 0 },
+        fleet: { total: 0, active: 0 },
+      });
       return;
     }
     let cancelled = false;
 
     const load = async () => {
-      const { count } = await supabase
-        .from("suggestions")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending");
-      if (cancelled) return;
-      const shield = count ?? 0;
-      setCounts({ shield, total: shield });
+      try {
+        const nextState = await fetchSidebarState();
+        if (cancelled) return;
+        setState(nextState);
+      } catch {
+        if (!cancelled) {
+          setState({
+            notifications: { shield: 0, total: 0 },
+            fleet: { total: 0, active: 0 },
+          });
+        }
+      }
     };
 
     load();
@@ -98,7 +112,7 @@ function useNotificationCounts() {
     };
   }, [user]);
 
-  return counts;
+  return state;
 }
 
 
@@ -114,7 +128,8 @@ export function DashboardLayout({
   const [menuOpen, setMenuOpen] = useState(false);
   const isOperator = useRole("operator");
   const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
-  const notif = useNotificationCounts();
+  const sidebarState = useDashboardSidebarState();
+  const notif = sidebarState.notifications;
   const operations: NavItem[] = baseOperations.map((item) =>
     item.to === "/dashboard/shield" && notif.shield > 0
       ? { ...item, badge: notif.shield }
@@ -166,7 +181,7 @@ export function DashboardLayout({
         </div>
 
         <div className="border-t border-border/40 p-4">
-          <FleetStatusCard />
+          <FleetStatusCard stats={sidebarState.fleet} />
         </div>
       </aside>
 
@@ -430,41 +445,9 @@ function IconBtn({ children }: { children: ReactNode }) {
   );
 }
 
-function FleetStatusCard() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState<{ total: number; active: number } | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    const load = async () => {
-      const { data, error } = await supabase
-        .from("agents")
-        .select("id,status");
-      if (cancelled || error || !data) return;
-      const total = data.length;
-      const active = data.filter((a) => a.status === "active").length;
-      setStats({ total, active });
-    };
-    load();
-
-    const channel = supabase
-      .channel(`fleet-status-agents:${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "agents", filter: `customer_id=eq.${user.id}` },
-        () => load(),
-      )
-      .subscribe();
-
-    return () => {
-      cancelled = true;
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
-  const total = stats?.total ?? 0;
-  const active = stats?.active ?? 0;
+function FleetStatusCard({ stats }: { stats: { total: number; active: number } }) {
+  const total = stats.total;
+  const active = stats.active;
   const isSecure = total > 0 && active === total;
   const isEmpty = total === 0;
   const label = isEmpty ? "NO AGENTS" : isSecure ? "SECURE" : "DEGRADED";
