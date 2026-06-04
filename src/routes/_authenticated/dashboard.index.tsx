@@ -68,56 +68,81 @@ function decisionIcon(d: string) {
 }
 
 function CommandCenter() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [today, setToday] = useState<TodayRow | null>(null);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [agents, setAgents] = useState<AgentRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) return;
 
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    (async () => {
+    const load = async (attempt = 0): Promise<void> => {
       const uid = user.id;
-      const [{ data: t }, { data: d }, { data: a }] = await Promise.all([
-        supabase.from("dashboard_today_v").select("*").eq("customer_id", uid).maybeSingle(),
-        supabase
-          .from("decisions")
-          .select("id,decided_at,decision,tool_name,message")
-          .eq("customer_id", uid)
-          .order("decided_at", { ascending: false })
-          .limit(8),
-        supabase
-          .from("agents")
-          .select("id,display_name,status,provider,last_seen_at")
-          .eq("customer_id", uid)
-          .order("last_seen_at", { ascending: false, nullsFirst: false })
-          .limit(20),
-      ]);
-      if (!mounted) return;
-      setToday((t as TodayRow | null) ?? { agents_active: 0, tokens_24h: 0, actions_24h: 0, blocked_24h: 0, suggestions_pending: 0 });
-      setDecisions((d as Decision[] | null) ?? []);
-      setAgents((a as AgentRow[] | null) ?? []);
+      try {
+        const [tRes, dRes, aRes] = await Promise.all([
+          supabase.from("dashboard_today_v").select("*").eq("customer_id", uid).maybeSingle(),
+          supabase
+            .from("decisions")
+            .select("id,decided_at,decision,tool_name,message")
+            .eq("customer_id", uid)
+            .order("decided_at", { ascending: false })
+            .limit(8),
+          supabase
+            .from("agents")
+            .select("id,display_name,status,provider,last_seen_at")
+            .eq("customer_id", uid)
+            .order("last_seen_at", { ascending: false, nullsFirst: false })
+            .limit(20),
+        ]);
 
-      channel = supabase
-        .channel(`user:${uid}`, { config: { private: true } })
-        .on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "decisions", filter: `customer_id=eq.${uid}` },
-          (payload) => {
-            setDecisions((prev) => [payload.new as Decision, ...prev].slice(0, 8));
-          }
-        )
-        .subscribe();
-    })();
+        const firstErr = tRes.error ?? dRes.error ?? aRes.error;
+        if (firstErr) throw firstErr;
+
+        if (!mounted) return;
+        setToday((tRes.data as TodayRow | null) ?? { agents_active: 0, tokens_24h: 0, actions_24h: 0, blocked_24h: 0, suggestions_pending: 0 });
+        setDecisions((dRes.data as Decision[] | null) ?? []);
+        setAgents((aRes.data as AgentRow[] | null) ?? []);
+        setLoadError(null);
+        setLoaded(true);
+
+        channel = supabase
+          .channel(`user:${uid}`, { config: { private: true } })
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "decisions", filter: `customer_id=eq.${uid}` },
+            (payload) => {
+              setDecisions((prev) => [payload.new as Decision, ...prev].slice(0, 8));
+            }
+          )
+          .subscribe();
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[dashboard] load failed", { attempt, uid, error: e });
+        if (attempt < 2) {
+          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+          if (!mounted) return;
+          return load(attempt + 1);
+        }
+        if (!mounted) return;
+        setLoadError(msg);
+        setLoaded(true);
+        toast.error(`Failed to load dashboard: ${msg}`);
+      }
+    };
+
+    void load();
 
     return () => {
       mounted = false;
       if (channel) supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, authLoading]);
 
   const agentsActive = today?.agents_active ?? 0;
   const blocked = today?.blocked_24h ?? 0;
