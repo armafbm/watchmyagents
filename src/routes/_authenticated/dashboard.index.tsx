@@ -150,6 +150,28 @@ function CommandCenter() {
 
   return (
     <DashboardLayout breadcrumb="Command Center">
+      {loadError && (
+        <div className="mb-6 rounded-xl border border-danger/40 bg-danger/[0.06] backdrop-blur p-4 flex items-center gap-4">
+          <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          <div className="flex-1 text-sm">
+            <div className="font-semibold">Couldn't load your fortress data.</div>
+            <div className="text-muted-foreground text-xs mt-1">
+              The backend call failed: {loadError}. Your agents and data are safe — this is a temporary read error. Try refreshing the page.
+            </div>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-md border border-danger/60 text-danger hover:bg-danger/10"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      {!loaded && !loadError && (
+        <div className="mb-6 text-xs font-mono uppercase tracking-widest text-muted-foreground">
+          Loading your fortress…
+        </div>
+      )}
       {pending > 0 && (
         <div className="mb-6 relative rounded-xl border border-warning/40 bg-warning/[0.06] backdrop-blur p-4 flex items-center gap-4">
           <Inbox className="h-5 w-5 text-warning shrink-0" />
