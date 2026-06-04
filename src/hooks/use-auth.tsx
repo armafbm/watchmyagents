@@ -3,6 +3,22 @@ import type { Session, User } from "@supabase/supabase-js";
 import { useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
+const AUTH_STORAGE_KEY = "sb-kqddnrrbczrpmhnjdzmp-auth-token";
+
+function clearStoredAuthSession() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(AUTH_STORAGE_KEY);
+    window.localStorage.removeItem(`${AUTH_STORAGE_KEY}-user`);
+    window.localStorage.removeItem(`${AUTH_STORAGE_KEY}-code-verifier`);
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    window.sessionStorage.removeItem(`${AUTH_STORAGE_KEY}-user`);
+    window.sessionStorage.removeItem(`${AUTH_STORAGE_KEY}-code-verifier`);
+  } catch (error) {
+    console.warn("[auth] failed clearing stored session", error);
+  }
+}
+
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
@@ -45,7 +61,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         loading,
         signOut: async () => {
-          await supabase.auth.signOut();
+          setSession(null);
+          setLoading(false);
+          clearStoredAuthSession();
+          try {
+            await supabase.auth.signOut({ scope: "local" });
+          } catch (error) {
+            console.warn("[auth] signOut request failed after local cleanup", error);
+          } finally {
+            router.invalidate();
+          }
         },
       }}
     >

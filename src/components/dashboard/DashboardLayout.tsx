@@ -257,7 +257,10 @@ export function DashboardLayout({
                       </>
                     )}
                     <button
-                      onClick={() => signOut().then(() => (window.location.href = "/"))}
+                      onClick={async () => {
+                        await signOut();
+                        window.location.replace("/");
+                      }}
                       className="w-full flex items-center gap-2 px-3 py-2 hover:bg-secondary/60 text-left text-danger"
                     >
                       <LogOut className="h-4 w-4" />

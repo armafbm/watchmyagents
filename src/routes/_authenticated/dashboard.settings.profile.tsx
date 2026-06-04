@@ -183,7 +183,10 @@ function ProfilePage() {
             variant="outline"
             size="sm"
             className="mt-6 w-full"
-            onClick={() => signOut().then(() => (window.location.href = "/"))}
+            onClick={async () => {
+              await signOut();
+              window.location.replace("/");
+            }}
           >
             <LogOut className="h-3.5 w-3.5 mr-2" /> Sign out
           </Button>

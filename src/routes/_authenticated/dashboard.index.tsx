@@ -74,6 +74,7 @@ function CommandCenter() {
   const [agents, setAgents] = useState<AgentRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (authLoading) return;
@@ -85,6 +86,7 @@ function CommandCenter() {
     const load = async (attempt = 0): Promise<void> => {
       const uid = user.id;
       try {
+        setLoadError(null);
         const [tRes, dRes, aRes] = await Promise.all([
           supabase.from("dashboard_today_v").select("*").eq("customer_id", uid).maybeSingle(),
           supabase
@@ -122,7 +124,17 @@ function CommandCenter() {
           )
           .subscribe();
       } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
+        const detail =
+          e && typeof e === "object"
+            ? ["message", "details", "hint", "code"]
+                .map((key) => {
+                  const value = Reflect.get(e, key);
+                  return typeof value === "string" && value.trim() ? `${key}: ${value}` : null;
+                })
+                .filter(Boolean)
+                .join(" · ")
+            : "";
+        const msg = detail || (e instanceof Error ? e.message : String(e));
         console.error("[dashboard] load failed", { attempt, uid, error: e });
         if (attempt < 2) {
           await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
@@ -142,7 +154,7 @@ function CommandCenter() {
       mounted = false;
       if (channel) supabase.removeChannel(channel);
     };
-  }, [user, authLoading]);
+  }, [user, authLoading, reloadKey]);
 
   const agentsActive = today?.agents_active ?? 0;
   const blocked = today?.blocked_24h ?? 0;
@@ -160,7 +172,11 @@ function CommandCenter() {
             </div>
           </div>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              setLoaded(false);
+              setLoadError(null);
+              setReloadKey((key) => key + 1);
+            }}
             className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-md border border-danger/60 text-danger hover:bg-danger/10"
           >
             Retry
