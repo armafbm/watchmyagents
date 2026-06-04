@@ -16,12 +16,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import mascot from "@/assets/wma-shield-logo.png";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Panel, PageHeader, Stat } from "@/components/dashboard/primitives";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { getDashboardSnapshot, type AgentRow, type Decision, type TodayRow } from "@/lib/dashboard.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
@@ -32,30 +34,6 @@ export const Route = createFileRoute("/_authenticated/dashboard/")({
   }),
   component: CommandCenter,
 });
-
-type TodayRow = {
-  agents_active: number | null;
-  tokens_24h: number | null;
-  actions_24h: number | null;
-  blocked_24h: number | null;
-  suggestions_pending: number | null;
-};
-
-type Decision = {
-  id: string;
-  decided_at: string;
-  decision: string;
-  tool_name: string | null;
-  message: string | null;
-};
-
-type AgentRow = {
-  id: string;
-  display_name: string;
-  status: string;
-  provider: string;
-  last_seen_at: string | null;
-};
 
 function fmt(n: number | null | undefined) {
   return (n ?? 0).toLocaleString();
@@ -69,6 +47,7 @@ function decisionIcon(d: string) {
 
 function CommandCenter() {
   const { user, loading: authLoading } = useAuth();
+  const fetchDashboard = useServerFn(getDashboardSnapshot);
   const [today, setToday] = useState<TodayRow | null>(null);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [agents, setAgents] = useState<AgentRow[]>([]);
@@ -87,29 +66,12 @@ function CommandCenter() {
       const uid = user.id;
       try {
         setLoadError(null);
-        const [tRes, dRes, aRes] = await Promise.all([
-          supabase.from("dashboard_today_v").select("*").eq("customer_id", uid).maybeSingle(),
-          supabase
-            .from("decisions")
-            .select("id,decided_at,decision,tool_name,message")
-            .eq("customer_id", uid)
-            .order("decided_at", { ascending: false })
-            .limit(8),
-          supabase
-            .from("agents")
-            .select("id,display_name,status,provider,last_seen_at")
-            .eq("customer_id", uid)
-            .order("last_seen_at", { ascending: false, nullsFirst: false })
-            .limit(20),
-        ]);
-
-        const firstErr = tRes.error ?? dRes.error ?? aRes.error;
-        if (firstErr) throw firstErr;
+        const snapshot = await fetchDashboard();
 
         if (!mounted) return;
-        setToday((tRes.data as TodayRow | null) ?? { agents_active: 0, tokens_24h: 0, actions_24h: 0, blocked_24h: 0, suggestions_pending: 0 });
-        setDecisions((dRes.data as Decision[] | null) ?? []);
-        setAgents((aRes.data as AgentRow[] | null) ?? []);
+        setToday(snapshot.today);
+        setDecisions(snapshot.decisions);
+        setAgents(snapshot.agents);
         setLoadError(null);
         setLoaded(true);
 
@@ -124,17 +86,10 @@ function CommandCenter() {
           )
           .subscribe();
       } catch (e) {
-        const detail =
-          e && typeof e === "object"
-            ? ["message", "details", "hint", "code"]
-                .map((key) => {
-                  const value = Reflect.get(e, key);
-                  return typeof value === "string" && value.trim() ? `${key}: ${value}` : null;
-                })
-                .filter(Boolean)
-                .join(" · ")
-            : "";
-        const msg = detail || (e instanceof Error ? e.message : String(e));
+        const raw = e instanceof Error ? e.message : String(e);
+        const msg = /Failed to fetch/i.test(raw)
+          ? "Connection issue while loading your fortress. Please retry."
+          : raw;
         console.error("[dashboard] load failed", { attempt, uid, error: e });
         if (attempt < 2) {
           await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
@@ -168,7 +123,7 @@ function CommandCenter() {
           <div className="flex-1 text-sm">
             <div className="font-semibold">Couldn't load your fortress data.</div>
             <div className="text-muted-foreground text-xs mt-1">
-              The backend call failed: {loadError}. Your agents and data are safe — this is a temporary read error. Try refreshing the page.
+              {loadError} Your agents and data are safe.
             </div>
           </div>
           <button
