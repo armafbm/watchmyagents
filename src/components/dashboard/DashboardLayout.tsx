@@ -63,27 +63,37 @@ const baseOperations: Omit<NavItem, "badge">[] = [
   { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
 ];
 
-function useNotificationCounts() {
+function useDashboardSidebarState() {
   const { user } = useAuth();
-  const [counts, setCounts] = useState({ shield: 0, total: 0 });
+  const [state, setState] = useState({
+    notifications: { shield: 0, total: 0 },
+    fleet: { total: 0, active: 0 },
+  });
   const fetchSidebarState = useServerFn(getDashboardSidebarState);
 
   useEffect(() => {
     if (!user) {
-      setCounts({ shield: 0, total: 0 });
+      setState({
+        notifications: { shield: 0, total: 0 },
+        fleet: { total: 0, active: 0 },
+      });
       return;
     }
     let cancelled = false;
 
     const load = async () => {
       try {
-        const state = await fetchSidebarState();
+        const nextState = await fetchSidebarState();
         if (cancelled) return;
-        setCounts(state.notifications);
+        setState(nextState);
       } catch {
-        if (!cancelled) setCounts({ shield: 0, total: 0 });
+        if (!cancelled) {
+          setState({
+            notifications: { shield: 0, total: 0 },
+            fleet: { total: 0, active: 0 },
+          });
+        }
       }
-      if (cancelled) return;
     };
 
     load();
@@ -102,7 +112,7 @@ function useNotificationCounts() {
     };
   }, [user]);
 
-  return counts;
+  return state;
 }
 
 
@@ -118,7 +128,8 @@ export function DashboardLayout({
   const [menuOpen, setMenuOpen] = useState(false);
   const isOperator = useRole("operator");
   const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
-  const notif = useNotificationCounts();
+  const sidebarState = useDashboardSidebarState();
+  const notif = sidebarState.notifications;
   const operations: NavItem[] = baseOperations.map((item) =>
     item.to === "/dashboard/shield" && notif.shield > 0
       ? { ...item, badge: notif.shield }
@@ -170,7 +181,7 @@ export function DashboardLayout({
         </div>
 
         <div className="border-t border-border/40 p-4">
-          <FleetStatusCard />
+          <FleetStatusCard stats={sidebarState.fleet} />
         </div>
       </aside>
 
