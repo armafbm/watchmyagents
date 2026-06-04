@@ -445,42 +445,9 @@ function IconBtn({ children }: { children: ReactNode }) {
   );
 }
 
-function FleetStatusCard() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState<{ total: number; active: number } | null>(null);
-  const fetchSidebarState = useServerFn(getDashboardSidebarState);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const state = await fetchSidebarState();
-        if (cancelled) return;
-        setStats(state.fleet);
-      } catch {
-        if (!cancelled) setStats({ total: 0, active: 0 });
-      }
-    };
-    load();
-
-    const channel = supabase
-      .channel(`fleet-status-agents:${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "agents", filter: `customer_id=eq.${user.id}` },
-        () => load(),
-      )
-      .subscribe();
-
-    return () => {
-      cancelled = true;
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
-  const total = stats?.total ?? 0;
-  const active = stats?.active ?? 0;
+function FleetStatusCard({ stats }: { stats: { total: number; active: number } }) {
+  const total = stats.total;
+  const active = stats.active;
   const isSecure = total > 0 && active === total;
   const isEmpty = total === 0;
   const label = isEmpty ? "NO AGENTS" : isSecure ? "SECURE" : "DEGRADED";
