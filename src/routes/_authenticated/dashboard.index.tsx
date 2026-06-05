@@ -15,15 +15,15 @@ import {
   XCircle,
   AlertTriangle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import mascot from "@/assets/wma-shield-logo.png";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Panel, PageHeader, Stat } from "@/components/dashboard/primitives";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { getDashboardSnapshot, type AgentRow, type Decision, type TodayRow } from "@/lib/dashboard.functions";
+import { getDashboardSnapshot, type Decision } from "@/lib/dashboard.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
@@ -45,100 +45,84 @@ function decisionIcon(d: string) {
   return <AlertTriangle className="h-4 w-4 text-warning" />;
 }
 
+function humanizeError(err: unknown): { message: string; isFetchProxy: boolean } {
+  const raw = err instanceof Error ? err.message : String(err);
+  const isFetchProxy = /Failed to fetch|NetworkError|TypeError: fetch/i.test(raw);
+  return {
+    message: isFetchProxy
+      ? "Connection issue while loading your fortress."
+      : raw.replace(/^Error:\s*/, "").slice(0, 200),
+    isFetchProxy,
+  };
+}
+
 function CommandCenter() {
   const { user, loading: authLoading } = useAuth();
   const fetchDashboard = useServerFn(getDashboardSnapshot);
-  const [today, setToday] = useState<TodayRow | null>(null);
-  const [decisions, setDecisions] = useState<Decision[]>([]);
-  const [agents, setAgents] = useState<AgentRow[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
+  const queryClient = useQueryClient();
+  const uid = user?.id;
 
+  const query = useQuery({
+    queryKey: ["dashboard-snapshot", uid],
+    enabled: !authLoading && !!uid,
+    queryFn: () => fetchDashboard(),
+    retry: 1,
+    staleTime: 15_000,
+  });
+
+  // Realtime: push new decisions into the cache as they arrive.
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) return;
-
-    let mounted = true;
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-
-    const load = async (attempt = 0): Promise<void> => {
-      const uid = user.id;
-      try {
-        setLoadError(null);
-        const snapshot = await fetchDashboard();
-
-        if (!mounted) return;
-        setToday(snapshot.today);
-        setDecisions(snapshot.decisions);
-        setAgents(snapshot.agents);
-        setLoadError(null);
-        setLoaded(true);
-
-        channel = supabase
-          .channel(`user:${uid}`, { config: { private: true } })
-          .on(
-            "postgres_changes",
-            { event: "INSERT", schema: "public", table: "decisions", filter: `customer_id=eq.${uid}` },
-            (payload) => {
-              setDecisions((prev) => [payload.new as Decision, ...prev].slice(0, 8));
-            }
-          )
-          .subscribe();
-      } catch (e) {
-        const raw = e instanceof Error ? e.message : String(e);
-        const msg = /Failed to fetch/i.test(raw)
-          ? "Connection issue while loading your fortress. Please retry."
-          : raw;
-        console.error("[dashboard] load failed", { attempt, uid, error: e });
-        if (attempt < 2) {
-          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
-          if (!mounted) return;
-          return load(attempt + 1);
+    if (!uid) return;
+    const channel = supabase
+      .channel(`user:${uid}`, { config: { private: true } })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "decisions", filter: `customer_id=eq.${uid}` },
+        (payload) => {
+          queryClient.setQueryData<typeof query.data>(["dashboard-snapshot", uid], (prev) =>
+            prev
+              ? { ...prev, decisions: [payload.new as Decision, ...prev.decisions].slice(0, 8) }
+              : prev
+          );
         }
-        if (!mounted) return;
-        setLoadError(msg);
-        setLoaded(true);
-        toast.error(`Failed to load dashboard: ${msg}`);
-      }
-    };
-
-    void load();
-
+      )
+      .subscribe();
     return () => {
-      mounted = false;
-      if (channel) supabase.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
-  }, [user, authLoading, reloadKey]);
+  }, [uid, queryClient]);
 
+  const today = query.data?.today;
+  const decisions = query.data?.decisions ?? [];
+  const agents = query.data?.agents ?? [];
   const agentsActive = today?.agents_active ?? 0;
   const blocked = today?.blocked_24h ?? 0;
   const pending = today?.suggestions_pending ?? 0;
 
+  const err = query.error ? humanizeError(query.error) : null;
+
   return (
     <DashboardLayout breadcrumb="Command Center">
-      {loadError && (
+      {err && (
         <div className="mb-6 rounded-xl border border-danger/40 bg-danger/[0.06] backdrop-blur p-4 flex items-center gap-4">
           <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
           <div className="flex-1 text-sm">
             <div className="font-semibold">Couldn't load your fortress data.</div>
             <div className="text-muted-foreground text-xs mt-1">
-              {loadError} Your agents and data are safe.
+              {err.message} Your agents and data are safe.
+              {err.isFetchProxy && " If you're on the Lovable preview, try the published URL."}
             </div>
           </div>
           <button
-            onClick={() => {
-              setLoaded(false);
-              setLoadError(null);
-              setReloadKey((key) => key + 1);
-            }}
-            className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-md border border-danger/60 text-danger hover:bg-danger/10"
+            onClick={() => query.refetch()}
+            disabled={query.isFetching}
+            className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-md border border-danger/60 text-danger hover:bg-danger/10 disabled:opacity-50"
           >
-            Retry
+            {query.isFetching ? "Retrying…" : "Retry"}
           </button>
         </div>
       )}
-      {!loaded && !loadError && (
+      {query.isLoading && !err && (
         <div className="mb-6 text-xs font-mono uppercase tracking-widest text-muted-foreground">
           Loading your fortress…
         </div>
