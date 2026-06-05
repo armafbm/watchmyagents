@@ -11,7 +11,6 @@ import {
   ChevronDown,
   ChevronRight,
   LogOut,
-  Swords,
   KeyRound,
   CreditCard,
   Home,
@@ -21,6 +20,7 @@ import {
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/useRole";
@@ -58,61 +58,45 @@ const commandChildren: NavItem[] = [
 const baseOperations: Omit<NavItem, "badge">[] = [
   { to: "/dashboard/watch", label: "Watch · Monitoring", icon: WatchAvatar as unknown as LucideIcon },
   { to: "/dashboard/guardian", label: "Guardian AI", icon: GuardianAvatar as unknown as LucideIcon },
-  
   { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon },
   { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
 ];
 
+const EMPTY_SIDEBAR_STATE = {
+  notifications: { shield: 0, total: 0 },
+  fleet: { total: 0, active: 0 },
+};
+
 function useDashboardSidebarState() {
   const { user } = useAuth();
-  const [state, setState] = useState({
-    notifications: { shield: 0, total: 0 },
-    fleet: { total: 0, active: 0 },
-  });
+  const uid = user?.id;
   const fetchSidebarState = useServerFn(getDashboardSidebarState);
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ["dashboard-sidebar", uid],
+    enabled: !!uid,
+    queryFn: () => fetchSidebarState(),
+    retry: 1,
+    staleTime: 15_000,
+  });
 
   useEffect(() => {
-    if (!user) {
-      setState({
-        notifications: { shield: 0, total: 0 },
-        fleet: { total: 0, active: 0 },
-      });
-      return;
-    }
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const nextState = await fetchSidebarState();
-        if (cancelled) return;
-        setState(nextState);
-      } catch {
-        if (!cancelled) {
-          setState({
-            notifications: { shield: 0, total: 0 },
-            fleet: { total: 0, active: 0 },
-          });
-        }
-      }
-    };
-
-    load();
+    if (!uid) return;
     const channel = supabase
-      .channel(`notif-suggestions:${user.id}`)
+      .channel(`notif-suggestions:${uid}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "suggestions", filter: `customer_id=eq.${user.id}` },
-        () => load()
+        { event: "*", schema: "public", table: "suggestions", filter: `customer_id=eq.${uid}` },
+        () => queryClient.invalidateQueries({ queryKey: ["dashboard-sidebar", uid] })
       )
       .subscribe();
-
     return () => {
-      cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [uid, queryClient]);
 
-  return state;
+  return query.data ?? EMPTY_SIDEBAR_STATE;
 }
 
 
