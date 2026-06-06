@@ -24,6 +24,7 @@ import { Panel, PageHeader, Stat } from "@/components/dashboard/primitives";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { getDashboardSnapshot, type Decision } from "@/lib/dashboard.functions";
+import { humanizeError } from "@/lib/error-formatting";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
@@ -43,17 +44,6 @@ function decisionIcon(d: string) {
   if (d === "allow") return <CheckCircle2 className="h-4 w-4 text-success" />;
   if (d === "deny" || d === "block") return <XCircle className="h-4 w-4 text-danger" />;
   return <AlertTriangle className="h-4 w-4 text-warning" />;
-}
-
-function humanizeError(err: unknown): { message: string; isFetchProxy: boolean } {
-  const raw = err instanceof Error ? err.message : String(err);
-  const isFetchProxy = /Failed to fetch|NetworkError|TypeError: fetch/i.test(raw);
-  return {
-    message: isFetchProxy
-      ? "Connection issue while loading your fortress."
-      : raw.replace(/^Error:\s*/, "").slice(0, 200),
-    isFetchProxy,
-  };
 }
 
 function CommandCenter() {
@@ -110,7 +100,7 @@ function CommandCenter() {
             <div className="font-semibold">Couldn't load your fortress data.</div>
             <div className="text-muted-foreground text-xs mt-1">
               {err.message} Your agents and data are safe.
-              {err.isFetchProxy && " If you're on the Lovable preview, try the published URL."}
+              {err.isFetchProxy && " If this is a preview deployment, try the published URL."}
             </div>
           </div>
           <button
