@@ -30,7 +30,7 @@ export const lovable = {
       const mappedProvider = provider === "lovable" ? "google" : provider;
 
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: mappedProvider,
+        provider: mappedProvider as Parameters<typeof supabase.auth.signInWithOAuth>[0]["provider"],
         options: {
           redirectTo: opts?.redirect_uri,
           queryParams: opts?.extraParams,
