@@ -24,6 +24,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserProfile, resolveAvatarUrl } from "@/hooks/use-user-profile";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings/profile")({
   head: () => ({
@@ -63,6 +65,8 @@ const EMPTY: ProfileFields = {
 
 function ProfilePage() {
   const { user, signOut } = useAuth();
+  const profile = useUserProfile();
+  const queryClient = useQueryClient();
   const [fields, setFields] = useState<ProfileFields>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -74,6 +78,12 @@ function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     const m = (user.user_metadata ?? {}) as Record<string, unknown>;
+    // Avatar comes from public.customers (canonical) with fallback to
+    // user_metadata for legacy sessions. resolveAvatarUrl rejects base64
+    // dataURLs so the bloated form never renders. Everything else (name,
+    // job_title, etc.) stays in user_metadata — those fields are small
+    // and changing the schema is out of scope for this PR.
+    const canonicalAvatar = resolveAvatarUrl(profile.data ?? null, user);
     setFields({
       full_name: ((m.full_name as string) || (m.name as string)) ?? "",
       job_title: (m.job_title as string) ?? "",
@@ -84,18 +94,38 @@ function ProfilePage() {
       location: (m.location as string) ?? "",
       website: (m.website as string) ?? "",
       bio: (m.bio as string) ?? "",
-      avatar_url: (m.avatar_url as string) ?? "",
+      avatar_url: canonicalAvatar ?? "",
     });
     setNewEmail(user.email ?? "");
     setLoading(false);
-  }, [user]);
+  }, [user, profile.data]);
 
   const set = <K extends keyof ProfileFields>(k: K, v: ProfileFields[K]) =>
     setFields((f) => ({ ...f, [k]: v }));
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({ data: { ...fields } });
+    // avatar_url lives in public.customers (long-term storage) — never
+    // ship it back into user_metadata, otherwise we re-bloat the JWT
+    // every time the user clicks save. Other fields stay in
+    // user_metadata for now (small, name/job/etc.); display_name is
+    // mirrored into customers so the topbar can read it via
+    // useUserProfile without a second query.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { avatar_url, ...metaFields } = fields;
+    const { error } = await supabase.auth.updateUser({ data: metaFields });
+    if (!error && user) {
+      // Mirror display_name into customers so the rest of the app gets
+      // it via useUserProfile (single source of truth).
+      const display = fields.full_name?.trim() || null;
+      const { error: dbErr } = await supabase
+        .from("customers")
+        .update({ display_name: display })
+        .eq("id", user.id);
+      if (!dbErr) {
+        queryClient.invalidateQueries({ queryKey: ["user-profile", user.id] });
+      }
+    }
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Profile updated");
@@ -117,16 +147,45 @@ function ProfilePage() {
   const handleAvatarUpload = async (file: File) => {
     if (!user) return;
     if (file.size > 2 * 1024 * 1024) return toast.error("Max 2 MB");
-    // Inline as data URL (no storage bucket configured). Persists in user_metadata.
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUrl = reader.result as string;
-      set("avatar_url", dataUrl);
-      const { error } = await supabase.auth.updateUser({ data: { avatar_url: dataUrl } });
-      if (error) toast.error(error.message);
-      else toast.success("Avatar updated");
-    };
-    reader.readAsDataURL(file);
+
+    // 1. Upload to the public `avatars` bucket at <uid>/avatar.<ext>.
+    //    RLS only lets the user write under their own uid folder.
+    //    upsert=true so re-uploading replaces the previous file.
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const path = `${user.id}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+    if (upErr) return toast.error(upErr.message);
+
+    // 2. Resolve the public URL + cache-bust so the new image shows
+    //    immediately without waiting for CDN/browser cache to expire.
+    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+    const url = `${publicUrl}?t=${Date.now()}`;
+
+    // 3. Persist the URL in public.customers (canonical store). The old
+    //    user_metadata.avatar_url is left untouched here — the resolver
+    //    prefers customers.avatar_url so it wins anyway. We also clear
+    //    any legacy base64 in user_metadata so it stops bloating the
+    //    next refreshed JWT.
+    const { error: dbErr } = await supabase
+      .from("customers")
+      .update({ avatar_url: url })
+      .eq("id", user.id);
+    if (dbErr) return toast.error(dbErr.message);
+
+    const legacy = (user.user_metadata ?? {}) as Record<string, unknown>;
+    if (typeof legacy.avatar_url === "string" && legacy.avatar_url.startsWith("data:")) {
+      // Best-effort cleanup of the legacy bloat. Don't surface failures —
+      // the UX-relevant write (Storage + customers) already succeeded.
+      await supabase.auth.updateUser({ data: { avatar_url: null } }).catch(() => undefined);
+    }
+
+    // 4. Optimistically refresh local state + invalidate the React Query
+    //    cache so the topbar avatar re-renders with the new URL.
+    set("avatar_url", url);
+    queryClient.invalidateQueries({ queryKey: ["user-profile", user.id] });
+    toast.success("Avatar updated");
   };
 
   const initials = (fields.full_name || user?.email || "??").slice(0, 2).toUpperCase();

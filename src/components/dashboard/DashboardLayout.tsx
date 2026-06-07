@@ -24,6 +24,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/useRole";
+import { useUserProfile, resolveAvatarUrl } from "@/hooks/use-user-profile";
 import { supabase } from "@/integrations/supabase/client";
 import { getDashboardSidebarState } from "@/lib/dashboard.functions";
 import logo from "@/assets/fortress-logo.png";
@@ -111,7 +112,13 @@ export function DashboardLayout({
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   const isOperator = useRole("operator");
-  const initials = (user?.email ?? "??").slice(0, 2).toUpperCase();
+  const profile = useUserProfile();
+  // Avatar: prefer customers.avatar_url (Storage URL or OAuth URL), with
+  // a guard against the legacy base64 in user_metadata. Falls back to
+  // initials when no usable URL exists.
+  const avatarUrl = resolveAvatarUrl(profile.data ?? null, user);
+  const displayName = profile.data?.display_name || user?.email?.split("@")[0] || "";
+  const initials = (displayName || user?.email || "??").slice(0, 2).toUpperCase();
   const sidebarState = useDashboardSidebarState();
   const notif = sidebarState.notifications;
   const operations: NavItem[] = baseOperations.map((item) =>
@@ -201,12 +208,27 @@ export function DashboardLayout({
                   onClick={() => setMenuOpen((v) => !v)}
                   className="flex items-center gap-2 pl-1 pr-2 h-9 rounded-md border border-border/60 bg-card/40 hover:border-primary/60 transition"
                 >
-                  <span className="h-7 w-7 rounded grid place-items-center bg-gradient-to-br from-primary to-accent text-[11px] font-mono font-bold text-primary-foreground">
-                    {initials}
+                  <span className="h-7 w-7 rounded grid place-items-center bg-gradient-to-br from-primary to-accent text-[11px] font-mono font-bold text-primary-foreground overflow-hidden">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          // Hide broken images so the gradient + initials
+                          // fallback shows underneath. Common cause:
+                          // the OAuth provider rotated its avatar URL or
+                          // the Storage object was deleted.
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      initials
+                    )}
                   </span>
                   <div className="hidden lg:block text-left leading-tight">
                     <div className="text-xs font-semibold truncate max-w-[120px]">
-                      {user?.email?.split("@")[0]}
+                      {displayName}
                     </div>
                     <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
                       Fortress admin
