@@ -21,7 +21,7 @@ function PostLogin() {
       }
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) {
-        if (!cancelled) navigate({ to: "/signin", replace: true });
+        if (!cancelled) navigate({ to: "/auth/signin", replace: true });
         return;
       }
       const { count } = await supabase
