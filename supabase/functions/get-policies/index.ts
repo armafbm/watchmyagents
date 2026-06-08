@@ -84,9 +84,14 @@ serve(async (req) => {
   //   type  (this agent's type)      => surface_type='type'  AND surface_ref = this.agent_type
   //   subtree                        => surface_type='subtree' AND surface_ref in ancestor chain
   // Back-compat: rows with NULL surface_type were backfilled (fleet when agent_id null, agent otherwise).
+  //
+  // FORT-2 (P0 Codex audit): signature + signing_key_id are now in the
+  // select so the response matches the shape the SDK v1.1.5+ verifier
+  // (verifyPolicyBundle) requires. Without these fields, every policy
+  // would be dropped in strict mode and Shield would enforce nothing.
   let query = supabase
     .from('policies')
-    .select('id, rule_id, name, rationale, match, action, message, mode, priority, agent_id, surface_type, surface_ref')
+    .select('id, rule_id, name, rationale, match, action, message, mode, priority, agent_id, surface_type, surface_ref, signature, signing_key_id')
     .eq('customer_id', customerId)
     .eq('enabled', true)
     .order('priority', { ascending: true });
@@ -106,6 +111,31 @@ serve(async (req) => {
   const { data: policies, error: policiesErr } = await query;
   if (policiesErr) { console.error('[get-policies] policies lookup:', policiesErr); return json(500, { error: 'internal error' }); }
 
+  // FORT-2 (P0 Codex audit): the SDK v1.1.5+ chain-of-trust verifier
+  // (src/shield/signature.js#verifyPolicyBundle) needs the signing
+  // keys alongside the policies so it can chain
+  // policy.signature -> signing_key.pubkey -> root pubkey embedded in
+  // the SDK. We return any non-revoked signing key whose validity
+  // window overlaps a generous bracket (90d back, 30d ahead) so the
+  // verifier can validate older signed policies during a rotation
+  // overlap. Same window logic as src/lib/fortress-signing.functions.ts
+  // getPoliciesForCustomer — keep these two paths in sync.
+  const now = Date.now();
+  const lookbackMs = 90 * 24 * 3600 * 1000;
+  const aheadMs = 30 * 24 * 3600 * 1000;
+  const windowStart = new Date(now - lookbackMs).toISOString();
+  const windowEnd = new Date(now + aheadMs).toISOString();
+
+  const { data: signingKeys, error: keysErr } = await supabase
+    .from('signing_keys_public')
+    .select('kid, pubkey, valid_from, valid_until, signed_by_root')
+    .is('revoked_at', null)
+    .lt('valid_from', windowEnd)
+    .gt('valid_until', windowStart);
+  if (keysErr) {
+    console.error('[get-policies] signing_keys lookup:', keysErr);
+    return json(500, { error: 'internal error' });
+  }
 
   supabase.from('api_keys')
     .update({ last_used_at: new Date().toISOString() })
@@ -116,5 +146,7 @@ serve(async (req) => {
     ok: true,
     fetched_at: new Date().toISOString(),
     policies: policies || [],
+    // FORT-2: SDK chain-of-trust shape (signing_keys array).
+    signing_keys: signingKeys || [],
   });
 });
