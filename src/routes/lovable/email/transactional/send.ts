@@ -115,6 +115,64 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
+        // FORT-5 (P2 Codex audit): even though the caller is authenticated,
+        // the original code let them send any template to any recipient
+        // they wanted — a spam / abuse / phishing-pretext vector. Two
+        // guards now:
+        //
+        //   (a) Recipient lock: a caller can ONLY send to their OWN
+        //       email address. Templates with a fixed `template.to`
+        //       (operator-defined notifications) bypass this — they're
+        //       routed by the template author, not by the caller.
+        //
+        //   (b) Per-recipient rate limit: max 10 successfully-queued
+        //       emails to the same address within a rolling 60-minute
+        //       window. Suppressed / failed sends don't count. Prevents
+        //       bombing a single address even via authenticated callers.
+        const callerEmail = (user.email ?? '').toLowerCase();
+        const recipientLc = effectiveRecipient.toLowerCase();
+        const recipientIsTemplateFixed = !!template.to;
+        if (!recipientIsTemplateFixed && recipientLc !== callerEmail) {
+          console.warn('[email/send] recipient lock: caller tried to email another address', {
+            caller_redacted: redactEmail(callerEmail),
+            recipient_redacted: redactEmail(effectiveRecipient),
+            templateName,
+          });
+          return Response.json(
+            { error: 'recipientEmail must match the authenticated user' },
+            { status: 403 }
+          );
+        }
+
+        const SEND_WINDOW_MINUTES = 60;
+        const SEND_LIMIT_PER_WINDOW = 10;
+        const sinceIso = new Date(Date.now() - SEND_WINDOW_MINUTES * 60_000).toISOString();
+        const { count: recentSends, error: rateErr } = await supabase
+          .from('email_send_log')
+          .select('id', { count: 'exact', head: true })
+          .eq('recipient_email', effectiveRecipient)
+          .in('status', ['pending', 'sent'])
+          .gte('created_at', sinceIso);
+        if (rateErr) {
+          console.error('[email/send] rate-limit lookup failed — failing closed', {
+            error: rateErr,
+            recipient_redacted: redactEmail(effectiveRecipient),
+          });
+          return Response.json({ error: 'Rate-limit check failed' }, { status: 500 });
+        }
+        if ((recentSends ?? 0) >= SEND_LIMIT_PER_WINDOW) {
+          console.warn('[email/send] rate-limited', {
+            recipient_redacted: redactEmail(effectiveRecipient),
+            recent_count: recentSends,
+            limit: SEND_LIMIT_PER_WINDOW,
+            window_minutes: SEND_WINDOW_MINUTES,
+          });
+          return Response.json(
+            { error: `Rate limit exceeded: max ${SEND_LIMIT_PER_WINDOW} emails per ${SEND_WINDOW_MINUTES} minutes per recipient` },
+            { status: 429 }
+          );
+        }
+
         // 2. Check suppression list (fail-closed: if we can't verify, don't send)
         const { data: suppressed, error: suppressionError } = await supabase
           .from('suppressed_emails')
