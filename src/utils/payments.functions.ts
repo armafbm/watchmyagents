@@ -52,22 +52,73 @@ async function resolveOrCreateCustomer(
   return created.id;
 }
 
+// FORT-4 (P1 Codex audit): whitelist of allowed return_url hosts. Stripe
+// reflects this URL back to the browser after a successful checkout —
+// an attacker who can dictate it gets a free OAuth-style open redirect.
+// The list is intentionally narrow: prod domain + known dev/preview
+// hosts. Localhost on common dev ports is also accepted so the developer
+// can test the full checkout flow without deploying. Anything else is
+// rejected before the Stripe session is created.
+const ALLOWED_RETURN_HOSTS = new Set<string>([
+  'watchmyagents.com',
+  'www.watchmyagents.com',
+  'watchmyagents.lovable.app',
+  'localhost',
+  '127.0.0.1',
+]);
+
+function assertSafeReturnUrl(returnUrl: string): void {
+  let u: URL;
+  try {
+    u = new URL(returnUrl);
+  } catch {
+    throw new Error('Invalid return URL');
+  }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') {
+    throw new Error('Return URL must use http or https');
+  }
+  if (u.protocol === 'http:' && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') {
+    throw new Error('Return URL over http is only allowed for localhost');
+  }
+  if (!ALLOWED_RETURN_HOSTS.has(u.hostname)) {
+    throw new Error('Return URL host is not in the allow-list');
+  }
+}
+
 export const createCheckoutSession = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     (data: {
       priceId: string;
       quantity?: number;
-      customerEmail?: string;
-      userId?: string;
       returnUrl: string;
       environment: StripeEnv;
     }) => {
       if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error('Invalid priceId');
+      if (data.quantity != null) {
+        const q = Number(data.quantity);
+        if (!Number.isInteger(q) || q < 1 || q > 100) throw new Error('Invalid quantity');
+      }
+      if (data.environment !== 'test' && data.environment !== 'production') {
+        throw new Error('Invalid environment');
+      }
+      // FORT-4: pin return_url to a host we trust. Stripe reflects it
+      // back unconditionally so any open input is an open redirect.
+      assertSafeReturnUrl(data.returnUrl);
       return data;
     },
   )
-  .handler(async ({ data }): Promise<CheckoutSessionResult> => {
+  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     try {
+      // FORT-4: userId + email come from the authenticated server
+      // session, never from the client. The previous handler accepted
+      // both as input — a malicious client could trivially create a
+      // checkout session attached to another user's Stripe customer
+      // record (or to an email they don't own) and the webhook would
+      // happily wire the subscription up the wrong way.
+      const { userId, claims } = context as { userId: string; claims: { email?: string } };
+      const customerEmail = typeof claims?.email === 'string' ? claims.email : undefined;
+
       const stripe = createStripeClient(data.environment);
 
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
@@ -75,13 +126,10 @@ export const createCheckoutSession = createServerFn({ method: 'POST' })
       const stripePrice = prices.data[0];
       const isRecurring = stripePrice.type === 'recurring';
 
-      const customerId =
-        data.customerEmail || data.userId
-          ? await resolveOrCreateCustomer(stripe, {
-              email: data.customerEmail,
-              userId: data.userId,
-            })
-          : undefined;
+      const customerId = await resolveOrCreateCustomer(stripe, {
+        email: customerEmail,
+        userId,
+      });
 
       const includeTrial = isRecurring && TRIAL_ELIGIBLE_PRICES.has(data.priceId);
 
@@ -90,11 +138,11 @@ export const createCheckoutSession = createServerFn({ method: 'POST' })
         mode: isRecurring ? 'subscription' : 'payment',
         ui_mode: 'embedded_page',
         return_url: data.returnUrl,
-        ...(customerId && { customer: customerId }),
-        ...(data.userId && { metadata: { userId: data.userId } }),
+        customer: customerId,
+        metadata: { userId },
         ...(isRecurring && {
           subscription_data: {
-            ...(data.userId && { metadata: { userId: data.userId } }),
+            metadata: { userId },
             ...(includeTrial && { trial_period_days: 14 }),
           },
         }),
