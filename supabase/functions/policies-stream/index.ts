@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       channel = supabase
         .channel(`policies:${agent.id}`)
         .on(
-          // @ts-ignore - realtime types
+          // @ts-expect-error - realtime types are missing the 'postgres_changes' channel overload
           'postgres_changes',
           {
             event: '*',
