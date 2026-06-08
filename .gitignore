@@ -16,6 +16,15 @@ dist-ssr
 .nitro
 *.local
 
+# FORT-6 (P2 Codex audit): env files MUST stay out of git. Previously
+# only *.local was ignored, so .env / .env.development / .env.production
+# leaked into the repo (and into history). If you need a template for
+# new devs, commit `.env.example` with placeholder values — it's the
+# only env-shaped file allowed.
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
