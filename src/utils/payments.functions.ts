@@ -90,7 +90,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         const q = Number(data.quantity);
         if (!Number.isInteger(q) || q < 1 || q > 100) throw new Error("Invalid quantity");
       }
-      if (data.environment !== "test" && data.environment !== "production") {
+      if (data.environment !== "sandbox" && data.environment !== "live") {
         throw new Error("Invalid environment");
       }
       // FORT-4: pin return_url to a host we trust. Stripe reflects it
