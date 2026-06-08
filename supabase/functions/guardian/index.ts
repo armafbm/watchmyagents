@@ -490,15 +490,28 @@ serve(async (req) => {
   if (req.method !== 'POST' && req.method !== 'GET') {
     return new Response('method not allowed', { status: 405, headers: corsHeaders });
   }
-  // Auth: shared secret OR service-role key. If no GUARDIAN_SECRET is set, allow
-  // invocation (function deploys with verify_jwt=false; intended for trusted cron).
+  // FORT-1 (P0 Codex audit): fail-CLOSED auth. The Supabase config
+  // disables verify_jwt on this function (it's invoked by trusted cron),
+  // so the in-function check is the ONLY barrier. Previously, a missing
+  // GUARDIAN_SECRET env var was treated as "no auth needed" — a deploy
+  // misconfiguration would expose this sensitive function (it runs the
+  // Guardian AI over every customer's signals) to the entire internet.
+  // Now we require BOTH the secret AND a valid presented credential.
+  // Operator action item: ensure GUARDIAN_SECRET is set in the function
+  // environment via Lovable secrets (or supabase secrets set) before
+  // the cron job runs.
   const guardianSecret = Deno.env.get('GUARDIAN_SECRET');
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!guardianSecret) {
+    return new Response(JSON.stringify({ error: 'GUARDIAN_SECRET not configured — function disabled' }), {
+      status: 503, headers: { ...corsHeaders, 'content-type': 'application/json' },
+    });
+  }
   const provided = req.headers.get('x-guardian-secret') ?? '';
   const bearer = (req.headers.get('authorization') ?? '').match(/^Bearer\s+(.+)$/i)?.[1] ?? '';
-  const secretOk = guardianSecret ? provided === guardianSecret : true;
-  const serviceOk = serviceRoleKey ? bearer === serviceRoleKey : false;
-  if (guardianSecret && !secretOk && !serviceOk) {
+  const secretOk = provided !== '' && provided === guardianSecret;
+  const serviceOk = serviceRoleKey ? (bearer !== '' && bearer === serviceRoleKey) : false;
+  if (!secretOk && !serviceOk) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'content-type': 'application/json' },
     });
