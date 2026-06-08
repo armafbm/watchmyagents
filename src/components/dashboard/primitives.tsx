@@ -18,19 +18,13 @@ export function PageHeader({
   return (
     <div className="flex items-start justify-between gap-6 mb-8">
       <div className="flex items-start gap-4">
-        {layer && (
-          <LayerIcon layer={layer} className="h-16 w-16 mt-1" alt={kicker} />
-        )}
+        {layer && <LayerIcon layer={layer} className="h-16 w-16 mt-1" alt={kicker} />}
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-2">
             // {kicker}
           </p>
-          <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="mt-2 text-sm text-muted-foreground max-w-2xl">{subtitle}</p>
-          )}
+          <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight">{title}</h1>
+          {subtitle && <p className="mt-2 text-sm text-muted-foreground max-w-2xl">{subtitle}</p>}
         </div>
       </div>
       {actions}
@@ -106,9 +100,7 @@ export function Stat({
         {Icon && <Icon className={`h-4 w-4 ${toneClass}`} />}
       </div>
       <div className="relative font-display text-3xl font-bold">{value}</div>
-      {delta && (
-        <div className={`relative mt-1 font-mono text-[11px] ${toneClass}`}>{delta}</div>
-      )}
+      {delta && <div className={`relative mt-1 font-mono text-[11px] ${toneClass}`}>{delta}</div>}
     </div>
   );
 }

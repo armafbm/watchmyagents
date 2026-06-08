@@ -9,7 +9,7 @@ interface Line {
 // 3 commands only — no WMA key export in the landing demo
 const steps: Line[][] = [
   [{ text: "npm install -g watchmyagents", type: "command" }],
-  [{ text: "export ANTHROPIC_API_KEY=\"sk-ant-...\"", type: "command" }],
+  [{ text: 'export ANTHROPIC_API_KEY="sk-ant-..."', type: "command" }],
   [{ text: "wma-shield --agent-id agent_01XaNB4M88ZvcW8FoQ5GC14A", type: "command" }],
 ];
 
@@ -145,7 +145,11 @@ export function InstallSection() {
         <div className="text-center mb-14">
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono uppercase tracking-widest mb-6"
-            style={{ borderColor: `${BLUE_ACCENT}55`, background: `${BLUE_ACCENT}10`, color: BLUE_ACCENT }}
+            style={{
+              borderColor: `${BLUE_ACCENT}55`,
+              background: `${BLUE_ACCENT}10`,
+              color: BLUE_ACCENT,
+            }}
           >
             <Terminal className="w-3.5 h-3.5" />
             Quick Start
@@ -162,8 +166,18 @@ export function InstallSection() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               {[
-                { name: "Claude Agent", tag: "Anthropic", ready: true, desc: "Native Anthropic SDK — available now." },
-                { name: "LangGraph", tag: "LangChain", ready: false, desc: "The most robust framework for building complex, stateful agents with memory, steps, tools, human-in-the-loop and long workflows. LangGraph is built for reliable agent orchestration." },
+                {
+                  name: "Claude Agent",
+                  tag: "Anthropic",
+                  ready: true,
+                  desc: "Native Anthropic SDK — available now.",
+                },
+                {
+                  name: "LangGraph",
+                  tag: "LangChain",
+                  ready: false,
+                  desc: "The most robust framework for building complex, stateful agents with memory, steps, tools, human-in-the-loop and long workflows. LangGraph is built for reliable agent orchestration.",
+                },
                 { name: "OpenAI", tag: "OpenAI", ready: false },
                 { name: "CrewAI", tag: "CrewAI", ready: false },
                 { name: "AutoGen / AG2", tag: "Microsoft", ready: false },
@@ -188,9 +202,17 @@ export function InstallSection() {
                     </span>
                   )}
                   {fw.desc && (
-                    <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 rounded-lg border text-xs text-left opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                         style={{ background: "oklch(0.18 0.04 245)", borderColor: `${BLUE_ACCENT}55`, color: "#cfe3ff" }}>
-                      <div className="font-semibold mb-1" style={{ color: BLUE_ACCENT }}>{fw.tag}</div>
+                    <div
+                      className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 rounded-lg border text-xs text-left opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      style={{
+                        background: "oklch(0.18 0.04 245)",
+                        borderColor: `${BLUE_ACCENT}55`,
+                        color: "#cfe3ff",
+                      }}
+                    >
+                      <div className="font-semibold mb-1" style={{ color: BLUE_ACCENT }}>
+                        {fw.tag}
+                      </div>
                       {fw.desc}
                     </div>
                   )}
@@ -205,7 +227,10 @@ export function InstallSection() {
           {/* LEFT — Explanation */}
           <div className="flex flex-col justify-center min-w-0">
             <div className="space-y-6 min-w-0">
-              <div className="font-mono text-xs uppercase tracking-widest" style={{ color: BLUE_ACCENT }}>
+              <div
+                className="font-mono text-xs uppercase tracking-widest"
+                style={{ color: BLUE_ACCENT }}
+              >
                 Step 03 / 03 — Deploy
               </div>
               <div className="flex items-start gap-3 sm:gap-4 min-w-0">
@@ -216,16 +241,31 @@ export function InstallSection() {
                   <Rocket className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: BLUE_ACCENT }} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 break-words">Wrap, run, observe</h3>
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 break-words">
+                    Wrap, run, observe
+                  </h3>
                   <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                    Initialize once with your agentId. Every prompt, tool call and response is now streamed to your Fortress in real time.
+                    Initialize once with your agentId. Every prompt, tool call and response is now
+                    streamed to your Fortress in real time.
                   </p>
 
                   <ul className="mt-5 space-y-3">
                     {[
-                      { n: 1, title: "Framework API key", desc: "The key your application / framework uses to connect to its main provider (Anthropic, OpenAI, …)." },
-                      { n: 2, title: "Watch My Agent API key", desc: "The key tied to your Watch My Agent account." },
-                      { n: 3, title: "Agent ID from your framework console", desc: "The unique identifier of the agent you created in the framework console." },
+                      {
+                        n: 1,
+                        title: "Framework API key",
+                        desc: "The key your application / framework uses to connect to its main provider (Anthropic, OpenAI, …).",
+                      },
+                      {
+                        n: 2,
+                        title: "Watch My Agent API key",
+                        desc: "The key tied to your Watch My Agent account.",
+                      },
+                      {
+                        n: 3,
+                        title: "Agent ID from your framework console",
+                        desc: "The unique identifier of the agent you created in the framework console.",
+                      },
                     ].map((item) => (
                       <li key={item.n} className="flex gap-3 min-w-0">
                         <div
@@ -243,7 +283,6 @@ export function InstallSection() {
                   </ul>
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -272,7 +311,11 @@ export function InstallSection() {
                     className="p-1.5 rounded hover:bg-white/15 transition-colors text-white/70 hover:text-white"
                     title={isPlaying ? "Pause" : "Play"}
                   >
-                    {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                    {isPlaying ? (
+                      <Pause className="w-3.5 h-3.5" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5" />
+                    )}
                   </button>
                   <button
                     onClick={reset}
@@ -299,12 +342,14 @@ export function InstallSection() {
                         line.type === "command"
                           ? BLUE_ACCENT
                           : line.type === "comment"
-                          ? "#64748b"
-                          : "#dbeafe",
+                            ? "#64748b"
+                            : "#dbeafe",
                     }}
                   >
                     {line.type === "command" && (
-                      <span style={{ color: BLUE_ACCENT }} className="mr-2">$</span>
+                      <span style={{ color: BLUE_ACCENT }} className="mr-2">
+                        $
+                      </span>
                     )}
                     {line.text}
                   </div>
@@ -319,12 +364,14 @@ export function InstallSection() {
                         steps[currentStep - 1][currentLine - 1].type === "command"
                           ? BLUE_ACCENT
                           : steps[currentStep - 1][currentLine - 1].type === "comment"
-                          ? "#64748b"
-                          : "#dbeafe",
+                            ? "#64748b"
+                            : "#dbeafe",
                     }}
                   >
                     {steps[currentStep - 1][currentLine - 1].type === "command" && (
-                      <span style={{ color: BLUE_ACCENT }} className="mr-2">$</span>
+                      <span style={{ color: BLUE_ACCENT }} className="mr-2">
+                        $
+                      </span>
                     )}
                     {steps[currentStep - 1][currentLine - 1].text.slice(0, charIndex)}
                     <span
@@ -357,20 +404,20 @@ export function InstallSection() {
                         background: isActive
                           ? `${BLUE_ACCENT}25`
                           : isDone
-                          ? "oklch(0.6 0.18 145 / 0.18)"
-                          : "transparent",
+                            ? "oklch(0.6 0.18 145 / 0.18)"
+                            : "transparent",
                         border: `1px solid ${
                           isActive
                             ? `${BLUE_ACCENT}80`
                             : isDone
-                            ? "oklch(0.6 0.18 145 / 0.4)"
-                            : "rgba(255,255,255,0.08)"
+                              ? "oklch(0.6 0.18 145 / 0.4)"
+                              : "rgba(255,255,255,0.08)"
                         }`,
                         color: isActive
                           ? BLUE_ACCENT
                           : isDone
-                          ? "oklch(0.78 0.18 145)"
-                          : "rgba(255,255,255,0.5)",
+                            ? "oklch(0.78 0.18 145)"
+                            : "rgba(255,255,255,0.5)",
                       }}
                     >
                       {isDone ? (

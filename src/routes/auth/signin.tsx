@@ -92,7 +92,10 @@ function SigninPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+          <Label
+            htmlFor="email"
+            className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+          >
             Email
           </Label>
           <Input
@@ -107,13 +110,13 @@ function SigninPage() {
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+            <Label
+              htmlFor="password"
+              className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+            >
               Password
             </Label>
-            <Link
-              to="/auth/reset-password"
-              className="text-xs text-primary hover:underline"
-            >
+            <Link to="/auth/reset-password" className="text-xs text-primary hover:underline">
               Forgot?
             </Link>
           </div>
@@ -139,10 +142,7 @@ function SigninPage() {
         </div>
 
         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-          <Checkbox
-            checked={remember}
-            onCheckedChange={(v) => setRemember(v === true)}
-          />
+          <Checkbox checked={remember} onCheckedChange={(v) => setRemember(v === true)} />
           Remember this device
         </label>
 

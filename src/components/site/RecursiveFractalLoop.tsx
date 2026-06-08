@@ -17,9 +17,9 @@ export function RecursiveFractalLoop() {
             Recursive Fractal <span className="text-gradient">Security Loop™</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed mb-3">
-            Watch. Guardian. Shield. A self-reinforcing loop where every observation feeds
-            smarter analysis, every analysis feeds stronger policies, and every policy
-            sharpens the next observation — on each agent, then on whole teams of agents.
+            Watch. Guardian. Shield. A self-reinforcing loop where every observation feeds smarter
+            analysis, every analysis feeds stronger policies, and every policy sharpens the next
+            observation — on each agent, then on whole teams of agents.
           </p>
           <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-primary" />
@@ -28,7 +28,6 @@ export function RecursiveFractalLoop() {
         </div>
 
         <LayerCards withIds={false} />
-
       </div>
     </section>
   );

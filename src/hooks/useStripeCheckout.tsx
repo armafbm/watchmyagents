@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { StripeEmbeddedCheckoutInline } from '@/components/StripeEmbeddedCheckout';
+import { useState, useCallback } from "react";
+import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 
 interface CheckoutOptions {
   priceId: string;
@@ -23,8 +23,7 @@ export function useStripeCheckout() {
     setOptions(null);
   }, []);
 
-  const checkoutElement =
-    isOpen && options ? <StripeEmbeddedCheckoutInline {...options} /> : null;
+  const checkoutElement = isOpen && options ? <StripeEmbeddedCheckoutInline {...options} /> : null;
 
   return { openCheckout, closeCheckout, isOpen, checkoutElement };
 }

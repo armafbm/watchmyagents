@@ -29,10 +29,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings/profile")({
   head: () => ({
-    meta: [
-      { title: "Profile — WatchMyAgents" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Profile — WatchMyAgents" }, { name: "robots", content: "noindex" }],
   }),
   component: ProfilePage,
 });
@@ -111,7 +108,7 @@ function ProfilePage() {
     // user_metadata for now (small, name/job/etc.); display_name is
     // mirrored into customers so the topbar can read it via
     // useUserProfile without a second query.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { avatar_url, ...metaFields } = fields;
     const { error } = await supabase.auth.updateUser({ data: metaFields });
     if (!error && user) {
@@ -160,7 +157,9 @@ function ProfilePage() {
 
     // 2. Resolve the public URL + cache-bust so the new image shows
     //    immediately without waiting for CDN/browser cache to expire.
-    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("avatars").getPublicUrl(path);
     const url = `${publicUrl}?t=${Date.now()}`;
 
     // 3. Persist the URL in public.customers (canonical store). The old
@@ -224,9 +223,7 @@ function ProfilePage() {
             </Button>
           </label>
 
-          <div className="mt-5 font-display text-lg">
-            {fields.full_name || "Unnamed operator"}
-          </div>
+          <div className="mt-5 font-display text-lg">{fields.full_name || "Unnamed operator"}</div>
           {fields.job_title && (
             <div className="text-sm text-muted-foreground">{fields.job_title}</div>
           )}
@@ -368,8 +365,8 @@ function ProfilePage() {
             </div>
             <p className="text-xs text-muted-foreground">
               Member management (invitations, roles) lives under{" "}
-              <span className="font-mono">Settings → Subscription</span> once your plan
-              supports seats.
+              <span className="font-mono">Settings → Subscription</span> once your plan supports
+              seats.
             </p>
           </Panel>
 
@@ -394,8 +391,8 @@ function ProfilePage() {
                 onChange={(e) => setNewEmail(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Changing your email sends confirmation links to BOTH your current and new
-                inbox. Both must be clicked.
+                Changing your email sends confirmation links to BOTH your current and new inbox.
+                Both must be clicked.
               </p>
             </div>
             <Separator />

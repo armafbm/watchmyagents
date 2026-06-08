@@ -13,7 +13,9 @@ export function FractalLoop() {
               How it <span className="text-gradient">works</span>
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Watch and Shield run <span className="text-foreground font-semibold">locally on your machine</span>. Guardian runs in the cloud on anonymized data. You stay in control.
+              Watch and Shield run{" "}
+              <span className="text-foreground font-semibold">locally on your machine</span>.
+              Guardian runs in the cloud on anonymized data. You stay in control.
             </p>
           </div>
           <img

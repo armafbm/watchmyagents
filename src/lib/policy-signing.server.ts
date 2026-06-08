@@ -17,13 +17,7 @@ export function canonicalize(value: unknown): string {
   }
   const obj = value as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
-  return (
-    "{" +
-    keys
-      .map((k) => JSON.stringify(k) + ":" + canonicalize(obj[k]))
-      .join(",") +
-    "}"
-  );
+  return "{" + keys.map((k) => JSON.stringify(k) + ":" + canonicalize(obj[k])).join(",") + "}";
 }
 
 // ---------- payload shapes ----------
@@ -37,14 +31,7 @@ export type PolicySignableFields = {
   mode?: unknown;
 };
 
-const POLICY_FIELDS = [
-  "rule_id",
-  "match",
-  "action",
-  "message",
-  "priority",
-  "mode",
-] as const;
+const POLICY_FIELDS = ["rule_id", "match", "action", "message", "priority", "mode"] as const;
 
 export function policySigningPayload(p: PolicySignableFields): string {
   const out: Record<string, unknown> = {};
@@ -81,9 +68,7 @@ const ED25519_SPKI_PREFIX = Buffer.from([
 export function rawPubkeyToKeyObject(rawBase64: string) {
   const raw = Buffer.from(rawBase64, "base64");
   if (raw.length !== 32) {
-    throw new Error(
-      `Invalid Ed25519 public key length: expected 32 raw bytes, got ${raw.length}`,
-    );
+    throw new Error(`Invalid Ed25519 public key length: expected 32 raw bytes, got ${raw.length}`);
   }
   const spki = Buffer.concat([ED25519_SPKI_PREFIX, raw]);
   return createPublicKey({ key: spki, format: "der", type: "spki" });
@@ -102,12 +87,7 @@ export function verifyEd25519(
 ): boolean {
   try {
     const key = rawPubkeyToKeyObject(rawPubkeyBase64);
-    return cryptoVerify(
-      null,
-      Buffer.from(payload, "utf8"),
-      key,
-      Buffer.from(sigBase64, "base64"),
-    );
+    return cryptoVerify(null, Buffer.from(payload, "utf8"), key, Buffer.from(sigBase64, "base64"));
   } catch {
     return false;
   }

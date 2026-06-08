@@ -59,7 +59,10 @@ export const BrowserFrame: React.FC<{
   </div>
 );
 
-export const Tag: React.FC<{ children: React.ReactNode; color?: string }> = ({ children, color = C.primary }) => (
+export const Tag: React.FC<{ children: React.ReactNode; color?: string }> = ({
+  children,
+  color = C.primary,
+}) => (
   <span
     style={{
       fontFamily: F.mono,

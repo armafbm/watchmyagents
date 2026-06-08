@@ -5,10 +5,7 @@ import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth/google-popup")({
   head: () => ({
-    meta: [
-      { title: "Connecting Google…" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Connecting Google…" }, { name: "robots", content: "noindex" }],
   }),
   component: GooglePopup,
 });
@@ -49,10 +46,7 @@ function GooglePopup() {
 
         // Tokens received & session is set in localStorage (shared with opener).
         setStatus("Signed in. Returning to Fortress…");
-        window.opener?.postMessage(
-          { type: MSG_SUCCESS },
-          window.location.origin,
-        );
+        window.opener?.postMessage({ type: MSG_SUCCESS }, window.location.origin);
         // Small delay so the success state is visible if the window is slow to close.
         setTimeout(() => window.close(), 80);
       } catch (e) {

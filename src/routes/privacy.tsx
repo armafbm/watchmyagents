@@ -34,11 +34,14 @@ function PrivacyPage() {
             <div className="font-mono text-xs uppercase tracking-widest text-primary mb-4">
               // Legal
             </div>
-            <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
-              Privacy Policy
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">Privacy Policy</h1>
             <p className="text-muted-foreground text-lg">
-              Last updated: {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+              Last updated:{" "}
+              {new Date().toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
             </p>
           </div>
 
@@ -49,7 +52,10 @@ function PrivacyPage() {
                 <h2 className="text-2xl font-bold">1. Overview</h2>
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                WatchMyAgents (“we”, “our”, “us”) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services. By accessing or using WatchMyAgents, you agree to the terms of this Privacy Policy.
+                WatchMyAgents (“we”, “our”, “us”) is committed to protecting your privacy. This
+                Privacy Policy explains how we collect, use, disclose, and safeguard your
+                information when you use our website and services. By accessing or using
+                WatchMyAgents, you agree to the terms of this Privacy Policy.
               </p>
             </section>
 
@@ -60,13 +66,19 @@ function PrivacyPage() {
               </div>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  <strong className="text-foreground">Account Information:</strong> When you register for an account, we collect your email address, company name, and authentication credentials.
+                  <strong className="text-foreground">Account Information:</strong> When you
+                  register for an account, we collect your email address, company name, and
+                  authentication credentials.
                 </p>
                 <p>
-                  <strong className="text-foreground">Usage Data:</strong> We collect anonymized and pseudonymized signals about how you interact with our platform, including log data, device information, and agent behavior metadata.
+                  <strong className="text-foreground">Usage Data:</strong> We collect anonymized and
+                  pseudonymized signals about how you interact with our platform, including log
+                  data, device information, and agent behavior metadata.
                 </p>
                 <p>
-                  <strong className="text-foreground">Agent Signals:</strong> Our systems process encrypted, anonymized security signals from your AI agents. We never collect raw PII, secrets, or proprietary business content from your agents.
+                  <strong className="text-foreground">Agent Signals:</strong> Our systems process
+                  encrypted, anonymized security signals from your AI agents. We never collect raw
+                  PII, secrets, or proprietary business content from your agents.
                 </p>
               </div>
             </section>
@@ -92,14 +104,27 @@ function PrivacyPage() {
               </div>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Your logs stay inside your information system. Only encrypted, anonymized or pseudonymized signals are forwarded to WatchMyAgents — never raw PII, secrets or business content.
+                  Your logs stay inside your information system. Only encrypted, anonymized or
+                  pseudonymized signals are forwarded to WatchMyAgents — never raw PII, secrets or
+                  business content.
                 </p>
                 <p>
-                  We implement industry-standard encryption in transit (TLS 1.3) and at rest (AES-256). Access to production systems is strictly controlled through role-based access controls (RBAC) and multi-factor authentication.
+                  We implement industry-standard encryption in transit (TLS 1.3) and at rest
+                  (AES-256). Access to production systems is strictly controlled through role-based
+                  access controls (RBAC) and multi-factor authentication.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  {["No raw PII", "Encrypted in transit", "Pseudonymized", "Customer-owned retention", "SIEM / GRC ready"].map((b) => (
-                    <span key={b} className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-full border border-primary/30 text-primary bg-primary/5">
+                  {[
+                    "No raw PII",
+                    "Encrypted in transit",
+                    "Pseudonymized",
+                    "Customer-owned retention",
+                    "SIEM / GRC ready",
+                  ].map((b) => (
+                    <span
+                      key={b}
+                      className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-full border border-primary/30 text-primary bg-primary/5"
+                    >
                       {b}
                     </span>
                   ))}
@@ -110,28 +135,42 @@ function PrivacyPage() {
             <section>
               <h2 className="text-2xl font-bold mb-4">5. Data Sharing & Third Parties</h2>
               <p className="text-muted-foreground leading-relaxed">
-                We do not sell your personal information. We may share anonymized, aggregated data with trusted partners for infrastructure hosting, analytics, and security operations. All third-party providers are bound by strict data processing agreements.
+                We do not sell your personal information. We may share anonymized, aggregated data
+                with trusted partners for infrastructure hosting, analytics, and security
+                operations. All third-party providers are bound by strict data processing
+                agreements.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold mb-4">6. Your Rights</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Depending on your jurisdiction, you may have the right to access, correct, delete, or export your personal data. To exercise these rights, contact us at <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">minedor@watchmyagents.com</a>.
+                Depending on your jurisdiction, you may have the right to access, correct, delete,
+                or export your personal data. To exercise these rights, contact us at{" "}
+                <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">
+                  minedor@watchmyagents.com
+                </a>
+                .
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold mb-4">7. Changes to This Policy</h2>
               <p className="text-muted-foreground leading-relaxed">
-                We may update this Privacy Policy periodically. We will notify you of material changes via email or through the platform. Continued use of our services after changes constitutes acceptance of the revised policy.
+                We may update this Privacy Policy periodically. We will notify you of material
+                changes via email or through the platform. Continued use of our services after
+                changes constitutes acceptance of the revised policy.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold mb-4">8. Contact Us</h2>
               <p className="text-muted-foreground leading-relaxed">
-                For questions about this Privacy Policy or our data practices, please contact us at <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">minedor@watchmyagents.com</a>.
+                For questions about this Privacy Policy or our data practices, please contact us at{" "}
+                <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">
+                  minedor@watchmyagents.com
+                </a>
+                .
               </p>
             </section>
           </div>

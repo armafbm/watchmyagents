@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { generateApiKey } from "@/lib/fortress-keys";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Onboarding — Fortress" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Onboarding — Fortress" }, { name: "robots", content: "noindex" }],
+  }),
   component: Onboarding,
 });
 
@@ -17,7 +19,10 @@ function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [agentId, setAgentId] = useState("");
-  const [agentRow, setAgentRow] = useState<{ anthropic_agent_id: string | null; native_agent_id: string } | null>(null);
+  const [agentRow, setAgentRow] = useState<{
+    anthropic_agent_id: string | null;
+    native_agent_id: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -53,7 +58,6 @@ function Onboarding() {
     setAgentRow(data);
     setStep(2);
   };
-
 
   const generateKey = async () => {
     setLoading(true);
@@ -118,7 +122,11 @@ wma-shield --agent-id ${agentRow?.native_agent_id ?? agentRow?.anthropic_agent_i
                   autoFocus
                 />
               </div>
-              <Button onClick={submitStep1} disabled={!agentId.trim() || loading} className="w-full">
+              <Button
+                onClick={submitStep1}
+                disabled={!agentId.trim() || loading}
+                className="w-full"
+              >
                 {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 Register agent <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -156,7 +164,11 @@ wma-shield --agent-id ${agentRow?.native_agent_id ?? agentRow?.anthropic_agent_i
                   <div className="rounded-lg border border-border bg-background/60 p-3 flex items-center gap-2">
                     <code className="flex-1 font-mono text-sm break-all">{apiKey}</code>
                     <Button size="sm" variant="outline" onClick={() => copy(apiKey, "key")}>
-                      {copied === "key" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                      {copied === "key" ? (
+                        <Check className="h-3 w-3" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
                     </Button>
                   </div>
                   <Button onClick={() => setStep(3)} className="w-full">

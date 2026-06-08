@@ -1,9 +1,26 @@
-import { Brain, Zap, ShieldCheck, GitBranch, Radar, Bell, FileBarChart, Layers, Ban, Lock, Workflow, Activity } from "lucide-react";
+import {
+  Brain,
+  Zap,
+  ShieldCheck,
+  GitBranch,
+  Radar,
+  Bell,
+  FileBarChart,
+  Layers,
+  Ban,
+  Lock,
+  Workflow,
+  Activity,
+} from "lucide-react";
 import watchIcon from "@/assets/wma-icon-watch.png";
 import guardianIcon from "@/assets/wma-icon-guardian.png";
 import shieldIcon from "@/assets/wma-icon-shield.png";
 
-type Capability = { icon: React.ComponentType<{ className?: string }>; title: string; desc: string };
+type Capability = {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+};
 type Accent = "primary" | "accent";
 
 type LayerCardProps = {
@@ -19,26 +36,43 @@ type LayerCardProps = {
   accent: Accent;
 };
 
-const accentStyles: Record<Accent, { kicker: string; icon: string; hover: string; glow: string }> = {
-  primary: {
-    kicker: "text-primary",
-    icon: "text-primary",
-    hover: "hover:border-primary/50",
-    glow: "drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]",
-  },
-  accent: {
-    kicker: "text-accent",
-    icon: "text-accent",
-    hover: "hover:border-accent/50",
-    glow: "drop-shadow-[0_0_60px_hsl(var(--accent)/0.35)]",
-  },
-};
+const accentStyles: Record<Accent, { kicker: string; icon: string; hover: string; glow: string }> =
+  {
+    primary: {
+      kicker: "text-primary",
+      icon: "text-primary",
+      hover: "hover:border-primary/50",
+      glow: "drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]",
+    },
+    accent: {
+      kicker: "text-accent",
+      icon: "text-accent",
+      hover: "hover:border-accent/50",
+      glow: "drop-shadow-[0_0_60px_hsl(var(--accent)/0.35)]",
+    },
+  };
 
-function LayerCard({ id, image, imageAlt, kicker, titlePrefix, titleHighlight, titleSuffix, description, capabilities, accent }: LayerCardProps) {
+function LayerCard({
+  id,
+  image,
+  imageAlt,
+  kicker,
+  titlePrefix,
+  titleHighlight,
+  titleSuffix,
+  description,
+  capabilities,
+  accent,
+}: LayerCardProps) {
   const s = accentStyles[accent];
   return (
-    <div id={id} className="border-gradient rounded-2xl p-8 md:p-12 relative overflow-hidden scroll-mt-24">
-      <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--${accent})/0.12),transparent_70%)] pointer-events-none`} />
+    <div
+      id={id}
+      className="border-gradient rounded-2xl p-8 md:p-12 relative overflow-hidden scroll-mt-24"
+    >
+      <div
+        className={`absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--${accent})/0.12),transparent_70%)] pointer-events-none`}
+      />
       <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center relative">
         <div className="flex justify-center">
           <img
@@ -54,9 +88,7 @@ function LayerCard({ id, image, imageAlt, kicker, titlePrefix, titleHighlight, t
           <h3 className="text-3xl md:text-4xl font-bold mb-5">
             {titlePrefix} <span className="text-gradient">{titleHighlight}</span> {titleSuffix}
           </h3>
-          <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-            {description}
-          </p>
+          <p className="text-muted-foreground text-lg leading-relaxed mb-8">{description}</p>
           <div className="grid sm:grid-cols-2 gap-5">
             {capabilities.map((c) => (
               <div
@@ -150,15 +182,13 @@ export function LayerFeatures() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.06),transparent_70%)] pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="eyebrow eyebrow-accent mb-3">
-            // 03 — The three layers in detail
-          </div>
+          <div className="eyebrow eyebrow-accent mb-3">// 03 — The three layers in detail</div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             One loop, <span className="text-gradient">three layers</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Watch observes. Guardian AI thinks. Shield enforces. Each layer is
-            built to do one thing, and to do it brilliantly.
+            Watch observes. Guardian AI thinks. Shield enforces. Each layer is built to do one
+            thing, and to do it brilliantly.
           </p>
         </div>
 

@@ -10,9 +10,21 @@ export const Scene8Outro: React.FC = () => {
   const url = interpolate(frame, [120, 160], [0, 1], { extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 80 }}>
+    <AbsoluteFill
+      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 80 }}
+    >
       <div style={{ textAlign: "center" }}>
-        <div style={{ opacity: title, fontFamily: F.mono, fontSize: 14, letterSpacing: 6, color: C.primary, textTransform: "uppercase", marginBottom: 30 }}>
+        <div
+          style={{
+            opacity: title,
+            fontFamily: F.mono,
+            fontSize: 14,
+            letterSpacing: 6,
+            color: C.primary,
+            textTransform: "uppercase",
+            marginBottom: 30,
+          }}
+        >
           // WatchMyAgents
         </div>
         <h1
@@ -27,12 +39,28 @@ export const Scene8Outro: React.FC = () => {
             letterSpacing: -4,
           }}
         >
-          Protect your<br />
-          <span style={{ background: C.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          Protect your
+          <br />
+          <span
+            style={{
+              background: C.gradient,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
             IT FORTRESS
           </span>
         </h1>
-        <p style={{ opacity: sub, fontFamily: F.body, fontSize: 30, color: C.muted, marginTop: 36, marginBottom: 60 }}>
+        <p
+          style={{
+            opacity: sub,
+            fontFamily: F.body,
+            fontSize: 30,
+            color: C.muted,
+            marginTop: 36,
+            marginBottom: 60,
+          }}
+        >
           Watch. Decide. Enforce. Every agent. Every prompt.
         </p>
 

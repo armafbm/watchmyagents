@@ -6,7 +6,11 @@ export const Scene1Intro: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const tagOpacity = spring({ frame, fps, config: { damping: 200 } });
-  const titleY = interpolate(spring({ frame: frame - 10, fps, config: { damping: 18 } }), [0, 1], [60, 0]);
+  const titleY = interpolate(
+    spring({ frame: frame - 10, fps, config: { damping: 18 } }),
+    [0, 1],
+    [60, 0],
+  );
   const titleOpacity = interpolate(frame, [10, 30], [0, 1], { extrapolateRight: "clamp" });
   const line2 = spring({ frame: frame - 35, fps, config: { damping: 18 } });
   const subOpacity = interpolate(frame, [70, 95], [0, 1], { extrapolateRight: "clamp" });
@@ -32,7 +36,17 @@ export const Scene1Intro: React.FC = () => {
             marginBottom: 40,
           }}
         >
-          <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: 5, background: C.primary, marginRight: 14, boxShadow: `0 0 16px ${C.primary}` }} />
+          <span
+            style={{
+              display: "inline-block",
+              width: 10,
+              height: 10,
+              borderRadius: 5,
+              background: C.primary,
+              marginRight: 14,
+              boxShadow: `0 0 16px ${C.primary}`,
+            }}
+          />
           Runtime cybersecurity for AI agents
         </div>
         <h1
@@ -49,7 +63,16 @@ export const Scene1Intro: React.FC = () => {
           }}
         >
           Your{" "}
-          <span style={{ background: C.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI agents</span>.
+          <span
+            style={{
+              background: C.gradient,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            AI agents
+          </span>
+          .
         </h1>
         <h1
           style={{
@@ -79,7 +102,8 @@ export const Scene1Intro: React.FC = () => {
             lineHeight: 1.5,
           }}
         >
-          Three layers connected by a live feedback loop — observability turned into adaptive enforcement.
+          Three layers connected by a live feedback loop — observability turned into adaptive
+          enforcement.
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
           {layers.map((l, i) => {
@@ -97,8 +121,12 @@ export const Scene1Intro: React.FC = () => {
                   boxShadow: `0 8px 32px ${l.color}22`,
                 }}
               >
-                <div style={{ fontFamily: F.mono, fontSize: 14, letterSpacing: 4, color: l.color }}>{l.name}</div>
-                <div style={{ fontFamily: F.display, fontSize: 28, color: C.fg, marginTop: 4 }}>{l.desc}</div>
+                <div style={{ fontFamily: F.mono, fontSize: 14, letterSpacing: 4, color: l.color }}>
+                  {l.name}
+                </div>
+                <div style={{ fontFamily: F.display, fontSize: 28, color: C.fg, marginTop: 4 }}>
+                  {l.desc}
+                </div>
               </div>
             );
           })}

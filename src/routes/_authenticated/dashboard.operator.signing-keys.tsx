@@ -32,8 +32,10 @@ function keyStatus(k: KeyRow): { label: string; tone: string } {
   const now = Date.now();
   const from = new Date(k.valid_from).getTime();
   const until = new Date(k.valid_until).getTime();
-  if (now < from) return { label: "scheduled", tone: "bg-muted text-muted-foreground border-border" };
-  if (now >= until) return { label: "expired", tone: "bg-warning/15 text-warning border-warning/30" };
+  if (now < from)
+    return { label: "scheduled", tone: "bg-muted text-muted-foreground border-border" };
+  if (now >= until)
+    return { label: "expired", tone: "bg-warning/15 text-warning border-warning/30" };
   return { label: "active", tone: "bg-success/15 text-success border-success/30" };
 }
 
@@ -68,11 +70,18 @@ function SigningKeysPage() {
   }, [isOperator]);
 
   const onRevoke = async (kid: string) => {
-    if (!confirm(`Revoke signing key ${kid}? Every policy signed by it will be dropped by all SDKs on the next refresh.`)) return;
+    if (
+      !confirm(
+        `Revoke signing key ${kid}? Every policy signed by it will be dropped by all SDKs on the next refresh.`,
+      )
+    )
+      return;
     setBusy(true);
     try {
       const r = await callRevoke({ data: { kid } });
-      toast.success(`Revoked ${kid} — ${r.affected_policies} policies / ${r.affected_customers} customers impacted`);
+      toast.success(
+        `Revoked ${kid} — ${r.affected_policies} policies / ${r.affected_customers} customers impacted`,
+      );
       await reload();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Revoke failed");
@@ -138,7 +147,8 @@ function SigningKeysPage() {
             <div>
               <div className="font-semibold">Operator role required</div>
               <div className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-                This page manages the Fortress root chain-of-trust. If you're the first user setting it up, claim the role below — otherwise ask an existing operator to grant it.
+                This page manages the Fortress root chain-of-trust. If you're the first user setting
+                it up, claim the role below — otherwise ask an existing operator to grant it.
               </div>
             </div>
             <Button onClick={onClaim} disabled={busy} variant="outline">
@@ -173,8 +183,8 @@ function SigningKeysPage() {
         <Panel>
           <div className="flex items-center justify-between gap-4 py-2">
             <div className="text-sm">
-              <span className="font-semibold">{unsigned}</span> policy{unsigned > 1 ? "ies" : ""} unsigned.
-              SDK v1.1.5+ will drop them. Run a backfill with the current active key.
+              <span className="font-semibold">{unsigned}</span> policy{unsigned > 1 ? "ies" : ""}{" "}
+              unsigned. SDK v1.1.5+ will drop them. Run a backfill with the current active key.
             </div>
             <Button size="sm" onClick={onBackfill} disabled={busy}>
               {busy ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
@@ -214,7 +224,9 @@ function SigningKeysPage() {
                     <tr key={k.kid} className="border-b border-border/30 last:border-0">
                       <td className="py-2 pr-4 font-mono text-xs">{k.kid}</td>
                       <td className="py-2 pr-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest ${s.tone}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded border font-mono text-[10px] uppercase tracking-widest ${s.tone}`}
+                        >
                           {s.label}
                         </span>
                       </td>

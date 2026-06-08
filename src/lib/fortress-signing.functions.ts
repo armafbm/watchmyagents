@@ -41,7 +41,11 @@ function rootPubkey(): string {
 // ---------- mintSigningKey ----------
 
 const mintInput = z.object({
-  kid: z.string().min(3).max(64).regex(/^[a-zA-Z0-9_\-]+$/),
+  kid: z
+    .string()
+    .min(3)
+    .max(64)
+    .regex(/^[a-zA-Z0-9_\-]+$/),
   pubkey: z.string().min(40).max(60),
   valid_from: z.string().datetime(),
   valid_until: z.string().datetime(),
@@ -323,9 +327,7 @@ export const listSigningKeys = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     // Counts per key
-    const { data: countRows } = await supabaseAdmin
-      .from("policies")
-      .select("signing_key_id");
+    const { data: countRows } = await supabaseAdmin.from("policies").select("signing_key_id");
     const counts = new Map<string, number>();
     for (const r of (countRows ?? []) as Array<{ signing_key_id: string | null }>) {
       if (!r.signing_key_id) continue;
@@ -374,9 +376,7 @@ export const getPoliciesForCustomer = createServerFn({ method: "GET" })
 
     const { data: policies, error: pe } = await supabaseAdmin
       .from("policies")
-      .select(
-        "rule_id, match, action, message, priority, mode, signature, signing_key_id",
-      )
+      .select("rule_id, match, action, message, priority, mode, signature, signing_key_id")
       .eq("customer_id", userId)
       .eq("enabled", true);
     if (pe) throw new Error(pe.message);

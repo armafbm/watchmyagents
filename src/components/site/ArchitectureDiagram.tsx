@@ -1,4 +1,13 @@
-import { ArrowRight, Cpu, Cloud, UserCheck, BarChart3, Lightbulb, Rocket, Brain } from "lucide-react";
+import {
+  ArrowRight,
+  Cpu,
+  Cloud,
+  UserCheck,
+  BarChart3,
+  Lightbulb,
+  Rocket,
+  Brain,
+} from "lucide-react";
 import { LayerIcon } from "@/components/site/LayerIcons";
 
 /**
@@ -38,7 +47,10 @@ export function ArchitectureDiagram() {
               <div className="relative flex items-center gap-4 px-5 py-3.5 rounded-2xl border border-accent/60 bg-background/90 backdrop-blur-xl shadow-[0_0_50px_-10px_hsl(var(--accent)/0.7)]">
                 <div className="relative">
                   <div className="absolute inset-0 rounded-full bg-accent/30 blur-lg animate-pulse" />
-                  <LayerIcon layer="guardian" className="relative h-10 w-10 drop-shadow-[0_0_12px_hsl(var(--accent)/0.8)]" />
+                  <LayerIcon
+                    layer="guardian"
+                    className="relative h-10 w-10 drop-shadow-[0_0_12px_hsl(var(--accent)/0.8)]"
+                  />
                 </div>
                 <div className="text-left">
                   <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-accent mb-0.5">
@@ -55,16 +67,32 @@ export function ArchitectureDiagram() {
 
           {/* Pipeline */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-stretch">
-            <PipelineStep icon={<BarChart3 className="h-5 w-5" />} title="Analyze" subtitle="signals" />
-            <PipelineStep icon={<LayerIcon layer="fortress" className="h-6 w-6" />} title="Dashboard" subtitle="report" />
-            <PipelineStep icon={<Lightbulb className="h-5 w-5" />} title="Suggest" subtitle="policies" />
+            <PipelineStep
+              icon={<BarChart3 className="h-5 w-5" />}
+              title="Analyze"
+              subtitle="signals"
+            />
+            <PipelineStep
+              icon={<LayerIcon layer="fortress" className="h-6 w-6" />}
+              title="Dashboard"
+              subtitle="report"
+            />
+            <PipelineStep
+              icon={<Lightbulb className="h-5 w-5" />}
+              title="Suggest"
+              subtitle="policies"
+            />
             <PipelineStep
               icon={<UserCheck className="h-5 w-5" />}
               title="User"
               subtitle="agreement"
               highlight
             />
-            <PipelineStep icon={<Rocket className="h-5 w-5" />} title="Deploy" subtitle="policies" />
+            <PipelineStep
+              icon={<Rocket className="h-5 w-5" />}
+              title="Deploy"
+              subtitle="policies"
+            />
           </div>
 
           <p className="text-[11px] text-muted-foreground text-center mt-4 leading-snug">
@@ -158,7 +186,9 @@ function PipelineStep({
       >
         {icon}
       </div>
-      <div className="font-display font-bold text-xs md:text-sm leading-tight text-foreground whitespace-nowrap w-full px-0.5">{title}</div>
+      <div className="font-display font-bold text-xs md:text-sm leading-tight text-foreground whitespace-nowrap w-full px-0.5">
+        {title}
+      </div>
       {subtitle && (
         <div className="font-mono text-[8px] md:text-[9px] uppercase tracking-[0.12em] text-muted-foreground mt-1 leading-tight whitespace-nowrap w-full px-0.5">
           {subtitle}

@@ -11,7 +11,9 @@ import { SessionIdList } from "@/components/fortress/SessionIdChip";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/watch")({
-  head: () => ({ meta: [{ title: "Watch · Monitoring — WatchMyAgents" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Watch · Monitoring — WatchMyAgents" }, { name: "robots", content: "noindex" }],
+  }),
   component: WatchPage,
 });
 
@@ -31,10 +33,6 @@ type Agent = {
   composition_pattern: string | null;
   enforcement_mode: EnforcementMode;
 };
-
-
-
-
 
 type SignalRow = {
   id: string;
@@ -82,7 +80,8 @@ function kindOf(p: Record<string, unknown> | null): string {
 
 function summaryOf(p: Record<string, unknown> | null): string {
   if (!p) return "";
-  const s = (p as { summary?: unknown; message?: unknown }).summary ?? (p as { message?: unknown }).message;
+  const s =
+    (p as { summary?: unknown; message?: unknown }).summary ?? (p as { message?: unknown }).message;
   if (typeof s === "string") return s;
   // derive from counts
   const counts = (p as { counts?: Record<string, number> }).counts;
@@ -148,13 +147,34 @@ function WatchPage() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Stat label="Agents registered" value={loading ? "—" : String(agents.length)} tone="success" icon={Eye} />
-        <Stat label="Online (last hour)" value={loading ? "—" : String(onlineCount)} icon={Activity} tone={onlineCount > 0 ? "success" : "warning"} />
-        <Stat label="Signals (recent 50)" value={loading ? "—" : String(signals.length)} icon={Activity} />
-        <Stat label="Unique sources" value={loading ? "—" : String(Object.keys(signalCountByAgent).length)} />
+        <Stat
+          label="Agents registered"
+          value={loading ? "—" : String(agents.length)}
+          tone="success"
+          icon={Eye}
+        />
+        <Stat
+          label="Online (last hour)"
+          value={loading ? "—" : String(onlineCount)}
+          icon={Activity}
+          tone={onlineCount > 0 ? "success" : "warning"}
+        />
+        <Stat
+          label="Signals (recent 50)"
+          value={loading ? "—" : String(signals.length)}
+          icon={Activity}
+        />
+        <Stat
+          label="Unique sources"
+          value={loading ? "—" : String(Object.keys(signalCountByAgent).length)}
+        />
       </div>
 
-      <Panel title="Agents under watch" icon={Eye} tag={loading ? "loading…" : `${agents.length} agent${agents.length === 1 ? "" : "s"}`}>
+      <Panel
+        title="Agents under watch"
+        icon={Eye}
+        tag={loading ? "loading…" : `${agents.length} agent${agents.length === 1 ? "" : "s"}`}
+      >
         {loading ? (
           <div className="space-y-2 py-2">
             {[0, 1, 2].map((i) => (
@@ -181,7 +201,11 @@ function WatchPage() {
       </Panel>
 
       <div className="mt-6">
-        <Panel title="Signal tail" icon={Radio} tag={loading ? "loading…" : `live · last ${signals.length}`}>
+        <Panel
+          title="Signal tail"
+          icon={Radio}
+          tag={loading ? "loading…" : `live · last ${signals.length}`}
+        >
           {loading ? (
             <div className="space-y-2">
               {[0, 1, 2, 3].map((i) => (
@@ -195,23 +219,15 @@ function WatchPage() {
           ) : (
             <ul className="space-y-2 max-h-[28rem] overflow-y-auto pr-1">
               {signals.map((s) => (
-                <SignalCard
-                  key={s.id}
-                  signal={s}
-                  agentName={agentName(s.agent_id)}
-                />
+                <SignalCard key={s.id} signal={s} agentName={agentName(s.agent_id)} />
               ))}
             </ul>
           )}
         </Panel>
       </div>
 
-
       {selectedAgent && (
-        <AgentDetailDrawer
-          agent={selectedAgent}
-          onClose={() => setSelectedAgent(null)}
-        />
+        <AgentDetailDrawer agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
       )}
     </DashboardLayout>
   );
@@ -305,7 +321,11 @@ function TreeNode({
           }`}
         >
           {hasChildren ? (
-            open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />
+            open ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )
           ) : (
             <span className="h-1 w-1 rounded-full bg-current" />
           )}
@@ -364,7 +384,13 @@ function SignalCard({ signal, agentName }: { signal: SignalRow; agentName: strin
   const kind = kindOf(signal.payload);
   const summary = summaryOf(signal.payload);
   const toneVar =
-    sev === "CRIT" ? "danger" : sev === "WARN" ? "warning" : sev === "INFO" ? "muted-foreground" : "success";
+    sev === "CRIT"
+      ? "danger"
+      : sev === "WARN"
+        ? "warning"
+        : sev === "INFO"
+          ? "muted-foreground"
+          : "success";
 
   return (
     <li className="rounded-lg border border-border/40 bg-background/30 hover:border-primary/40 transition overflow-hidden">
@@ -372,11 +398,7 @@ function SignalCard({ signal, agentName }: { signal: SignalRow; agentName: strin
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-stretch gap-3 text-left"
       >
-        <span
-          aria-hidden
-          className="w-1 shrink-0"
-          style={{ background: `var(--${toneVar})` }}
-        />
+        <span aria-hidden className="w-1 shrink-0" style={{ background: `var(--${toneVar})` }} />
         <div className="flex-1 grid grid-cols-[80px_110px_1fr_auto] items-center gap-3 px-3 py-2.5 min-w-0">
           <span className="font-mono text-[11px] text-muted-foreground">
             {new Date(signal.ingested_at).toLocaleTimeString()}
@@ -434,9 +456,20 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
 
   const stats = useMemo(() => {
     if (!logs) return null;
-    const sevCounts: Record<"OK" | "WARN" | "CRIT" | "INFO", number> = { OK: 0, WARN: 0, CRIT: 0, INFO: 0 };
+    const sevCounts: Record<"OK" | "WARN" | "CRIT" | "INFO", number> = {
+      OK: 0,
+      WARN: 0,
+      CRIT: 0,
+      INFO: 0,
+    };
     logs.forEach((l) => sevCounts[severityOfSignal(l.payload)]++);
-    return { total: logs.length, OK: sevCounts.OK, WARN: sevCounts.WARN, CRIT: sevCounts.CRIT, INFO: sevCounts.INFO };
+    return {
+      total: logs.length,
+      OK: sevCounts.OK,
+      WARN: sevCounts.WARN,
+      CRIT: sevCounts.CRIT,
+      INFO: sevCounts.INFO,
+    };
   }, [logs]);
 
   return (
@@ -449,7 +482,9 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
       <aside className="w-full max-w-2xl h-full bg-card/95 backdrop-blur-xl border-l border-border/60 flex flex-col shadow-2xl">
         <header className="flex items-start justify-between gap-4 p-5 border-b border-border/40">
           <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-1">// Agent detail</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary mb-1">
+              // Agent detail
+            </p>
             <div className="flex items-center gap-2 mb-1">
               <ProviderBadge provider={agent.provider as AgentProvider | null} />
               <h2 className="font-display text-xl font-bold truncate">{agent.display_name}</h2>
@@ -457,7 +492,10 @@ function AgentDetailDrawer({ agent, onClose }: { agent: Agent; onClose: () => vo
             <p className="font-mono text-[11px] text-muted-foreground truncate mt-1">
               {agent.native_agent_id ?? agent.anthropic_agent_id ?? "—"}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2"><TypologyBadge a={agent} /><EnforcementBadge mode={agent.enforcement_mode} /></div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <TypologyBadge a={agent} />
+              <EnforcementBadge mode={agent.enforcement_mode} />
+            </div>
           </div>
           <button
             onClick={onClose}
