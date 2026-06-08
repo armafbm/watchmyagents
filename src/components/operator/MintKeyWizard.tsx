@@ -35,7 +35,9 @@ export function MintKeyWizard({ onClose, onMinted }: Props) {
   const today = new Date().toISOString().slice(0, 10);
   const defaultEnd = new Date(Date.now() + 90 * 24 * 3600 * 1000).toISOString().slice(0, 10);
 
-  const [kid, setKid] = useState(`sk-${new Date().getFullYear()}-q${Math.floor(new Date().getMonth() / 3) + 1}`);
+  const [kid, setKid] = useState(
+    `sk-${new Date().getFullYear()}-q${Math.floor(new Date().getMonth() / 3) + 1}`,
+  );
   const [validFrom, setValidFrom] = useState(today);
   const [validUntil, setValidUntil] = useState(defaultEnd);
   const [pubkey, setPubkey] = useState("");
@@ -137,14 +139,20 @@ console.log('private_pem:\\n' + privatePem);`;
             </div>
             <div className="font-semibold">Mint signing key</div>
           </div>
-          <button type="button" onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 text-muted-foreground hover:text-foreground"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="px-6 py-5 space-y-5">
           <section className="space-y-3">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">1. Key identity</div>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">
+              1. Key identity
+            </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="kid">kid</Label>
@@ -152,15 +160,33 @@ console.log('private_pem:\\n' + privatePem);`;
               </div>
               <div className="space-y-1">
                 <Label htmlFor="vf">Valid from</Label>
-                <Input id="vf" type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} required />
-                <div className="text-[10px] font-mono text-muted-foreground truncate" title={fromIso}>
+                <Input
+                  id="vf"
+                  type="date"
+                  value={validFrom}
+                  onChange={(e) => setValidFrom(e.target.value)}
+                  required
+                />
+                <div
+                  className="text-[10px] font-mono text-muted-foreground truncate"
+                  title={fromIso}
+                >
                   → {fromIso || "—"}
                 </div>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="vu">Valid until</Label>
-                <Input id="vu" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} required />
-                <div className="text-[10px] font-mono text-muted-foreground truncate" title={untilIso}>
+                <Input
+                  id="vu"
+                  type="date"
+                  value={validUntil}
+                  onChange={(e) => setValidUntil(e.target.value)}
+                  required
+                />
+                <div
+                  className="text-[10px] font-mono text-muted-foreground truncate"
+                  title={untilIso}
+                >
                   → {untilIso || "—"}
                 </div>
               </div>
@@ -173,12 +199,16 @@ console.log('private_pem:\\n' + privatePem);`;
                 2. Run offline on an air-gapped machine
               </div>
               <Button type="button" size="sm" variant="outline" onClick={copyCeremony}>
-                {copied ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 mr-1" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5 mr-1" />
+                )}
                 Copy snippet
               </Button>
             </div>
             <pre className="text-[11px] font-mono bg-muted/40 border border-border rounded-lg p-3 overflow-x-auto max-h-72 overflow-y-auto whitespace-pre">
-{ceremonySnippet}
+              {ceremonySnippet}
             </pre>
           </section>
 
@@ -188,11 +218,22 @@ console.log('private_pem:\\n' + privatePem);`;
             </div>
             <div className="space-y-1">
               <Label htmlFor="pk">pubkey (base64 raw 32-byte)</Label>
-              <Input id="pk" value={pubkey} onChange={(e) => setPubkey(e.target.value)} required placeholder="mWNwGoO...==" />
+              <Input
+                id="pk"
+                value={pubkey}
+                onChange={(e) => setPubkey(e.target.value)}
+                required
+                placeholder="mWNwGoO...=="
+              />
             </div>
             <div className="space-y-1">
               <Label htmlFor="sbr">signed_by_root (base64)</Label>
-              <Input id="sbr" value={signedByRoot} onChange={(e) => setSignedByRoot(e.target.value)} required />
+              <Input
+                id="sbr"
+                value={signedByRoot}
+                onChange={(e) => setSignedByRoot(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-1">
               <Label htmlFor="sn">Vault secret name (private key ref)</Label>

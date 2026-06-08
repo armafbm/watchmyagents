@@ -35,48 +35,42 @@ const STEPS: Step[] = [
     id: "intro",
     target: "#top",
     title: "Bienvenue dans WatchMyAgents",
-    body:
-      "Une infrastructure de cybersécurité runtime pour vos agents IA. Laissez-vous guider : nous allons parcourir les trois couches Watch, Guardian AI et Shield, puis My Fortress.",
+    body: "Une infrastructure de cybersécurité runtime pour vos agents IA. Laissez-vous guider : nous allons parcourir les trois couches Watch, Guardian AI et Shield, puis My Fortress.",
     duration: 7000,
   },
   {
     id: "loop",
     target: "#recursive-fractal",
     title: "La boucle Recursive Fractal Security™",
-    body:
-      "Watch observe, Guardian AI analyse, Shield applique. Chaque observation nourrit l'analyse, chaque analyse renforce les politiques — agent par agent, puis sur des flottes entières.",
+    body: "Watch observe, Guardian AI analyse, Shield applique. Chaque observation nourrit l'analyse, chaque analyse renforce les politiques — agent par agent, puis sur des flottes entières.",
     duration: 8000,
   },
   {
     id: "watch",
     target: "#watch",
     title: "Watch · Observer en temps réel",
-    body:
-      "Chaque action, chaque outil appelé, chaque token. Watch capture le comportement réel de vos agents en production sans rien casser.",
+    body: "Chaque action, chaque outil appelé, chaque token. Watch capture le comportement réel de vos agents en production sans rien casser.",
     duration: 8000,
   },
   {
     id: "guardian",
     target: "#guardian",
     title: "Guardian AI · Comprendre et conseiller",
-    body:
-      "Guardian AI corrèle, score et explique. Il transforme le bruit des signaux en recommandations actionnables : quelle politique appliquer, sur quel agent, et pourquoi.",
+    body: "Guardian AI corrèle, score et explique. Il transforme le bruit des signaux en recommandations actionnables : quelle politique appliquer, sur quel agent, et pourquoi.",
     duration: 8000,
   },
   {
     id: "shield",
     target: "#shield",
     title: "Shield · Bloquer en runtime",
-    body:
-      "Politiques adaptatives par agent, par flotte ou par sous-arbre. Shield applique en temps réel ce que Guardian recommande — confirm, interrupt ou detect-only.",
+    body: "Politiques adaptatives par agent, par flotte ou par sous-arbre. Shield applique en temps réel ce que Guardian recommande — confirm, interrupt ou detect-only.",
     duration: 8000,
   },
   {
     id: "fortress",
     target: "#dashboard",
     title: "My Fortress · Le centre de commandement",
-    body:
-      "Une seule console pour tous vos agents. KPI live, timeline temps réel, inbox Guardian, audit et conformité — tout au même endroit.",
+    body: "Une seule console pour tous vos agents. KPI live, timeline temps réel, inbox Guardian, audit et conformité — tout au même endroit.",
     duration: 9000,
   },
 ];
@@ -227,7 +221,10 @@ function PresentationPage() {
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-5 animate-fade-in" key={step.id}>
+                <p
+                  className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-5 animate-fade-in"
+                  key={step.id}
+                >
                   {step.body}
                 </p>
                 <div className="flex items-center gap-2">
@@ -267,8 +264,8 @@ function PresentationPage() {
                           i === index
                             ? "w-6 bg-primary"
                             : i < index
-                            ? "w-1.5 bg-primary/60"
-                            : "w-1.5 bg-border hover:bg-muted-foreground"
+                              ? "w-1.5 bg-primary/60"
+                              : "w-1.5 bg-border hover:bg-muted-foreground"
                         }`}
                       />
                     ))}

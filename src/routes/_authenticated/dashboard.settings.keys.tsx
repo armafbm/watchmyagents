@@ -9,7 +9,9 @@ import { generateApiKey } from "@/lib/fortress-keys";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings/keys")({
-  head: () => ({ meta: [{ title: "API Keys — WatchMyAgents" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "API Keys — WatchMyAgents" }, { name: "robots", content: "noindex" }],
+  }),
   component: KeysPage,
 });
 
@@ -80,7 +82,11 @@ function KeysPage() {
         subtitle="Used by your shield process to authenticate with Fortress. We only store SHA-256 hashes."
         actions={
           <Button onClick={create} disabled={busy}>
-            {busy ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
             New key
           </Button>
         }

@@ -10,10 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth/reset-password")({
   head: () => ({
-    meta: [
-      { title: "Reset password — WatchMyAgents" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Reset password — WatchMyAgents" }, { name: "robots", content: "noindex" }],
   }),
   component: ResetPage,
 });
@@ -81,13 +78,13 @@ function ResetPage() {
 
   if (isRecovery) {
     return (
-      <AuthLayout
-        title="Set a new password"
-        subtitle="Choose a strong password for your account."
-      >
+      <AuthLayout title="Set a new password" subtitle="Choose a strong password for your account.">
         <form onSubmit={updatePw} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="newpw" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+            <Label
+              htmlFor="newpw"
+              className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+            >
               New password
             </Label>
             <Input
@@ -99,7 +96,10 @@ function ResetPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirmpw" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+            <Label
+              htmlFor="confirmpw"
+              className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+            >
               Confirm password
             </Label>
             <Input
@@ -124,7 +124,10 @@ function ResetPage() {
       <AuthLayout
         title="Check your email"
         footer={
-          <Link to="/auth/signin" className="text-primary hover:underline inline-flex items-center gap-1">
+          <Link
+            to="/auth/signin"
+            className="text-primary hover:underline inline-flex items-center gap-1"
+          >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
           </Link>
         }
@@ -160,14 +163,20 @@ function ResetPage() {
       title="Reset your password"
       subtitle="Enter your email — we'll send a recovery link."
       footer={
-        <Link to="/auth/signin" className="text-primary hover:underline inline-flex items-center gap-1">
+        <Link
+          to="/auth/signin"
+          className="text-primary hover:underline inline-flex items-center gap-1"
+        >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
         </Link>
       }
     >
       <form onSubmit={send} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+          <Label
+            htmlFor="email"
+            className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+          >
             Email
           </Label>
           <Input

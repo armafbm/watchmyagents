@@ -28,10 +28,7 @@ import { humanizeError } from "@/lib/error-formatting";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
-    meta: [
-      { title: "Command Center — WatchMyAgents" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Command Center — WatchMyAgents" }, { name: "robots", content: "noindex" }],
   }),
   component: CommandCenter,
 });
@@ -72,9 +69,9 @@ function CommandCenter() {
           queryClient.setQueryData<typeof query.data>(["dashboard-snapshot", uid], (prev) =>
             prev
               ? { ...prev, decisions: [payload.new as Decision, ...prev.decisions].slice(0, 8) }
-              : prev
+              : prev,
           );
-        }
+        },
       )
       .subscribe();
     return () => {
@@ -121,7 +118,9 @@ function CommandCenter() {
         <div className="mb-6 relative rounded-xl border border-warning/40 bg-warning/[0.06] backdrop-blur p-4 flex items-center gap-4">
           <Inbox className="h-5 w-5 text-warning shrink-0" />
           <div className="flex-1 text-sm">
-            <span className="font-semibold">Guardian has {pending} pending suggestion{pending > 1 ? "s" : ""}.</span>{" "}
+            <span className="font-semibold">
+              Guardian has {pending} pending suggestion{pending > 1 ? "s" : ""}.
+            </span>{" "}
             <span className="text-muted-foreground">Review them to harden your shield.</span>
           </div>
           <Link
@@ -151,7 +150,12 @@ function CommandCenter() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Stat label="Agents protected" value={fmt(agentsActive)} icon={Bot} />
         <Stat label="Actions · 24h" value={fmt(today?.actions_24h)} icon={Activity} />
-        <Stat label="Blocked · 24h" value={fmt(blocked)} icon={Shield} tone={blocked > 0 ? "danger" : "success"} />
+        <Stat
+          label="Blocked · 24h"
+          value={fmt(blocked)}
+          icon={Shield}
+          tone={blocked > 0 ? "danger" : "success"}
+        />
         <Stat label="Tokens · 24h" value={fmt(today?.tokens_24h)} icon={Coins} />
       </div>
 
@@ -164,7 +168,13 @@ function CommandCenter() {
               </div>
               <h2 className="font-display text-2xl font-bold mb-2">
                 {agentsActive > 0 ? (
-                  <>Observing <span className="text-gradient">{agentsActive} agent{agentsActive > 1 ? "s" : ""}</span>.</>
+                  <>
+                    Observing{" "}
+                    <span className="text-gradient">
+                      {agentsActive} agent{agentsActive > 1 ? "s" : ""}
+                    </span>
+                    .
+                  </>
                 ) : (
                   <>No agent connected yet.</>
                 )}
@@ -177,9 +187,17 @@ function CommandCenter() {
               <div className="flex flex-wrap gap-2">
                 {agentsActive > 0 ? (
                   <>
-                    <Pill icon={Zap} tone="primary">{fmt(today?.actions_24h)} actions</Pill>
-                    <Pill icon={Eye} tone="success">{agentsActive} online</Pill>
-                    {pending > 0 && <Pill icon={Shield} tone="warning">{pending} pending</Pill>}
+                    <Pill icon={Zap} tone="primary">
+                      {fmt(today?.actions_24h)} actions
+                    </Pill>
+                    <Pill icon={Eye} tone="success">
+                      {agentsActive} online
+                    </Pill>
+                    {pending > 0 && (
+                      <Pill icon={Shield} tone="warning">
+                        {pending} pending
+                      </Pill>
+                    )}
                   </>
                 ) : (
                   <Link
@@ -219,7 +237,12 @@ function CommandCenter() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4 mb-6">
-        <Panel title="Protected agents" icon={Bot} tag={`${agents.length}`} className="lg:col-span-2">
+        <Panel
+          title="Protected agents"
+          icon={Bot}
+          tag={`${agents.length}`}
+          className="lg:col-span-2"
+        >
           {agents.length === 0 ? (
             <div className="text-center py-8 space-y-3">
               <p className="text-sm text-muted-foreground">No agent registered yet.</p>
@@ -241,7 +264,9 @@ function CommandCenter() {
                     <div className="text-sm font-medium truncate">{a.display_name}</div>
                     <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                       {a.provider} · {a.status}
-                      {a.last_seen_at ? ` · last seen ${new Date(a.last_seen_at).toLocaleString()}` : " · never seen"}
+                      {a.last_seen_at
+                        ? ` · last seen ${new Date(a.last_seen_at).toLocaleString()}`
+                        : " · never seen"}
                     </div>
                   </div>
                   <Link
@@ -258,16 +283,31 @@ function CommandCenter() {
 
         <Panel title="Quick actions" icon={Shield}>
           <div className="space-y-2">
-            <Link to="/dashboard/shield" className="block rounded-md border border-border/60 bg-card/40 px-3 py-2.5 hover:border-primary/60 text-sm">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-primary">Shield</span>
+            <Link
+              to="/dashboard/shield"
+              className="block rounded-md border border-border/60 bg-card/40 px-3 py-2.5 hover:border-primary/60 text-sm"
+            >
+              <span className="font-mono text-[10px] uppercase tracking-widest text-primary">
+                Shield
+              </span>
               <div>Manage policies</div>
             </Link>
-            <Link to="/dashboard/guardian" className="block rounded-md border border-border/60 bg-card/40 px-3 py-2.5 hover:border-primary/60 text-sm">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-primary">Guardian</span>
+            <Link
+              to="/dashboard/guardian"
+              className="block rounded-md border border-border/60 bg-card/40 px-3 py-2.5 hover:border-primary/60 text-sm"
+            >
+              <span className="font-mono text-[10px] uppercase tracking-widest text-primary">
+                Guardian
+              </span>
               <div>Review suggestions</div>
             </Link>
-            <Link to="/dashboard/settings/keys" className="block rounded-md border border-border/60 bg-card/40 px-3 py-2.5 hover:border-primary/60 text-sm">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-primary">Keys</span>
+            <Link
+              to="/dashboard/settings/keys"
+              className="block rounded-md border border-border/60 bg-card/40 px-3 py-2.5 hover:border-primary/60 text-sm"
+            >
+              <span className="font-mono text-[10px] uppercase tracking-widest text-primary">
+                Keys
+              </span>
               <div>Manage API keys</div>
             </Link>
           </div>
@@ -289,7 +329,10 @@ function CommandCenter() {
                 </span>
                 <div className="min-w-0">
                   <span className="font-mono text-xs text-primary">{d.tool_name ?? "—"}</span>
-                  <span className="text-sm text-muted-foreground"> · {d.message ?? d.decision}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {" "}
+                    · {d.message ?? d.decision}
+                  </span>
                 </div>
               </li>
             ))}
@@ -300,7 +343,9 @@ function CommandCenter() {
       <div className="mt-6">
         <div className="flex items-end justify-between mb-3">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-widest text-primary">Intelligence</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-primary">
+              Intelligence
+            </div>
             <h3 className="font-display text-lg font-bold">Audit, intel & compliance</h3>
           </div>
         </div>
@@ -373,7 +418,9 @@ function IntelCard({
         </span>
         <span
           className={`font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded ${
-            soon ? "text-muted-foreground/70" : "text-success border border-success/30 bg-success/10"
+            soon
+              ? "text-muted-foreground/70"
+              : "text-success border border-success/30 bg-success/10"
           }`}
         >
           {tag}

@@ -1,10 +1,26 @@
 import { AlertTriangle, KeyRound, Activity, Skull } from "lucide-react";
 
 const threats = [
-  { icon: KeyRound, title: "Data leaks", desc: "Prompt injection, exfiltration via tools, verbose logs leaking secrets and PII." },
-  { icon: AlertTriangle, title: "Bad operational practices", desc: "Plaintext secrets, excessive permissions, no traceability across runs." },
-  { icon: Activity, title: "Behavioral drift", desc: "Loops, action escalation, abnormal cost spikes, out-of-scope actions." },
-  { icon: Skull, title: "Compromise & corruption", desc: "Hijacked tools, malicious instructions, agents taken hostage." },
+  {
+    icon: KeyRound,
+    title: "Data leaks",
+    desc: "Prompt injection, exfiltration via tools, verbose logs leaking secrets and PII.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Bad operational practices",
+    desc: "Plaintext secrets, excessive permissions, no traceability across runs.",
+  },
+  {
+    icon: Activity,
+    title: "Behavioral drift",
+    desc: "Loops, action escalation, abnormal cost spikes, out-of-scope actions.",
+  },
+  {
+    icon: Skull,
+    title: "Compromise & corruption",
+    desc: "Hijacked tools, malicious instructions, agents taken hostage.",
+  },
 ];
 
 export function Problem() {
@@ -17,7 +33,8 @@ export function Problem() {
             AI agents are the new <span className="text-gradient">attack surface</span>.
           </h2>
           <p className="text-muted-foreground text-lg">
-            LLM + tools + actions introduce risks classic security stacks were never designed to see.
+            LLM + tools + actions introduce risks classic security stacks were never designed to
+            see.
           </p>
         </div>
 

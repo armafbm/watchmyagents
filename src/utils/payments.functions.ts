@@ -1,22 +1,18 @@
-import { createServerFn } from '@tanstack/react-start';
-import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
-import {
-  type StripeEnv,
-  createStripeClient,
-  getStripeErrorMessage,
-} from '@/lib/stripe.server';
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
 type CheckoutSessionResult = { clientSecret: string } | { error: string };
 type PortalSessionResult = { url: string } | { error: string };
 
 // Price IDs that should include a 14-day free trial (subscription plans).
 const TRIAL_ELIGIBLE_PRICES = new Set([
-  'pro_monthly',
-  'pro_yearly',
-  'pro_plus_monthly',
-  'pro_plus_yearly',
-  'business_monthly',
-  'business_yearly',
+  "pro_monthly",
+  "pro_yearly",
+  "pro_plus_monthly",
+  "pro_plus_yearly",
+  "business_monthly",
+  "business_yearly",
 ]);
 
 async function resolveOrCreateCustomer(
@@ -24,7 +20,7 @@ async function resolveOrCreateCustomer(
   options: { email?: string; userId?: string },
 ): Promise<string> {
   if (options.userId && !/^[a-zA-Z0-9_-]+$/.test(options.userId)) {
-    throw new Error('Invalid userId');
+    throw new Error("Invalid userId");
   }
   if (options.userId) {
     const found = await stripe.customers.search({
@@ -60,11 +56,11 @@ async function resolveOrCreateCustomer(
 // can test the full checkout flow without deploying. Anything else is
 // rejected before the Stripe session is created.
 const ALLOWED_RETURN_HOSTS = new Set<string>([
-  'watchmyagents.com',
-  'www.watchmyagents.com',
-  'watchmyagents.lovable.app',
-  'localhost',
-  '127.0.0.1',
+  "watchmyagents.com",
+  "www.watchmyagents.com",
+  "watchmyagents.lovable.app",
+  "localhost",
+  "127.0.0.1",
 ]);
 
 function assertSafeReturnUrl(returnUrl: string): void {
@@ -72,35 +68,30 @@ function assertSafeReturnUrl(returnUrl: string): void {
   try {
     u = new URL(returnUrl);
   } catch {
-    throw new Error('Invalid return URL');
+    throw new Error("Invalid return URL");
   }
-  if (u.protocol !== 'https:' && u.protocol !== 'http:') {
-    throw new Error('Return URL must use http or https');
+  if (u.protocol !== "https:" && u.protocol !== "http:") {
+    throw new Error("Return URL must use http or https");
   }
-  if (u.protocol === 'http:' && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') {
-    throw new Error('Return URL over http is only allowed for localhost');
+  if (u.protocol === "http:" && u.hostname !== "localhost" && u.hostname !== "127.0.0.1") {
+    throw new Error("Return URL over http is only allowed for localhost");
   }
   if (!ALLOWED_RETURN_HOSTS.has(u.hostname)) {
-    throw new Error('Return URL host is not in the allow-list');
+    throw new Error("Return URL host is not in the allow-list");
   }
 }
 
-export const createCheckoutSession = createServerFn({ method: 'POST' })
+export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (data: {
-      priceId: string;
-      quantity?: number;
-      returnUrl: string;
-      environment: StripeEnv;
-    }) => {
-      if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error('Invalid priceId');
+    (data: { priceId: string; quantity?: number; returnUrl: string; environment: StripeEnv }) => {
+      if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
       if (data.quantity != null) {
         const q = Number(data.quantity);
-        if (!Number.isInteger(q) || q < 1 || q > 100) throw new Error('Invalid quantity');
+        if (!Number.isInteger(q) || q < 1 || q > 100) throw new Error("Invalid quantity");
       }
-      if (data.environment !== 'test' && data.environment !== 'production') {
-        throw new Error('Invalid environment');
+      if (data.environment !== "test" && data.environment !== "production") {
+        throw new Error("Invalid environment");
       }
       // FORT-4: pin return_url to a host we trust. Stripe reflects it
       // back unconditionally so any open input is an open redirect.
@@ -117,14 +108,14 @@ export const createCheckoutSession = createServerFn({ method: 'POST' })
       // record (or to an email they don't own) and the webhook would
       // happily wire the subscription up the wrong way.
       const { userId, claims } = context as { userId: string; claims: { email?: string } };
-      const customerEmail = typeof claims?.email === 'string' ? claims.email : undefined;
+      const customerEmail = typeof claims?.email === "string" ? claims.email : undefined;
 
       const stripe = createStripeClient(data.environment);
 
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
-      if (!prices.data.length) throw new Error('Price not found');
+      if (!prices.data.length) throw new Error("Price not found");
       const stripePrice = prices.data[0];
-      const isRecurring = stripePrice.type === 'recurring';
+      const isRecurring = stripePrice.type === "recurring";
 
       const customerId = await resolveOrCreateCustomer(stripe, {
         email: customerEmail,
@@ -135,8 +126,8 @@ export const createCheckoutSession = createServerFn({ method: 'POST' })
 
       const session = await stripe.checkout.sessions.create({
         line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
-        mode: isRecurring ? 'subscription' : 'payment',
-        ui_mode: 'embedded_page',
+        mode: isRecurring ? "subscription" : "payment",
+        ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
         metadata: { userId },
@@ -150,28 +141,28 @@ export const createCheckoutSession = createServerFn({ method: 'POST' })
         managed_payments: { enabled: true },
       } as any);
 
-      return { clientSecret: session.client_secret ?? '' };
+      return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
   });
 
-export const createPortalSession = createServerFn({ method: 'POST' })
+export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { returnUrl?: string; environment: StripeEnv }) => data)
   .handler(async ({ data, context }): Promise<PortalSessionResult> => {
     const { supabase, userId } = context;
 
     const { data: sub, error: subError } = await supabase
-      .from('subscriptions')
-      .select('stripe_customer_id')
-      .eq('user_id', userId)
-      .eq('environment', data.environment)
-      .order('created_at', { ascending: false })
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", userId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (subError || !sub?.stripe_customer_id) {
-      return { error: 'No subscription found for this account.' };
+      return { error: "No subscription found for this account." };
     }
 
     try {

@@ -1,10 +1,10 @@
 // Guardian AI — LLM-based risk analysis + policy suggestion engine.
 // Reads ONLY anonymized signals (Modèle C). Never sees raw URLs, prompts or commands.
-import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-import { corsHeaders } from '../_shared/cors.ts';
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders } from "../_shared/cors.ts";
 
-const MODEL = 'google/gemini-2.5-flash';
+const MODEL = "google/gemini-2.5-flash";
 const RECENT_HOURS = 24;
 const BASELINE_DAYS = 30;
 const MAX_SUGGESTIONS_PER_AGENT = 5;
@@ -51,11 +51,17 @@ interface LlmRisk {
 }
 
 const VALID_CATEGORIES = new Set([
-  'data_exfiltration', 'tool_abuse', 'prompt_injection',
-  'anomalous_volume', 'perimeter_drift', 'error_spike', 'looping', 'other',
+  "data_exfiltration",
+  "tool_abuse",
+  "prompt_injection",
+  "anomalous_volume",
+  "perimeter_drift",
+  "error_spike",
+  "looping",
+  "other",
 ]);
-const VALID_ACTIONS = new Set(['allow', 'deny', 'interrupt']);
-const VALID_SURFACES = new Set(['agent', 'type', 'fleet']);
+const VALID_ACTIONS = new Set(["allow", "deny", "interrupt"]);
+const VALID_SURFACES = new Set(["agent", "type", "fleet"]);
 
 const SYSTEM_PROMPT = `You are Guardian, the security analyst of WatchMyAgents. You review the
 ANONYMIZED behaviour of one AI agent and identify security risks, then propose
@@ -124,7 +130,7 @@ say so explicitly in the rationale. Do NOT raise an 'error_spike' risk when the
 absolute error count is below 3, regardless of the percentage.`;
 
 function clamp(n: unknown, lo: number, hi: number, def: number) {
-  const v = typeof n === 'number' && Number.isFinite(n) ? Math.round(n) : def;
+  const v = typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def;
   return Math.max(lo, Math.min(hi, v));
 }
 
@@ -139,9 +145,12 @@ function aggregateRecent(signals: { payload: SignalPayload }[]) {
 
   for (const s of signals) {
     const p = s.payload ?? {};
-    for (const [k, v] of Object.entries(p.tool_counts ?? {})) tool_counts[k] = (tool_counts[k] ?? 0) + (v as number);
-    for (const [k, v] of Object.entries(p.action_counts ?? {})) action_counts[k] = (action_counts[k] ?? 0) + (v as number);
-    for (const [k, v] of Object.entries(p.stop_reasons ?? {})) stop_reasons[k] = (stop_reasons[k] ?? 0) + (v as number);
+    for (const [k, v] of Object.entries(p.tool_counts ?? {}))
+      tool_counts[k] = (tool_counts[k] ?? 0) + (v as number);
+    for (const [k, v] of Object.entries(p.action_counts ?? {}))
+      action_counts[k] = (action_counts[k] ?? 0) + (v as number);
+    for (const [k, v] of Object.entries(p.stop_reasons ?? {}))
+      stop_reasons[k] = (stop_reasons[k] ?? 0) + (v as number);
     for (const [k, v] of Object.entries(p.error_rate_by_tool ?? {})) {
       (error_rate_acc[k] ??= []).push(v as number);
     }
@@ -173,8 +182,15 @@ function aggregateRecent(signals: { payload: SignalPayload }[]) {
     tool_stats[tool] = { calls, errors, error_rate: Number(rate.toFixed(3)) };
   }
   return {
-    tool_counts, action_counts, error_rate_by_tool, tool_stats, stop_reasons,
-    tokens_total, ioc_distinct: ioc_freq.size, ioc_hashes_frequent, top_sequences,
+    tool_counts,
+    action_counts,
+    error_rate_by_tool,
+    tool_stats,
+    stop_reasons,
+    tokens_total,
+    ioc_distinct: ioc_freq.size,
+    ioc_hashes_frequent,
+    top_sequences,
   };
 }
 
@@ -185,24 +201,24 @@ function baselineTools(signals: { payload: SignalPayload }[]): string[] {
 }
 
 async function callLlm(apiKey: string, evidence: unknown): Promise<{ risks: LlmRisk[] } | null> {
-  const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       model: MODEL,
       temperature: 0.2,
-      response_format: { type: 'json_object' },
+      response_format: { type: "json_object" },
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: JSON.stringify(evidence) },
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: JSON.stringify(evidence) },
       ],
     }),
   });
   if (!res.ok) {
-    console.error('LLM call failed', res.status, await res.text());
+    console.error("LLM call failed", res.status, await res.text());
     return null;
   }
   const json = await res.json();
@@ -213,7 +229,7 @@ async function callLlm(apiKey: string, evidence: unknown): Promise<{ risks: LlmR
     if (!parsed || !Array.isArray(parsed.risks)) return { risks: [] };
     return parsed as { risks: LlmRisk[] };
   } catch (e) {
-    console.error('Failed to parse LLM JSON', e, content?.slice(0, 500));
+    console.error("Failed to parse LLM JSON", e, content?.slice(0, 500));
     return null;
   }
 }
@@ -224,12 +240,12 @@ function validateRisk(
   deployedRuleIds: Set<string>,
   toolStats: Record<string, { calls: number; errors: number }>,
 ) {
-  if (!r || typeof r !== 'object') return null;
+  if (!r || typeof r !== "object") return null;
   const pp = r.proposed_policy;
-  if (!pp || !pp.match || typeof pp.match !== 'object') return null;
-  const action = VALID_ACTIONS.has(pp.action ?? '') ? pp.action! : 'deny';
-  const category = VALID_CATEGORIES.has(r.category ?? '') ? r.category! : 'other';
-  const surfaceType = VALID_SURFACES.has(r.surface?.type ?? '') ? r.surface!.type! : 'agent';
+  if (!pp || !pp.match || typeof pp.match !== "object") return null;
+  const action = VALID_ACTIONS.has(pp.action ?? "") ? pp.action! : "deny";
+  const category = VALID_CATEGORIES.has(r.category ?? "") ? r.category! : "other";
+  const surfaceType = VALID_SURFACES.has(r.surface?.type ?? "") ? r.surface!.type! : "agent";
   const ruleId = (pp.rule_id ?? `guardian-${Date.now().toString(36)}`).toString().slice(0, 80);
   if (deployedRuleIds.has(ruleId)) return null;
   const enforceableNow = pp.enforceable_now === true;
@@ -240,33 +256,35 @@ function validateRisk(
   let score = clamp(r.score, 0, 100, 50);
   let confidence = clamp(r.confidence, 0, 100, 50);
   const tName = (pp.match as Record<string, unknown>).tool_name;
-  if (typeof tName === 'string' && toolStats[tName]) {
+  if (typeof tName === "string" && toolStats[tName]) {
     const { calls, errors } = toolStats[tName];
     if (calls < SMALL_SAMPLE_THRESHOLD) {
-      if (category === 'error_spike' && errors < 3) return null;
+      if (category === "error_spike" && errors < 3) return null;
       score = Math.min(score, 40);
       confidence = Math.min(confidence, 50);
     }
   }
 
   return {
-    title: (r.title ?? 'Security risk').toString().slice(0, 200),
+    title: (r.title ?? "Security risk").toString().slice(0, 200),
     category,
     score,
     confidence,
-    rationale: (r.rationale ?? '').toString().slice(0, 2000),
-    objective: (r.objective ?? '').toString().slice(0, 1000),
+    rationale: (r.rationale ?? "").toString().slice(0, 2000),
+    objective: (r.objective ?? "").toString().slice(0, 1000),
     surface_type: surfaceType,
     surface_ref: (r.surface?.ref ?? agent.display_name).toString().slice(0, 200),
     proposed_policy: {
       rule_id: ruleId,
-      name: (pp.name ?? r.title ?? 'Guardian policy').toString().slice(0, 200),
+      name: (pp.name ?? r.title ?? "Guardian policy").toString().slice(0, 200),
       match: pp.match,
       action,
       message: (pp.message ?? `Blocked by Guardian rule ${ruleId}`).toString().slice(0, 500),
-      priority: typeof pp.priority === 'number' ? pp.priority : 100,
+      priority: typeof pp.priority === "number" ? pp.priority : 100,
       enforceable_now: enforceableNow,
-      enforcement_note: enforceableNow ? null : (pp.enforcement_note ?? 'Requires future Shield capability').toString().slice(0, 500),
+      enforcement_note: enforceableNow
+        ? null
+        : (pp.enforcement_note ?? "Requires future Shield capability").toString().slice(0, 500),
     },
   };
 }
@@ -278,15 +296,15 @@ type Validated = NonNullable<ReturnType<typeof validateRisk>>;
 // Shape: agent|category|action_type|toolKey|status|action
 function toolKeyOf(match: Record<string, unknown> | null | undefined): string {
   const t = match?.tool_name as unknown;
-  if (t == null) return '';
-  if (typeof t === 'string') return t;
-  if (typeof t === 'object') {
+  if (t == null) return "";
+  if (typeof t === "string") return t;
+  if (typeof t === "object") {
     const obj = t as { not_in?: unknown; in?: unknown };
     if (Array.isArray(obj.not_in)) {
-      return 'not_in:' + [...obj.not_in].map(String).sort().join(',');
+      return "not_in:" + [...obj.not_in].map(String).sort().join(",");
     }
     if (Array.isArray(obj.in)) {
-      return 'in:' + [...obj.in].map(String).sort().join(',');
+      return "in:" + [...obj.in].map(String).sort().join(",");
     }
   }
   return JSON.stringify(t);
@@ -299,8 +317,8 @@ function semanticSig(
   action: string,
 ): string {
   const m = (match ?? {}) as Record<string, unknown>;
-  const actionType = (m.action_type as string | undefined) ?? '';
-  const status = (m.status as string | undefined) ?? '';
+  const actionType = (m.action_type as string | undefined) ?? "";
+  const status = (m.status as string | undefined) ?? "";
   return `${agentId}|${category}|${actionType}|${toolKeyOf(m)}|${status}|${action}`;
 }
 
@@ -312,13 +330,18 @@ function structuralSig(
   action: string,
 ): string {
   const m = (match ?? {}) as Record<string, unknown>;
-  const actionType = (m.action_type as string | undefined) ?? '';
-  const status = (m.status as string | undefined) ?? '';
+  const actionType = (m.action_type as string | undefined) ?? "";
+  const status = (m.status as string | undefined) ?? "";
   return `${agentId}|${actionType}|${toolKeyOf(m)}|${status}|${action}`;
 }
 
 function sigForValidated(v: Validated, agentId: string): string {
-  return semanticSig(agentId, v.category, v.proposed_policy.match as Record<string, unknown>, v.proposed_policy.action);
+  return semanticSig(
+    agentId,
+    v.category,
+    v.proposed_policy.match as Record<string, unknown>,
+    v.proposed_policy.action,
+  );
 }
 
 async function filterAlreadySuggested(
@@ -331,28 +354,40 @@ async function filterAlreadySuggested(
 
   // 1. Open (pending/accepted) suggestions for this agent → block forever.
   const { data: openRows } = await supabase
-    .from('suggestions')
-    .select('risk_category, proposed_match, proposed_action')
-    .eq('agent_id', agentId)
-    .in('status', ['pending', 'accepted']);
+    .from("suggestions")
+    .select("risk_category, proposed_match, proposed_action")
+    .eq("agent_id", agentId)
+    .in("status", ["pending", "accepted"]);
 
   const blockedSemantic = new Set<string>();
   for (const r of openRows ?? []) {
-    const row = r as { risk_category: string | null; proposed_match: Record<string, unknown> | null; proposed_action: string };
-    blockedSemantic.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
+    const row = r as {
+      risk_category: string | null;
+      proposed_match: Record<string, unknown> | null;
+      proposed_action: string;
+    };
+    blockedSemantic.add(
+      semanticSig(agentId, row.risk_category ?? "other", row.proposed_match, row.proposed_action),
+    );
   }
 
   // 2. Rejections within cooldown window → respect user's no.
   const cooldownSince = new Date(Date.now() - REJECT_COOLDOWN_DAYS * 86_400_000).toISOString();
   const { data: rejectedRows } = await supabase
-    .from('suggestions')
-    .select('risk_category, proposed_match, proposed_action')
-    .eq('agent_id', agentId)
-    .eq('status', 'rejected')
-    .gt('resolved_at', cooldownSince);
+    .from("suggestions")
+    .select("risk_category, proposed_match, proposed_action")
+    .eq("agent_id", agentId)
+    .eq("status", "rejected")
+    .gt("resolved_at", cooldownSince);
   for (const r of rejectedRows ?? []) {
-    const row = r as { risk_category: string | null; proposed_match: Record<string, unknown> | null; proposed_action: string };
-    blockedSemantic.add(semanticSig(agentId, row.risk_category ?? 'other', row.proposed_match, row.proposed_action));
+    const row = r as {
+      risk_category: string | null;
+      proposed_match: Record<string, unknown> | null;
+      proposed_action: string;
+    };
+    blockedSemantic.add(
+      semanticSig(agentId, row.risk_category ?? "other", row.proposed_match, row.proposed_action),
+    );
   }
 
   // 3. Within-batch dedup: collapse same-sig candidates, keep highest risk_score.
@@ -360,7 +395,11 @@ async function filterAlreadySuggested(
   for (const c of candidates) {
     const semSig = sigForValidated(c, agentId);
     if (blockedSemantic.has(semSig)) continue;
-    const structSig = structuralSig(agentId, c.proposed_policy.match as Record<string, unknown>, c.proposed_policy.action);
+    const structSig = structuralSig(
+      agentId,
+      c.proposed_policy.match as Record<string, unknown>,
+      c.proposed_policy.action,
+    );
     if (deployedStructuralSigs.has(structSig)) continue;
     const prev = bestBySig.get(semSig);
     if (!prev || c.score > prev.score) bestBySig.set(semSig, c);
@@ -369,12 +408,18 @@ async function filterAlreadySuggested(
 }
 
 async function runGuardian(customerId?: string) {
-  const apiKey = Deno.env.get('LOVABLE_API_KEY');
-  if (!apiKey) return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: ['LOVABLE_API_KEY missing'] };
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!apiKey)
+    return {
+      agents_scanned: 0,
+      suggestions_emitted: 0,
+      mode: MODEL,
+      errors: ["LOVABLE_API_KEY missing"],
+    };
 
   const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     { auth: { persistSession: false } },
   );
 
@@ -382,12 +427,15 @@ async function runGuardian(customerId?: string) {
   let suggestions_emitted = 0;
 
   let agentsQuery = supabase
-    .from('agents').select('id, customer_id, display_name').eq('status', 'active');
-  if (customerId) agentsQuery = agentsQuery.eq('customer_id', customerId);
+    .from("agents")
+    .select("id, customer_id, display_name")
+    .eq("status", "active");
+  if (customerId) agentsQuery = agentsQuery.eq("customer_id", customerId);
   const { data: agents, error: agentsErr } = await agentsQuery;
-  if (agentsErr) return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: [agentsErr.message] };
-  if (!agents || agents.length === 0) return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: [] };
-
+  if (agentsErr)
+    return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: [agentsErr.message] };
+  if (!agents || agents.length === 0)
+    return { agents_scanned: 0, suggestions_emitted: 0, mode: MODEL, errors: [] };
 
   const recentSince = new Date(Date.now() - RECENT_HOURS * 3_600_000).toISOString();
   const baselineSince = new Date(Date.now() - BASELINE_DAYS * 86_400_000).toISOString();
@@ -395,28 +443,45 @@ async function runGuardian(customerId?: string) {
 
   for (const agent of agents as Agent[]) {
     try {
-      const [{ data: recent }, { data: baseline }, { data: policies }, { data: decisions }] = await Promise.all([
-        supabase.from('signals').select('payload, window_start, window_end')
-          .eq('agent_id', agent.id).gt('window_start', recentSince)
-          .order('window_start', { ascending: false }),
-        supabase.from('signals').select('payload')
-          .eq('agent_id', agent.id).gt('window_start', baselineSince).lt('window_start', recentSince),
-        supabase.from('policies').select('rule_id, match, action, agent_id')
-          .eq('customer_id', agent.customer_id).eq('enabled', true)
-          .or(`agent_id.is.null,agent_id.eq.${agent.id}`),
-        supabase.from('decisions').select('tool_name, decision')
-          .eq('agent_id', agent.id).gt('decided_at', decisionsSince).limit(500),
-      ]);
+      const [{ data: recent }, { data: baseline }, { data: policies }, { data: decisions }] =
+        await Promise.all([
+          supabase
+            .from("signals")
+            .select("payload, window_start, window_end")
+            .eq("agent_id", agent.id)
+            .gt("window_start", recentSince)
+            .order("window_start", { ascending: false }),
+          supabase
+            .from("signals")
+            .select("payload")
+            .eq("agent_id", agent.id)
+            .gt("window_start", baselineSince)
+            .lt("window_start", recentSince),
+          supabase
+            .from("policies")
+            .select("rule_id, match, action, agent_id")
+            .eq("customer_id", agent.customer_id)
+            .eq("enabled", true)
+            .or(`agent_id.is.null,agent_id.eq.${agent.id}`),
+          supabase
+            .from("decisions")
+            .select("tool_name, decision")
+            .eq("agent_id", agent.id)
+            .gt("decided_at", decisionsSince)
+            .limit(500),
+        ]);
 
       if (!recent || recent.length === 0) continue;
 
       const recentAgg = aggregateRecent(recent as { payload: SignalPayload }[]);
       const baselineTool = baselineTools((baseline ?? []) as { payload: SignalPayload }[]);
-      const new_tools_vs_baseline = Object.keys(recentAgg.tool_counts).filter((t) => !baselineTool.includes(t));
+      const new_tools_vs_baseline = Object.keys(recentAgg.tool_counts).filter(
+        (t) => !baselineTool.includes(t),
+      );
       const decisionBreakdown: Record<string, Record<string, number>> = {};
       for (const d of decisions ?? []) {
-        const tn = (d as { tool_name: string | null }).tool_name ?? 'unknown';
-        const dec = (d as { decision: string }).decision ?? 'unknown';
+        const tn = (d as { tool_name: string | null }).tool_name ?? "unknown";
+        const dec = (d as { decision: string }).decision ?? "unknown";
         (decisionBreakdown[tn] ??= {})[dec] = (decisionBreakdown[tn]?.[dec] ?? 0) + 1;
       }
 
@@ -430,7 +495,7 @@ async function runGuardian(customerId?: string) {
           rule_id: (p as { rule_id: string }).rule_id,
           action: (p as { action: string }).action,
           match: (p as { match: unknown }).match,
-          scope: (p as { agent_id: string | null }).agent_id ? 'agent' : 'fleet',
+          scope: (p as { agent_id: string | null }).agent_id ? "agent" : "fleet",
         })),
       };
 
@@ -439,7 +504,9 @@ async function runGuardian(customerId?: string) {
         errors.push(`agent ${agent.id}: llm call failed`);
         continue;
       }
-      const deployedRuleIds = new Set((policies ?? []).map((p) => (p as { rule_id: string }).rule_id));
+      const deployedRuleIds = new Set(
+        (policies ?? []).map((p) => (p as { rule_id: string }).rule_id),
+      );
       const deployedStructuralSigs = new Set<string>();
       for (const p of policies ?? []) {
         const row = p as { match: Record<string, unknown> | null; action: string };
@@ -451,7 +518,12 @@ async function runGuardian(customerId?: string) {
         .sort((a, b) => b.score - a.score)
         .slice(0, MAX_SUGGESTIONS_PER_AGENT);
 
-      const fresh = await filterAlreadySuggested(supabase, agent.id, validated, deployedStructuralSigs);
+      const fresh = await filterAlreadySuggested(
+        supabase,
+        agent.id,
+        validated,
+        deployedStructuralSigs,
+      );
       if (fresh.length === 0) continue;
 
       const rows = fresh.map((v) => ({
@@ -471,7 +543,7 @@ async function runGuardian(customerId?: string) {
         generated_by: MODEL,
         proposed_policy: v.proposed_policy,
       }));
-      const { error: insertErr } = await supabase.from('suggestions').insert(rows);
+      const { error: insertErr } = await supabase.from("suggestions").insert(rows);
       if (insertErr) {
         errors.push(`agent ${agent.id}: ${insertErr.message}`);
         continue;
@@ -486,9 +558,9 @@ async function runGuardian(customerId?: string) {
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST' && req.method !== 'GET') {
-    return new Response('method not allowed', { status: 405, headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST" && req.method !== "GET") {
+    return new Response("method not allowed", { status: 405, headers: corsHeaders });
   }
   // FORT-1 (P0 Codex audit): fail-CLOSED auth. The Supabase config
   // disables verify_jwt on this function (it's invoked by trusted cron),
@@ -500,38 +572,46 @@ serve(async (req) => {
   // Operator action item: ensure GUARDIAN_SECRET is set in the function
   // environment via Lovable secrets (or supabase secrets set) before
   // the cron job runs.
-  const guardianSecret = Deno.env.get('GUARDIAN_SECRET');
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const guardianSecret = Deno.env.get("GUARDIAN_SECRET");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!guardianSecret) {
-    return new Response(JSON.stringify({ error: 'GUARDIAN_SECRET not configured — function disabled' }), {
-      status: 503, headers: { ...corsHeaders, 'content-type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: "GUARDIAN_SECRET not configured — function disabled" }),
+      {
+        status: 503,
+        headers: { ...corsHeaders, "content-type": "application/json" },
+      },
+    );
   }
-  const provided = req.headers.get('x-guardian-secret') ?? '';
-  const bearer = (req.headers.get('authorization') ?? '').match(/^Bearer\s+(.+)$/i)?.[1] ?? '';
-  const secretOk = provided !== '' && provided === guardianSecret;
-  const serviceOk = serviceRoleKey ? (bearer !== '' && bearer === serviceRoleKey) : false;
+  const provided = req.headers.get("x-guardian-secret") ?? "";
+  const bearer = (req.headers.get("authorization") ?? "").match(/^Bearer\s+(.+)$/i)?.[1] ?? "";
+  const secretOk = provided !== "" && provided === guardianSecret;
+  const serviceOk = serviceRoleKey ? bearer !== "" && bearer === serviceRoleKey : false;
   if (!secretOk && !serviceOk) {
-    return new Response(JSON.stringify({ error: 'unauthorized' }), {
-      status: 401, headers: { ...corsHeaders, 'content-type': 'application/json' },
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "content-type": "application/json" },
     });
   }
 
   try {
     let customerId: string | undefined;
-    if (req.method === 'POST') {
+    if (req.method === "POST") {
       try {
         const body = await req.json();
-        if (body && typeof body.customer_id === 'string') customerId = body.customer_id;
-      } catch { /* empty body ok */ }
+        if (body && typeof body.customer_id === "string") customerId = body.customer_id;
+      } catch {
+        /* empty body ok */
+      }
     }
     const result = await runGuardian(customerId);
     return new Response(JSON.stringify(result, null, 2), {
-      headers: { ...corsHeaders, 'content-type': 'application/json' },
+      headers: { ...corsHeaders, "content-type": "application/json" },
     });
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' },
+      status: 500,
+      headers: { ...corsHeaders, "content-type": "application/json" },
     });
   }
 });

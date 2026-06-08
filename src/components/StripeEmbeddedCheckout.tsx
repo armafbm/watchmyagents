@@ -1,6 +1,6 @@
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
-import { getStripe, getStripeEnvironment } from '@/lib/stripe';
-import { createCheckoutSession } from '@/utils/payments.functions';
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
+import { getStripe, getStripeEnvironment } from "@/lib/stripe";
+import { createCheckoutSession } from "@/utils/payments.functions";
 
 interface StripeEmbeddedCheckoutProps {
   priceId: string;
@@ -28,8 +28,8 @@ export function StripeEmbeddedCheckoutInline({
         environment: getStripeEnvironment(),
       },
     });
-    if ('error' in result) throw new Error(result.error);
-    if (!result.clientSecret) throw new Error('No client secret returned');
+    if ("error" in result) throw new Error(result.error);
+    if (!result.clientSecret) throw new Error("No client secret returned");
     return result.clientSecret;
   };
 

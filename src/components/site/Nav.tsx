@@ -7,7 +7,16 @@ import legionsImg from "@/assets/wma-legions.png";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown, AlertTriangle, Cpu, RefreshCw, Download, Lock, Rocket } from "lucide-react";
+import {
+  Shield,
+  ChevronDown,
+  AlertTriangle,
+  Cpu,
+  RefreshCw,
+  Download,
+  Lock,
+  Rocket,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +51,11 @@ export function Nav() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/" hash="recursive-fractal" className="flex items-center gap-2 cursor-pointer">
+                  <Link
+                    to="/"
+                    hash="recursive-fractal"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
                     <Cpu className="h-5 w-5 text-primary icon-neon-glow" />
                     Our technology
                   </Link>
@@ -55,19 +68,31 @@ export function Nav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/" hash="guardian" className="flex items-center gap-2 cursor-pointer">
-                    <img src={guardianIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    <img
+                      src={guardianIcon}
+                      alt=""
+                      className="h-5 w-5 object-contain icon-neon-glow"
+                    />
                     Guardian AI
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/" hash="shield" className="flex items-center gap-2 cursor-pointer">
-                    <img src={shieldIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    <img
+                      src={shieldIcon}
+                      alt=""
+                      className="h-5 w-5 object-contain icon-neon-glow"
+                    />
                     Shield
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard/legions" className="flex items-center gap-2 cursor-pointer">
-                    <img src={legionsImg} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    <img
+                      src={legionsImg}
+                      alt=""
+                      className="h-5 w-5 object-contain icon-neon-glow"
+                    />
                     Legions
                   </Link>
                 </DropdownMenuItem>
@@ -79,7 +104,11 @@ export function Nav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/" hash="dashboard" className="flex items-center gap-2 cursor-pointer">
-                    <img src={fortressIcon} alt="" className="h-5 w-5 object-contain icon-neon-glow" />
+                    <img
+                      src={fortressIcon}
+                      alt=""
+                      className="h-5 w-5 object-contain icon-neon-glow"
+                    />
                     Fortress
                   </Link>
                 </DropdownMenuItem>
@@ -109,7 +138,6 @@ export function Nav() {
               Pricing
             </Link>
           </li>
-
         </ul>
 
         <div className="flex items-center gap-3">

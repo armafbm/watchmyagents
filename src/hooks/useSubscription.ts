@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/use-auth';
-import { getStripeEnvironment, isPaymentsConfigured } from '@/lib/stripe';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { getStripeEnvironment, isPaymentsConfigured } from "@/lib/stripe";
 
 export type SubscriptionRow = {
   id: string;
@@ -19,30 +19,33 @@ export type SubscriptionRow = {
   updated_at: string;
 };
 
-export type SubscriptionTier = 'free' | 'pro' | 'pro_plus' | 'business';
+export type SubscriptionTier = "free" | "pro" | "pro_plus" | "business";
 
 const PRICE_TO_TIER: Record<string, SubscriptionTier> = {
-  pro_monthly: 'pro',
-  pro_yearly: 'pro',
-  pro_plus_monthly: 'pro_plus',
-  pro_plus_yearly: 'pro_plus',
-  business_monthly: 'business',
-  business_yearly: 'business',
+  pro_monthly: "pro",
+  pro_yearly: "pro",
+  pro_plus_monthly: "pro_plus",
+  pro_plus_yearly: "pro_plus",
+  business_monthly: "business",
+  business_yearly: "business",
 };
 
 export function tierFromPriceId(priceId: string | null | undefined): SubscriptionTier {
-  if (!priceId) return 'free';
-  return PRICE_TO_TIER[priceId] ?? 'free';
+  if (!priceId) return "free";
+  return PRICE_TO_TIER[priceId] ?? "free";
 }
 
 export function isActiveStatus(sub: SubscriptionRow | null): boolean {
   if (!sub) return false;
   const end = sub.current_period_end ? new Date(sub.current_period_end).getTime() : null;
   const future = end === null || end > Date.now();
-  if ((sub.status === 'active' || sub.status === 'trialing' || sub.status === 'past_due') && future) {
+  if (
+    (sub.status === "active" || sub.status === "trialing" || sub.status === "past_due") &&
+    future
+  ) {
     return true;
   }
-  if (sub.status === 'canceled' && end && end > Date.now()) return true;
+  if (sub.status === "canceled" && end && end > Date.now()) return true;
   return false;
 }
 
@@ -63,25 +66,25 @@ export function useSubscription() {
       try {
         return getStripeEnvironment();
       } catch {
-        return 'sandbox' as const;
+        return "sandbox" as const;
       }
     })();
 
     const load = async () => {
       const tryEnv = async (e: string) => {
         const { data } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('environment', e)
-          .order('created_at', { ascending: false })
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("environment", e)
+          .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
         return (data as SubscriptionRow | null) ?? null;
       };
       let row = await tryEnv(env);
       if (!row || !isActiveStatus(row)) {
-        const other = env === 'live' ? 'sandbox' : 'live';
+        const other = env === "live" ? "sandbox" : "live";
         const fallback = await tryEnv(other);
         if (fallback) row = fallback;
       }
@@ -95,8 +98,8 @@ export function useSubscription() {
     const channel = supabase
       .channel(`subscriptions:${user.id}`)
       .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'subscriptions', filter: `user_id=eq.${user.id}` },
+        "postgres_changes",
+        { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` },
         () => load(),
       )
       .subscribe();
@@ -113,7 +116,7 @@ export function useSubscription() {
   return {
     subscription,
     loading,
-    tier: isActive ? tier : ('free' as SubscriptionTier),
+    tier: isActive ? tier : ("free" as SubscriptionTier),
     isActive,
   };
 }

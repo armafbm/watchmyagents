@@ -30,21 +30,52 @@ export const Scene3Loop: React.FC = () => {
   return (
     <AbsoluteFill style={{ padding: 100, display: "flex", flexDirection: "column" }}>
       <div style={{ opacity: titleOp }}>
-        <span style={{ fontFamily: F.mono, fontSize: 14, letterSpacing: 5, color: C.primary, textTransform: "uppercase" }}>
+        <span
+          style={{
+            fontFamily: F.mono,
+            fontSize: 14,
+            letterSpacing: 5,
+            color: C.primary,
+            textTransform: "uppercase",
+          }}
+        >
           // The Loop
         </span>
-        <h2 style={{ fontFamily: F.display, fontSize: 90, color: C.fg, margin: "16px 0 8px", letterSpacing: -2 }}>
-          Watch <span style={{ color: C.primary }}>→</span> Guardian <span style={{ color: C.accent }}>→</span> Shield
+        <h2
+          style={{
+            fontFamily: F.display,
+            fontSize: 90,
+            color: C.fg,
+            margin: "16px 0 8px",
+            letterSpacing: -2,
+          }}
+        >
+          Watch <span style={{ color: C.primary }}>→</span> Guardian{" "}
+          <span style={{ color: C.accent }}>→</span> Shield
         </h2>
         <p style={{ fontFamily: F.body, fontSize: 26, color: C.muted, margin: 0, maxWidth: 1100 }}>
           A closed feedback loop. Every signal informs the next decision, agent by agent.
         </p>
       </div>
 
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 60, marginTop: 40 }}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 60,
+          marginTop: 40,
+        }}
+      >
         {layers.map((l, i) => {
           const card = spring({ frame: frame - 30 - i * 25, fps, config: { damping: 18 } });
-          const arrowOp = i < 2 ? interpolate(frame, [80 + i * 25, 110 + i * 25], [0, 1], { extrapolateRight: "clamp" }) : 0;
+          const arrowOp =
+            i < 2
+              ? interpolate(frame, [80 + i * 25, 110 + i * 25], [0, 1], {
+                  extrapolateRight: "clamp",
+                })
+              : 0;
           return (
             <>
               <div
@@ -79,13 +110,33 @@ export const Scene3Loop: React.FC = () => {
                 />
                 <div style={{ fontSize: 80, position: "relative" }}>{l.icon}</div>
                 <div style={{ position: "relative" }}>
-                  <div style={{ fontFamily: F.mono, fontSize: 14, letterSpacing: 4, color: l.color, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      fontFamily: F.mono,
+                      fontSize: 14,
+                      letterSpacing: 4,
+                      color: l.color,
+                      marginBottom: 12,
+                    }}
+                  >
                     {String(i + 1).padStart(2, "0")} · LAYER
                   </div>
-                  <div style={{ fontFamily: F.display, fontSize: 46, color: C.fg, lineHeight: 1.05, marginBottom: 16 }}>
+                  <div
+                    style={{
+                      fontFamily: F.display,
+                      fontSize: 46,
+                      color: C.fg,
+                      lineHeight: 1.05,
+                      marginBottom: 16,
+                    }}
+                  >
                     {l.name}
                   </div>
-                  <div style={{ fontFamily: F.body, fontSize: 18, color: C.muted, lineHeight: 1.5 }}>{l.desc}</div>
+                  <div
+                    style={{ fontFamily: F.body, fontSize: 18, color: C.muted, lineHeight: 1.5 }}
+                  >
+                    {l.desc}
+                  </div>
                 </div>
               </div>
               {i < 2 && (

@@ -4,8 +4,16 @@ import legions from "@/assets/wma-legions.png";
 const cases = [
   { i: Code2, t: "Coding agents", d: "Tool-using agents writing, deploying and altering code." },
   { i: Headphones, t: "Customer support", d: "Agents touching PII, tickets and customer history." },
-  { i: Building2, t: "Internal ops", d: "Finance, HR, ops agents with access to sensitive systems." },
-  { i: Network, t: "Multi-agent platforms", d: "Swarms, orchestrators and complex agent workflows." },
+  {
+    i: Building2,
+    t: "Internal ops",
+    d: "Finance, HR, ops agents with access to sensitive systems.",
+  },
+  {
+    i: Network,
+    t: "Multi-agent platforms",
+    d: "Swarms, orchestrators and complex agent workflows.",
+  },
 ];
 
 export function UseCases() {
@@ -20,7 +28,10 @@ export function UseCases() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {cases.map((c) => (
-            <div key={c.t} className="rounded-xl border border-border bg-card/50 backdrop-blur p-6 hover:border-primary/60 transition">
+            <div
+              key={c.t}
+              className="rounded-xl border border-border bg-card/50 backdrop-blur p-6 hover:border-primary/60 transition"
+            >
               <c.i className="h-6 w-6 text-primary mb-4 icon-neon-glow" />
               <h3 className="font-display font-bold mb-2">{c.t}</h3>
               <p className="text-sm text-muted-foreground">{c.d}</p>
@@ -38,16 +49,14 @@ export function UseCases() {
             />
           </div>
           <div>
-            <div className="eyebrow mb-4">
-              // Agents fleet management
-            </div>
+            <div className="eyebrow mb-4">// Agents fleet management</div>
             <h3 className="text-3xl md:text-4xl font-bold mb-4">
               Command your <span className="text-gradient">LEGIONS</span>.
             </h3>
             <p className="text-muted-foreground text-lg">
               Organize agents into squads by team — Customer Services, HR, Marketing, Dev Team.
-              Apply policies, monitor hygiene and orchestrate the whole fleet from a single
-              command center.
+              Apply policies, monitor hygiene and orchestrate the whole fleet from a single command
+              center.
             </p>
           </div>
         </div>

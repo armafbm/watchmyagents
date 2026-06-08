@@ -22,8 +22,7 @@ export function CTA() {
         body: JSON.stringify({
           email: value,
           source: "landing_cta",
-          userAgent:
-            typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -45,7 +44,6 @@ export function CTA() {
     }
   };
 
-
   return (
     <section id="cta" className="relative py-14">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
@@ -54,8 +52,8 @@ export function CTA() {
           Don't wait for your first <span className="text-gradient">agent incident</span>.
         </h2>
         <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto">
-          Join the early-access program and deploy Watch + Shield on your production agents
-          in days, not quarters.
+          Join the early-access program and deploy Watch + Shield on your production agents in days,
+          not quarters.
         </p>
         {done ? (
           <div className="max-w-md mx-auto border-gradient rounded-md p-5 font-mono text-sm">
@@ -83,13 +81,15 @@ export function CTA() {
           </form>
         )}
         <p className="text-xs text-muted-foreground mt-6 font-mono">
-          Or email <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">minedor@watchmyagents.com</a>
+          Or email{" "}
+          <a href="mailto:minedor@watchmyagents.com" className="text-primary hover:underline">
+            minedor@watchmyagents.com
+          </a>
         </p>
       </div>
     </section>
   );
 }
-
 
 export function Footer() {
   return (
@@ -99,9 +99,15 @@ export function Footer() {
           © {new Date().getFullYear()} WatchMyAgents · Cybersecurity for AI Agents
         </div>
         <div className="flex gap-6 font-mono text-xs uppercase tracking-widest">
-          <Link to="/privacy" className="hover:text-primary">Privacy Policy</Link>
-          <Link to="/terms" className="hover:text-primary">Terms of Service</Link>
-          <a href="mailto:minedor@watchmyagents.com" className="hover:text-primary">Contact</a>
+          <Link to="/privacy" className="hover:text-primary">
+            Privacy Policy
+          </Link>
+          <Link to="/terms" className="hover:text-primary">
+            Terms of Service
+          </Link>
+          <a href="mailto:minedor@watchmyagents.com" className="hover:text-primary">
+            Contact
+          </a>
         </div>
       </div>
     </footer>

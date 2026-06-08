@@ -1,21 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Brain, Check, X, Loader2, Sparkles, Shield, AlertTriangle, Target, RefreshCw, MessageCircle } from "lucide-react";
+import {
+  Brain,
+  Check,
+  X,
+  Loader2,
+  Sparkles,
+  Shield,
+  AlertTriangle,
+  Target,
+  RefreshCw,
+  MessageCircle,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import mascot from "@/assets/wma-mascot.png";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GuardianChatPanel } from "@/components/dashboard/GuardianChatPanel";
 import { TypologyBadge, type AgentTypology } from "@/components/fortress/TypologyBadge";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
-import { EnforcementBadge, isDetectOnly, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
+import {
+  EnforcementBadge,
+  isDetectOnly,
+  type EnforcementMode,
+} from "@/components/fortress/EnforcementBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/guardian")({
-  head: () => ({ meta: [{ title: "Guardian AI — WatchMyAgents" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Guardian AI — WatchMyAgents" }, { name: "robots", content: "noindex" }],
+  }),
   component: GuardianPage,
 });
 
@@ -52,8 +75,20 @@ type Suggestion = {
 
 function severityTone(score: number | null) {
   const s = score ?? 0;
-  if (s >= 70) return { bg: "bg-danger/15", text: "text-danger", border: "border-danger/40", label: "CRITICAL" };
-  if (s >= 40) return { bg: "bg-warning/15", text: "text-warning", border: "border-warning/40", label: "ELEVATED" };
+  if (s >= 70)
+    return {
+      bg: "bg-danger/15",
+      text: "text-danger",
+      border: "border-danger/40",
+      label: "CRITICAL",
+    };
+  if (s >= 40)
+    return {
+      bg: "bg-warning/15",
+      text: "text-warning",
+      border: "border-warning/40",
+      label: "ELEVATED",
+    };
   return { bg: "bg-success/15", text: "text-success", border: "border-success/40", label: "LOW" };
 }
 
@@ -91,11 +126,15 @@ function GuardianPage() {
         .order("generated_at", { ascending: false }),
       supabase
         .from("agents")
-        .select("id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence, enforcement_mode"),
+        .select(
+          "id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence, enforcement_mode",
+        ),
     ]);
     setList((data as unknown as Suggestion[] | null) ?? []);
     const map: Record<string, AgentMini> = {};
-    ((ag as AgentMini[] | null) ?? []).forEach((a) => { map[a.id] = a; });
+    ((ag as AgentMini[] | null) ?? []).forEach((a) => {
+      map[a.id] = a;
+    });
     setAgents(map);
     setLoading(false);
   };
@@ -104,7 +143,9 @@ function GuardianPage() {
     reload();
     const ch = supabase
       .channel("guardian-suggestions")
-      .on("postgres_changes", { event: "*", schema: "public", table: "suggestions" }, () => reload())
+      .on("postgres_changes", { event: "*", schema: "public", table: "suggestions" }, () =>
+        reload(),
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
@@ -143,14 +184,21 @@ function GuardianPage() {
       toast.error("Suggestion is missing a deployable policy");
       return;
     }
-    const surface = (surfaceOverride[s.id] ?? s.surface_type ?? "agent") as "agent" | "type" | "fleet";
+    const surface = (surfaceOverride[s.id] ?? s.surface_type ?? "agent") as
+      | "agent"
+      | "type"
+      | "fleet";
 
     // Resolve surface_ref for 'type' (need the agent's agent_type)
     let surfaceRef: string | null = null;
     if (surface === "type") {
       const { data: ag } = await supabase
-        .from("agents").select("agent_type").eq("id", s.agent_id).maybeSingle();
-      surfaceRef = (ag as { agent_type: string | null } | null)?.agent_type ?? s.surface_ref ?? null;
+        .from("agents")
+        .select("agent_type")
+        .eq("id", s.agent_id)
+        .maybeSingle();
+      surfaceRef =
+        (ag as { agent_type: string | null } | null)?.agent_type ?? s.surface_ref ?? null;
       if (!surfaceRef) {
         setBusy(null);
         toast.error("This agent has no detected typology yet — pick agent or fleet.");
@@ -218,7 +266,6 @@ function GuardianPage() {
     reload();
   };
 
-
   const reject = async (s: Suggestion) => {
     setBusy(s.id);
     const { error } = await supabase
@@ -239,7 +286,11 @@ function GuardianPage() {
         subtitle="Guardian reads only anonymized telemetry, identifies security risks, scores them, and proposes deployable Shield policies for your review."
         actions={
           <Button onClick={runGuardianNow} disabled={running}>
-            {running ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            {running ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
             Run scan now
           </Button>
         }
@@ -257,7 +308,12 @@ function GuardianPage() {
 
         <TabsContent value="risks" className="mt-0">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <Stat label="Pending risks" value={loading ? "—" : String(stats.count)} icon={AlertTriangle} tone="warning" />
+            <Stat
+              label="Pending risks"
+              value={loading ? "—" : String(stats.count)}
+              icon={AlertTriangle}
+              tone="warning"
+            />
             <Stat
               label="Average risk score"
               value={loading ? "—" : `${stats.avg}/100`}
@@ -280,7 +336,6 @@ function GuardianPage() {
               }
             />
           </div>
-
 
           <div className="grid lg:grid-cols-[1fr_320px] gap-4">
             <Panel title="Validation queue" icon={Brain} tag={`${list.length} pending`}>
@@ -313,7 +368,9 @@ function GuardianPage() {
                           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                             // source agent
                           </span>
-                          <ProviderBadge provider={agent?.provider as AgentProvider | null | undefined} />
+                          <ProviderBadge
+                            provider={agent?.provider as AgentProvider | null | undefined}
+                          />
                           <span className="font-semibold text-sm text-foreground">
                             {agent?.display_name ?? "Unknown agent"}
                           </span>
@@ -331,8 +388,12 @@ function GuardianPage() {
                             <div
                               className={`flex flex-col items-center justify-center rounded-lg border ${sev.border} ${sev.bg} ${sev.text} px-3 py-2 min-w-[70px]`}
                             >
-                              <span className="font-display text-2xl font-bold leading-none">{s.risk_score ?? 0}</span>
-                              <span className="font-mono text-[9px] uppercase tracking-widest mt-1">{sev.label}</span>
+                              <span className="font-display text-2xl font-bold leading-none">
+                                {s.risk_score ?? 0}
+                              </span>
+                              <span className="font-mono text-[9px] uppercase tracking-widest mt-1">
+                                {sev.label}
+                              </span>
                             </div>
                             <div>
                               <h3 className="font-semibold leading-snug">{s.title}</h3>
@@ -375,7 +436,9 @@ function GuardianPage() {
                               <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                                 rule_id
                               </span>
-                              <code className="font-mono text-xs text-foreground">{pp.rule_id}</code>
+                              <code className="font-mono text-xs text-foreground">
+                                {pp.rule_id}
+                              </code>
                               <span
                                 className={`ml-auto px-2 py-0.5 rounded border text-[10px] font-mono uppercase tracking-widest ${
                                   enforceable
@@ -392,7 +455,9 @@ function GuardianPage() {
                             </pre>
                             {pp.message && (
                               <div className="text-xs text-muted-foreground">
-                                <span className="font-mono uppercase tracking-widest text-[10px] mr-2">deny msg</span>
+                                <span className="font-mono uppercase tracking-widest text-[10px] mr-2">
+                                  deny msg
+                                </span>
                                 {pp.message}
                               </div>
                             )}
@@ -406,7 +471,9 @@ function GuardianPage() {
                             </span>
                             <Select
                               value={surface}
-                              onValueChange={(v) => setSurfaceOverride((m) => ({ ...m, [s.id]: v }))}
+                              onValueChange={(v) =>
+                                setSurfaceOverride((m) => ({ ...m, [s.id]: v }))
+                              }
                             >
                               <SelectTrigger className="h-8 w-[140px]">
                                 <SelectValue />
@@ -421,9 +488,15 @@ function GuardianPage() {
                           <div className="ml-auto flex gap-2">
                             <Button onClick={() => accept(s)} disabled={busy === s.id || !pp}>
                               <Check className="h-4 w-4 mr-2" />
-                              {isDetectOnly(agent?.enforcement_mode) ? "Convert to monitor rule" : "Accept & deploy"}
+                              {isDetectOnly(agent?.enforcement_mode)
+                                ? "Convert to monitor rule"
+                                : "Accept & deploy"}
                             </Button>
-                            <Button variant="ghost" onClick={() => reject(s)} disabled={busy === s.id}>
+                            <Button
+                              variant="ghost"
+                              onClick={() => reject(s)}
+                              disabled={busy === s.id}
+                            >
                               <X className="h-4 w-4 mr-2" /> Reject
                             </Button>
                           </div>
@@ -439,7 +512,11 @@ function GuardianPage() {
               <Panel title="Sentinel" icon={Sparkles}>
                 <div className="relative h-40 grid place-items-center">
                   <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-pulse-ring" />
-                  <img src={mascot} alt="" className="relative h-36 w-36 object-contain animate-float" />
+                  <img
+                    src={mascot}
+                    alt=""
+                    className="relative h-36 w-36 object-contain animate-float"
+                  />
                 </div>
                 <p className="text-xs text-muted-foreground text-center mt-2">
                   Guardian online · LLM scan every 15min
@@ -447,17 +524,32 @@ function GuardianPage() {
               </Panel>
               <Panel title="Pipeline">
                 <ol className="space-y-2 text-sm text-muted-foreground list-decimal pl-4">
-                  <li><span className="text-foreground font-medium">Analyze</span> — aggregate anonymized signals.</li>
-                  <li><span className="text-foreground font-medium">Report</span> — LLM identifies & scores risks.</li>
-                  <li><span className="text-foreground font-medium">Suggest</span> — propose a deployable policy.</li>
-                  <li><span className="text-foreground font-medium">Approve</span> — you accept, modify, or reject.</li>
-                  <li><span className="text-foreground font-medium">Deploy</span> — Shield enforces in real time.</li>
+                  <li>
+                    <span className="text-foreground font-medium">Analyze</span> — aggregate
+                    anonymized signals.
+                  </li>
+                  <li>
+                    <span className="text-foreground font-medium">Report</span> — LLM identifies &
+                    scores risks.
+                  </li>
+                  <li>
+                    <span className="text-foreground font-medium">Suggest</span> — propose a
+                    deployable policy.
+                  </li>
+                  <li>
+                    <span className="text-foreground font-medium">Approve</span> — you accept,
+                    modify, or reject.
+                  </li>
+                  <li>
+                    <span className="text-foreground font-medium">Deploy</span> — Shield enforces in
+                    real time.
+                  </li>
                 </ol>
               </Panel>
               <Panel title="Privacy">
                 <p className="text-xs text-muted-foreground">
-                  Guardian only ever sees anonymized counts, distributions and salted hashes.
-                  Raw URLs, prompts and commands never leave your environment.
+                  Guardian only ever sees anonymized counts, distributions and salted hashes. Raw
+                  URLs, prompts and commands never leave your environment.
                 </p>
               </Panel>
             </div>

@@ -7,10 +7,7 @@ import { getSafeAuthRedirect } from "@/lib/auth-redirect";
 
 export const Route = createFileRoute("/auth/callback")({
   head: () => ({
-    meta: [
-      { title: "Signing in…" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Signing in…" }, { name: "robots", content: "noindex" }],
   }),
   component: CallbackPage,
 });
@@ -51,11 +48,11 @@ function CallbackPage() {
 
     // 1) Listen for the SIGNED_IN event — fires the instant Supabase
     //    hydrates the session from the URL hash / storage.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_IN" && session) goSuccess();
-      },
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) goSuccess();
+    });
 
     // 2) Also check immediately in case the session is already there
     //    (warm cache, second mount, etc.).

@@ -4,7 +4,9 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/post-login")({
-  head: () => ({ meta: [{ title: "Loading… — Fortress" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Loading… — Fortress" }, { name: "robots", content: "noindex" }],
+  }),
   component: PostLogin,
 });
 
@@ -24,9 +26,7 @@ function PostLogin() {
         if (!cancelled) navigate({ to: "/auth/signin", replace: true });
         return;
       }
-      const { count } = await supabase
-        .from("agents")
-        .select("id", { count: "exact", head: true });
+      const { count } = await supabase.from("agents").select("id", { count: "exact", head: true });
       if (cancelled) return;
       if ((count ?? 0) === 0) navigate({ to: "/onboarding", replace: true });
       else navigate({ to: "/dashboard", replace: true });

@@ -1,12 +1,12 @@
-import * as React from 'react'
-import { render } from '@react-email/components'
-import { createFileRoute } from '@tanstack/react-router'
-import { SignupEmail } from '@/lib/email-templates/signup'
-import { InviteEmail } from '@/lib/email-templates/invite'
-import { MagicLinkEmail } from '@/lib/email-templates/magic-link'
-import { RecoveryEmail } from '@/lib/email-templates/recovery'
-import { EmailChangeEmail } from '@/lib/email-templates/email-change'
-import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
+import * as React from "react";
+import { render } from "@react-email/components";
+import { createFileRoute } from "@tanstack/react-router";
+import { SignupEmail } from "@/lib/email-templates/signup";
+import { InviteEmail } from "@/lib/email-templates/invite";
+import { MagicLinkEmail } from "@/lib/email-templates/magic-link";
+import { RecoveryEmail } from "@/lib/email-templates/recovery";
+import { EmailChangeEmail } from "@/lib/email-templates/email-change";
+import { ReauthenticationEmail } from "@/lib/email-templates/reauthentication";
 
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   signup: SignupEmail,
@@ -15,19 +15,19 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   recovery: RecoveryEmail,
   email_change: EmailChangeEmail,
   reauthentication: ReauthenticationEmail,
-}
+};
 
 // Configuration
-const SITE_NAME = "watchmyagents"
-const ROOT_DOMAIN = "watchmyagents.com"
+const SITE_NAME = "watchmyagents";
+const ROOT_DOMAIN = "watchmyagents.com";
 
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false
-  let result = 0
+  if (a.length !== b.length) return false;
+  let result = 0;
   for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
-  return result === 0
+  return result === 0;
 }
 
 // Sample data for preview mode ONLY (not used in actual email sending).
@@ -35,8 +35,8 @@ function timingSafeEqual(a: string, b: string): boolean {
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://watchmyagents.com"
-const SAMPLE_EMAIL = "user@example.test"
+const SAMPLE_PROJECT_URL = "https://watchmyagents.com";
+const SAMPLE_EMAIL = "user@example.test";
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
     siteName: SITE_NAME,
@@ -65,58 +65,49 @@ const SAMPLE_DATA: Record<string, object> = {
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   reauthentication: {
-    token: '123456',
+    token: "123456",
   },
-}
+};
 
 export const Route = createFileRoute("/lovable/email/auth/preview")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        const apiKey = process.env.LOVABLE_API_KEY;
 
         if (!apiKey) {
-          return Response.json(
-            { error: 'Server configuration error' },
-            { status: 500 }
-          )
+          return Response.json({ error: "Server configuration error" }, { status: 500 });
         }
 
         // Verify the caller is authorized with LOVABLE_API_KEY
-        const authHeader = request.headers.get('Authorization')
-        const expected = `Bearer ${apiKey}`
+        const authHeader = request.headers.get("Authorization");
+        const expected = `Bearer ${apiKey}`;
         if (!authHeader || !timingSafeEqual(authHeader, expected)) {
-          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+          return Response.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        let type: string
+        let type: string;
         try {
-          const body = await request.json()
-          type = body.type
+          const body = await request.json();
+          type = body.type;
         } catch {
-          return Response.json(
-            { error: 'Invalid JSON in request body' },
-            { status: 400 }
-          )
+          return Response.json({ error: "Invalid JSON in request body" }, { status: 400 });
         }
 
-        const EmailTemplate = EMAIL_TEMPLATES[type]
+        const EmailTemplate = EMAIL_TEMPLATES[type];
 
         if (!EmailTemplate) {
-          return Response.json(
-            { error: `Unknown email type: ${type}` },
-            { status: 400 }
-          )
+          return Response.json({ error: `Unknown email type: ${type}` }, { status: 400 });
         }
 
-        const sampleData = SAMPLE_DATA[type] || {}
-        const html = await render(React.createElement(EmailTemplate, sampleData))
+        const sampleData = SAMPLE_DATA[type] || {};
+        const html = await render(React.createElement(EmailTemplate, sampleData));
 
         return new Response(html, {
           status: 200,
-          headers: { 'Content-Type': 'text/html; charset=utf-8' },
-        })
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
       },
     },
   },
-})
+});

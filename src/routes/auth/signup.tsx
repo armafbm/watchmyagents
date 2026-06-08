@@ -120,7 +120,10 @@ function SignupPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="fullName" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+          <Label
+            htmlFor="fullName"
+            className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+          >
             Full name
           </Label>
           <Input
@@ -134,7 +137,10 @@ function SignupPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+          <Label
+            htmlFor="email"
+            className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+          >
             Email
           </Label>
           <Input
@@ -149,7 +155,10 @@ function SignupPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+          <Label
+            htmlFor="password"
+            className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+          >
             Password
           </Label>
           <div className="relative">
@@ -200,7 +209,10 @@ function SignupPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="company" className="text-xs uppercase tracking-wider font-mono text-muted-foreground">
+          <Label
+            htmlFor="company"
+            className="text-xs uppercase tracking-wider font-mono text-muted-foreground"
+          >
             Company <span className="text-muted-foreground/60 normal-case">(optional)</span>
           </Label>
           <Input
@@ -219,8 +231,14 @@ function SignupPage() {
 
         <p className="text-xs text-muted-foreground text-center pt-2">
           By signing up, you agree to our{" "}
-          <a href="/terms" className="underline hover:text-foreground">Terms</a> and{" "}
-          <a href="/privacy" className="underline hover:text-foreground">Privacy Policy</a>.
+          <a href="/terms" className="underline hover:text-foreground">
+            Terms
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="underline hover:text-foreground">
+            Privacy Policy
+          </a>
+          .
         </p>
       </form>
     </AuthLayout>

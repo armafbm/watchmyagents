@@ -1,15 +1,15 @@
-import { loadStripe, type Stripe } from '@stripe/stripe-js';
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
 
-export type StripeEnv = 'sandbox' | 'live';
+export type StripeEnv = "sandbox" | "live";
 
 const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
 
 function paymentsEnvironment(): StripeEnv {
-  if (clientToken?.startsWith('pk_test_')) return 'sandbox';
-  if (clientToken?.startsWith('pk_live_')) return 'live';
+  if (clientToken?.startsWith("pk_test_")) return "sandbox";
+  if (clientToken?.startsWith("pk_live_")) return "live";
   throw new Error(
-    'Stripe payments are not configured for this build. ' +
-      'Complete payments go-live in your Lovable project to enable production checkout.',
+    "Stripe payments are not configured for this build. " +
+      "Complete payments go-live in your Lovable project to enable production checkout.",
   );
 }
 
@@ -28,5 +28,7 @@ export function getStripeEnvironment(): StripeEnv {
 }
 
 export function isPaymentsConfigured(): boolean {
-  return !!clientToken && (clientToken.startsWith('pk_test_') || clientToken.startsWith('pk_live_'));
+  return (
+    !!clientToken && (clientToken.startsWith("pk_test_") || clientToken.startsWith("pk_live_"))
+  );
 }

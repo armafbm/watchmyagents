@@ -8,11 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { useRole } from "@/hooks/useRole";
 import { SignatureChip } from "@/components/policies/SignatureChip";
-import { autoSignOwnPolicy, getPolicySignature, signPolicy } from "@/lib/fortress-signing.functions";
+import {
+  autoSignOwnPolicy,
+  getPolicySignature,
+  signPolicy,
+} from "@/lib/fortress-signing.functions";
 
 export type PolicySurface = "agent" | "subtree" | "type" | "fleet";
 
@@ -33,12 +41,17 @@ export type PolicyDraft = {
 };
 
 const AGENT_TYPES = [
-  "coding","devops_infra","data_rag","customer_facing","browser_web",
-  "orchestrator","workflow_backoffice","personal_assistant",
-  "transactional_financial","generic",
+  "coding",
+  "devops_infra",
+  "data_rag",
+  "customer_facing",
+  "browser_web",
+  "orchestrator",
+  "workflow_backoffice",
+  "personal_assistant",
+  "transactional_financial",
+  "generic",
 ] as const;
-
-
 
 const ACTIONS = ["allow", "deny", "interrupt"] as const;
 
@@ -62,9 +75,16 @@ export function PolicyEditor({
   );
   const [surfaceRef, setSurfaceRef] = useState<string>(draft.surface_ref ?? "generic");
   const [agentId, setAgentId] = useState<string | null>(
-    draft.agent_id ?? (draft.surface_type === "subtree" ? draft.surface_ref ?? null : null),
+    draft.agent_id ?? (draft.surface_type === "subtree" ? (draft.surface_ref ?? null) : null),
   );
-  const [agentOpts, setAgentOpts] = useState<Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }>>([]);
+  const [agentOpts, setAgentOpts] = useState<
+    Array<{
+      id: string;
+      display_name: string;
+      agent_type: string | null;
+      enforcement_mode: string | null;
+    }>
+  >([]);
   const [mode, setMode] = useState<PolicyMode>(draft.mode ?? "enforce");
   const [isFirstPolicy, setIsFirstPolicy] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -75,7 +95,14 @@ export function PolicyEditor({
       .select("id, display_name, agent_type, enforcement_mode")
       .order("display_name")
       .then(({ data }) => {
-        setAgentOpts(((data as Array<{ id: string; display_name: string; agent_type: string | null; enforcement_mode: string | null }> | null) ?? []));
+        setAgentOpts(
+          (data as Array<{
+            id: string;
+            display_name: string;
+            agent_type: string | null;
+            enforcement_mode: string | null;
+          }> | null) ?? [],
+        );
       });
     // Onboarding nudge: if this is a brand-new policy and the customer has no policies yet, default to shadow.
     if (!draft.id && draft.mode === undefined) {
@@ -96,7 +123,8 @@ export function PolicyEditor({
   const isDetectOnlyAgent =
     (surfaceType === "agent" || surfaceType === "subtree") && selectedEnforcement === "detect_only";
   const availableActions: readonly string[] =
-    (surfaceType === "agent" || surfaceType === "subtree") && selectedEnforcement === "sync_interrupt"
+    (surfaceType === "agent" || surfaceType === "subtree") &&
+    selectedEnforcement === "sync_interrupt"
       ? (["allow", "interrupt"] as const)
       : ACTIONS;
 
@@ -140,10 +168,7 @@ export function PolicyEditor({
       message: message.trim() || null,
       match: parsed as never,
       surface_type: surfaceType,
-      surface_ref:
-        surfaceType === "type" ? surfaceRef :
-        surfaceType === "subtree" ? agentId :
-        null,
+      surface_ref: surfaceType === "type" ? surfaceRef : surfaceType === "subtree" ? agentId : null,
       agent_id: surfaceType === "agent" ? agentId : null,
       customer_id,
     };
@@ -203,7 +228,6 @@ export function PolicyEditor({
     }
   };
 
-
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4">
       <div className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl">
@@ -219,9 +243,7 @@ export function PolicyEditor({
                   signingKeyId={sigInfo.signing_key_id}
                   signedAt={sigInfo.signed_at}
                   keyValidUntilByKid={
-                    sigInfo.signing_key_id
-                      ? { [sigInfo.signing_key_id]: sigInfo.valid_until }
-                      : {}
+                    sigInfo.signing_key_id ? { [sigInfo.signing_key_id]: sigInfo.valid_until } : {}
                   }
                 />
                 <button
@@ -231,13 +253,20 @@ export function PolicyEditor({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-primary/60 transition disabled:opacity-50"
                   title="Re-sign with current active signing key"
                 >
-                  {resigning ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  {resigning ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3 w-3" />
+                  )}
                   Re-sign
                 </button>
               </>
             )}
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0">
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground shrink-0"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -266,10 +295,13 @@ export function PolicyEditor({
                     className="sr-only peer"
                   />
                   <div className="cursor-pointer text-center py-2 rounded-md border border-border peer-checked:border-primary peer-checked:bg-primary/10 text-[11px] font-mono uppercase tracking-widest">
-                    {s === "agent" ? "This agent"
-                      : s === "subtree" ? "Subtree"
-                      : s === "type" ? "Same type"
-                      : "Whole fleet"}
+                    {s === "agent"
+                      ? "This agent"
+                      : s === "subtree"
+                        ? "Subtree"
+                        : s === "type"
+                          ? "Same type"
+                          : "Whole fleet"}
                   </div>
                 </label>
               ))}
@@ -281,11 +313,14 @@ export function PolicyEditor({
             )}
             {(surfaceType === "agent" || surfaceType === "subtree") && (
               <Select value={agentId ?? ""} onValueChange={(v) => setAgentId(v || null)}>
-                <SelectTrigger><SelectValue placeholder="Pick an agent…" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pick an agent…" />
+                </SelectTrigger>
                 <SelectContent>
                   {agentOpts.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
-                      {a.display_name}{a.agent_type ? ` · ${a.agent_type}` : ""}
+                      {a.display_name}
+                      {a.agent_type ? ` · ${a.agent_type}` : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -293,31 +328,43 @@ export function PolicyEditor({
             )}
             {surfaceType === "type" && (
               <Select value={surfaceRef} onValueChange={setSurfaceRef}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {AGENT_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             )}
             <p className="text-xs text-muted-foreground">
-              Created as <b>pending</b> — toggle Enabled in the table to deploy. The
-              global-baseline floors always apply on top.
+              Created as <b>pending</b> — toggle Enabled in the table to deploy. The global-baseline
+              floors always apply on top.
             </p>
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="rationale">Rationale</Label>
-            <Textarea id="rationale" rows={2} value={rationale} onChange={(e) => setRationale(e.target.value)} />
+            <Textarea
+              id="rationale"
+              rows={2}
+              value={rationale}
+              onChange={(e) => setRationale(e.target.value)}
+            />
           </div>
           {isDetectOnlyAgent && (
             <div className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
-              Detection-only agent — Shield enforcement is not available for this adapter. WMA will surface findings
-              in Reports &amp; Audit but cannot block actions in real time. This rule will be saved in monitor mode.
+              Detection-only agent — Shield enforcement is not available for this adapter. WMA will
+              surface findings in Reports &amp; Audit but cannot block actions in real time. This
+              rule will be saved in monitor mode.
             </div>
           )}
-          <div className={`space-y-1.5 ${isDetectOnlyAgent ? "opacity-50 pointer-events-none" : ""}`}>
+          <div
+            className={`space-y-1.5 ${isDetectOnlyAgent ? "opacity-50 pointer-events-none" : ""}`}
+          >
             <Label>Action</Label>
             <div className="flex gap-2">
               {availableActions.map((a) => (
@@ -331,17 +378,20 @@ export function PolicyEditor({
                     className="sr-only peer"
                   />
                   <div className="cursor-pointer text-center py-2 rounded-md border border-border peer-checked:border-primary peer-checked:bg-primary/10 text-sm font-mono uppercase tracking-widest">
-                    {a === "interrupt" && selectedEnforcement === "sync_interrupt" ? "interrupt" : a}
+                    {a === "interrupt" && selectedEnforcement === "sync_interrupt"
+                      ? "interrupt"
+                      : a}
                   </div>
                 </label>
               ))}
             </div>
-            {selectedEnforcement === "sync_interrupt" && (surfaceType === "agent" || surfaceType === "subtree") && (
-              <p className="text-[11px] text-muted-foreground">
-                Adapter is <code className="font-mono">sync_interrupt</code>: fine-grained confirm is not available —
-                only allow or interrupt.
-              </p>
-            )}
+            {selectedEnforcement === "sync_interrupt" &&
+              (surfaceType === "agent" || surfaceType === "subtree") && (
+                <p className="text-[11px] text-muted-foreground">
+                  Adapter is <code className="font-mono">sync_interrupt</code>: fine-grained confirm
+                  is not available — only allow or interrupt.
+                </p>
+              )}
           </div>
           <div className="space-y-1.5">
             <Label>Mode</Label>
@@ -377,14 +427,14 @@ export function PolicyEditor({
             </div>
             {mode === "shadow" && (
               <div className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-[11px] text-warning/90">
-                Shadow is a staging step. The SDK evaluates the rule and logs the decision, but the agent is not
-                blocked. Promote to Enforce once you trust the signal.
+                Shadow is a staging step. The SDK evaluates the rule and logs the decision, but the
+                agent is not blocked. Promote to Enforce once you trust the signal.
               </div>
             )}
             {isFirstPolicy && mode === "shadow" && (
               <div className="rounded-md border border-primary/40 bg-primary/5 px-3 py-2 text-[11px] text-primary">
-                Your first rule starts in Shadow so you can see what it would do without risking false positives.
-                Promote when ready.
+                Your first rule starts in Shadow so you can see what it would do without risking
+                false positives. Promote when ready.
               </div>
             )}
           </div>

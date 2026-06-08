@@ -6,10 +6,7 @@ import { useRole } from "@/hooks/useRole";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings/")({
   head: () => ({
-    meta: [
-      { title: "Settings — WatchMyAgents" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Settings — WatchMyAgents" }, { name: "robots", content: "noindex" }],
   }),
   component: SettingsHub,
 });

@@ -29,7 +29,9 @@ const composition = await selectComposition({
   puppeteerInstance: browser,
 });
 
-console.log(`Composition: ${composition.durationInFrames} frames @ ${composition.fps}fps -> ${composition.durationInFrames / composition.fps}s`);
+console.log(
+  `Composition: ${composition.durationInFrames} frames @ ${composition.fps}fps -> ${composition.durationInFrames / composition.fps}s`,
+);
 
 let frameRangeParsed = undefined;
 if (frameRange) {

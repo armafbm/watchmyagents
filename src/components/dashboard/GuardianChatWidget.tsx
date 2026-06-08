@@ -15,7 +15,9 @@ export function GuardianChatWidget() {
               <LayerIcon layer="guardian" className="h-5 w-5 shrink-0" />
               <div className="leading-tight min-w-0">
                 <div className="font-display text-sm font-bold truncate">Guardian AI</div>
-                <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">gemini-2.5-flash</div>
+                <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                  gemini-2.5-flash
+                </div>
               </div>
             </div>
             <button

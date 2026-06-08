@@ -12,7 +12,9 @@ import { SessionIdChip } from "@/components/fortress/SessionIdChip";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/reports")({
-  head: () => ({ meta: [{ title: "Reports & Audit — WatchMyAgents" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Reports & Audit — WatchMyAgents" }, { name: "robots", content: "noindex" }],
+  }),
   component: ReportsPage,
 });
 
@@ -44,7 +46,6 @@ type AuditRow = {
   signal_id: string | null;
 };
 
-
 function decisionIcon(d: string) {
   if (d === "allow") return <CheckCircle2 className="h-4 w-4 text-success" />;
   if (d === "deny" || d === "block") return <XCircle className="h-4 w-4 text-danger" />;
@@ -63,7 +64,7 @@ function toCsv(rows: Decision[]) {
     ...rows.map((r) =>
       [r.decided_at, r.decision, r.tool_name, r.action_type, r.message, r.decided_in_ms]
         .map(escape)
-        .join(",")
+        .join(","),
     ),
   ];
   return lines.join("\n");
@@ -83,14 +84,18 @@ function ReportsPage() {
       const [{ data: d }, { data: a }] = await Promise.all([
         supabase
           .from("decisions")
-          .select("id,decided_at,decision,mode,tool_name,action_type,message,decided_in_ms,agent_id")
+          .select(
+            "id,decided_at,decision,mode,tool_name,action_type,message,decided_in_ms,agent_id",
+          )
           .order("decided_at", { ascending: false })
           .limit(500),
         supabase.from("agents").select("id, display_name, provider, parent_agent_id"),
       ]);
       setRows((d as Decision[] | null) ?? []);
       const map: Record<string, AgentMini> = {};
-      ((a as AgentMini[] | null) ?? []).forEach((x) => { map[x.id] = x; });
+      ((a as AgentMini[] | null) ?? []).forEach((x) => {
+        map[x.id] = x;
+      });
       setAgents(map);
       setLoading(false);
     })();
@@ -108,7 +113,9 @@ function ReportsPage() {
   }, []);
 
   const stats = useMemo(() => {
-    let allow = 0, deny = 0, other = 0;
+    let allow = 0,
+      deny = 0,
+      other = 0;
     rows.forEach((r) => {
       if (r.decision === "allow") allow++;
       else if (r.decision === "deny" || r.decision === "block") deny++;
@@ -153,8 +160,14 @@ function ReportsPage() {
         actions={
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs font-mono">
-              <Switch id="incl-sids" checked={includeSessionIds} onCheckedChange={setIncludeSessionIds} />
-              <Label htmlFor="incl-sids" className="text-muted-foreground">include session_ids</Label>
+              <Switch
+                id="incl-sids"
+                checked={includeSessionIds}
+                onCheckedChange={setIncludeSessionIds}
+              />
+              <Label htmlFor="incl-sids" className="text-muted-foreground">
+                include session_ids
+              </Label>
             </div>
             <Button onClick={download} disabled={rows.length === 0}>
               <Download className="h-4 w-4 mr-2" /> Export CSV
@@ -181,7 +194,9 @@ function ReportsPage() {
         <TabsContent value="decisions">
           <Panel title="Decision history" icon={FileText} tag="last 500">
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mr-1">Mode:</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
+                Mode:
+              </span>
               {(["all", "enforce", "shadow"] as const).map((m) => (
                 <button
                   key={m}
@@ -202,16 +217,21 @@ function ReportsPage() {
             </div>
             {modeFilter === "shadow" && (
               <div className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-warning">
-                Showing rules that would have blocked but didn't. Promote them to Enforce once you trust the signal.
+                Showing rules that would have blocked but didn't. Promote them to Enforce once you
+                trust the signal.
               </div>
             )}
             {loading ? (
-              <div className="py-10 text-center text-muted-foreground text-sm font-mono">Loading…</div>
+              <div className="py-10 text-center text-muted-foreground text-sm font-mono">
+                Loading…
+              </div>
             ) : filteredRows.length === 0 ? (
               <div className="py-12 text-center">
                 <FileText className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
                 <div className="font-display text-lg font-bold mb-1">
-                  {rows.length === 0 ? "No decision recorded yet" : "No decision matches this filter"}
+                  {rows.length === 0
+                    ? "No decision recorded yet"
+                    : "No decision matches this filter"}
                 </div>
                 {rows.length === 0 && (
                   <p className="text-sm text-muted-foreground">
@@ -242,7 +262,9 @@ function ReportsPage() {
                       while (cursor && !seen.has(cursor.id) && chain.length < 10) {
                         chain.unshift(cursor);
                         seen.add(cursor.id);
-                        cursor = cursor.parent_agent_id ? agents[cursor.parent_agent_id] : undefined;
+                        cursor = cursor.parent_agent_id
+                          ? agents[cursor.parent_agent_id]
+                          : undefined;
                       }
                       const isShadow = (r.mode ?? "enforce") === "shadow";
                       return (
@@ -253,7 +275,9 @@ function ReportsPage() {
                           </td>
                           <td className="p-3 whitespace-nowrap">
                             <div className="flex items-center gap-2">
-                              <ProviderBadge provider={(ag?.provider as AgentProvider | null) ?? null} />
+                              <ProviderBadge
+                                provider={(ag?.provider as AgentProvider | null) ?? null}
+                              />
                               <span className="font-mono text-xs text-foreground/90">
                                 {ag?.display_name ?? `${r.agent_id.slice(0, 8)}…`}
                               </span>
@@ -277,8 +301,12 @@ function ReportsPage() {
                               )}
                             </div>
                           </td>
-                          <td className="p-3 font-mono text-xs text-primary">{r.tool_name ?? "—"}</td>
-                          <td className="p-3 text-muted-foreground truncate max-w-[400px]">{r.message ?? "—"}</td>
+                          <td className="p-3 font-mono text-xs text-primary">
+                            {r.tool_name ?? "—"}
+                          </td>
+                          <td className="p-3 text-muted-foreground truncate max-w-[400px]">
+                            {r.message ?? "—"}
+                          </td>
                           <td className="p-3 text-right font-mono text-xs">
                             {r.decided_in_ms != null ? `${r.decided_in_ms}ms` : "—"}
                           </td>
@@ -310,7 +338,9 @@ function ReportsPage() {
               ))}
             </div>
             {auditRows === null ? (
-              <div className="py-10 text-center text-muted-foreground text-sm font-mono">Loading…</div>
+              <div className="py-10 text-center text-muted-foreground text-sm font-mono">
+                Loading…
+              </div>
             ) : filteredAudit.length === 0 ? (
               <div className="py-12 text-center">
                 <Eye className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
@@ -363,4 +393,3 @@ function ReportsPage() {
     </DashboardLayout>
   );
 }
-

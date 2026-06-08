@@ -9,12 +9,36 @@ export const Scene6Account: React.FC = () => {
   const dropdown = spring({ frame: frame - 60, fps, config: { damping: 20 } });
 
   return (
-    <AbsoluteFill style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 80 }}>
+    <AbsoluteFill
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 80,
+      }}
+    >
       <div style={{ marginBottom: 30, opacity: intro, textAlign: "center" }}>
-        <span style={{ fontFamily: F.mono, fontSize: 14, letterSpacing: 5, color: C.primary, textTransform: "uppercase" }}>
+        <span
+          style={{
+            fontFamily: F.mono,
+            fontSize: 14,
+            letterSpacing: 5,
+            color: C.primary,
+            textTransform: "uppercase",
+          }}
+        >
           // Signed in
         </span>
-        <h2 style={{ fontFamily: F.display, fontSize: 64, color: C.fg, margin: "12px 0 0 0", letterSpacing: -2 }}>
+        <h2
+          style={{
+            fontFamily: F.display,
+            fontSize: 64,
+            color: C.fg,
+            margin: "12px 0 0 0",
+            letterSpacing: -2,
+          }}
+        >
           Your fortress, your team.
         </h2>
       </div>
@@ -53,8 +77,20 @@ export const Scene6Account: React.FC = () => {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: F.display, fontSize: 30, color: C.fg }}>Arma</div>
-            <div style={{ fontFamily: F.mono, fontSize: 17, color: C.primary, marginTop: 4 }}>arma@talkytranslate.com</div>
-            <div style={{ fontFamily: F.mono, fontSize: 12, color: C.muted, marginTop: 8, letterSpacing: 2 }}>● ADMIN · TALKYTRANSLATE WORKSPACE</div>
+            <div style={{ fontFamily: F.mono, fontSize: 17, color: C.primary, marginTop: 4 }}>
+              arma@talkytranslate.com
+            </div>
+            <div
+              style={{
+                fontFamily: F.mono,
+                fontSize: 12,
+                color: C.muted,
+                marginTop: 8,
+                letterSpacing: 2,
+              }}
+            >
+              ● ADMIN · TALKYTRANSLATE WORKSPACE
+            </div>
           </div>
         </div>
 
@@ -67,9 +103,29 @@ export const Scene6Account: React.FC = () => {
             { k: "Plan", v: "Free trial", c: C.accent },
             { k: "Region", v: "EU · Paris", c: C.fg },
           ].map((kpi) => (
-            <div key={kpi.k} style={{ padding: 16, background: C.bg, borderRadius: 10, border: `1px solid ${C.border}` }}>
-              <div style={{ fontFamily: F.mono, fontSize: 10, letterSpacing: 3, color: C.muted, textTransform: "uppercase" }}>{kpi.k}</div>
-              <div style={{ fontFamily: F.display, fontSize: 24, color: kpi.c, marginTop: 6 }}>{kpi.v}</div>
+            <div
+              key={kpi.k}
+              style={{
+                padding: 16,
+                background: C.bg,
+                borderRadius: 10,
+                border: `1px solid ${C.border}`,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: F.mono,
+                  fontSize: 10,
+                  letterSpacing: 3,
+                  color: C.muted,
+                  textTransform: "uppercase",
+                }}
+              >
+                {kpi.k}
+              </div>
+              <div style={{ fontFamily: F.display, fontSize: 24, color: kpi.c, marginTop: 6 }}>
+                {kpi.v}
+              </div>
             </div>
           ))}
         </div>

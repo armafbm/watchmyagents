@@ -1,4 +1,11 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Sequence } from "remotion";
+import {
+  AbsoluteFill,
+  useCurrentFrame,
+  useVideoConfig,
+  spring,
+  interpolate,
+  Sequence,
+} from "remotion";
 import { C, F } from "../theme";
 
 const alerts = [
@@ -16,9 +23,19 @@ export const Scene2Problem: React.FC = () => {
   const subOp = interpolate(frame, [20, 50], [0, 1], { extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ padding: 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+    <AbsoluteFill
+      style={{ padding: 120, display: "flex", flexDirection: "column", justifyContent: "center" }}
+    >
       <div style={{ opacity: titleOp, marginBottom: 24 }}>
-        <span style={{ fontFamily: F.mono, fontSize: 14, letterSpacing: 5, color: C.danger, textTransform: "uppercase" }}>
+        <span
+          style={{
+            fontFamily: F.mono,
+            fontSize: 14,
+            letterSpacing: 5,
+            color: C.danger,
+            textTransform: "uppercase",
+          }}
+        >
           // The problem
         </span>
       </div>
@@ -34,7 +51,8 @@ export const Scene2Problem: React.FC = () => {
           letterSpacing: -3,
         }}
       >
-        Agents go rogue.<br />
+        Agents go rogue.
+        <br />
         <span style={{ color: C.danger }}>You see it too late.</span>
       </h2>
       <p

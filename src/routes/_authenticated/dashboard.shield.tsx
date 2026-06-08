@@ -1,5 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Shield, GitPullRequest, Lock, Plus, Pencil, Trash2, Loader2, Globe, Layers, User, GitBranch, Eye } from "lucide-react";
+import {
+  Shield,
+  GitPullRequest,
+  Lock,
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+  Globe,
+  Layers,
+  User,
+  GitBranch,
+  Eye,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -8,11 +21,17 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PolicyEditor, type PolicyDraft } from "@/components/fortress/PolicyEditor";
 import { ProviderBadge, type AgentProvider } from "@/components/fortress/ProviderBadge";
-import { EnforcementBadge, isDetectOnly, type EnforcementMode } from "@/components/fortress/EnforcementBadge";
+import {
+  EnforcementBadge,
+  isDetectOnly,
+  type EnforcementMode,
+} from "@/components/fortress/EnforcementBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard/shield")({
-  head: () => ({ meta: [{ title: "Shield · Defense — WatchMyAgents" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Shield · Defense — WatchMyAgents" }, { name: "robots", content: "noindex" }],
+  }),
   component: ShieldPage,
 });
 
@@ -52,13 +71,7 @@ function actionTone(a: string) {
   return "bg-success/15 text-success border-success/30";
 }
 
-function AppliesToBadge({
-  p,
-  agents,
-}: {
-  p: Policy;
-  agents: AgentMini[];
-}) {
+function AppliesToBadge({ p, agents }: { p: Policy; agents: AgentMini[] }) {
   // back-compat: rows with NULL surface_type
   const surface = p.surface_type ?? (p.agent_id ? "agent" : "fleet");
 
@@ -175,8 +188,18 @@ function ShieldPage() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Stat label="Active policies" value={loading ? "—" : String(activeCount)} icon={Shield} tone="success" />
-        <Stat label="Disabled / draft" value={loading ? "—" : String(draftCount)} icon={GitPullRequest} tone="warning" />
+        <Stat
+          label="Active policies"
+          value={loading ? "—" : String(activeCount)}
+          icon={Shield}
+          tone="success"
+        />
+        <Stat
+          label="Disabled / draft"
+          value={loading ? "—" : String(draftCount)}
+          icon={GitPullRequest}
+          tone="warning"
+        />
         <Stat label="From Guardian" value={loading ? "—" : String(guardianCount)} icon={Lock} />
         <Stat label="Total" value={loading ? "—" : String(list.length)} />
       </div>
@@ -187,9 +210,10 @@ function ShieldPage() {
             <Eye className="h-4 w-4" /> Detection-only agents in fleet
           </div>
           <p className="text-xs text-warning/90">
-            Shield enforcement is not available for adapters reporting <code className="font-mono">detect_only</code>. WMA
-            will surface findings in Reports &amp; Audit but cannot block actions in real time. Policies targeting these
-            agents are kept in monitor mode.
+            Shield enforcement is not available for adapters reporting{" "}
+            <code className="font-mono">detect_only</code>. WMA will surface findings in Reports
+            &amp; Audit but cannot block actions in real time. Policies targeting these agents are
+            kept in monitor mode.
           </p>
         </div>
       )}
@@ -264,21 +288,31 @@ function ShieldPage() {
                         </div>
                       )}
                     </td>
-                    <td className="p-3"><AppliesToBadge p={p} agents={agents} /></td>
+                    <td className="p-3">
+                      <AppliesToBadge p={p} agents={agents} />
+                    </td>
                     <td className="p-3">
                       {(() => {
                         const targetAgent =
                           p.surface_type === "agent" || (!p.surface_type && p.agent_id)
                             ? agents.find((x) => x.id === p.agent_id)
                             : null;
-                        const detectOnly = targetAgent ? isDetectOnly(targetAgent.enforcement_mode) : false;
+                        const detectOnly = targetAgent
+                          ? isDetectOnly(targetAgent.enforcement_mode)
+                          : false;
                         return (
                           <div className="flex flex-col gap-1">
                             <span
                               className={`px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-widest w-fit ${
-                                detectOnly ? "bg-muted text-muted-foreground border-border line-through" : actionTone(p.action)
+                                detectOnly
+                                  ? "bg-muted text-muted-foreground border-border line-through"
+                                  : actionTone(p.action)
                               }`}
-                              title={detectOnly ? "Adapter is detect-only — enforcement disabled, rule runs in monitor mode." : undefined}
+                              title={
+                                detectOnly
+                                  ? "Adapter is detect-only — enforcement disabled, rule runs in monitor mode."
+                                  : undefined
+                              }
                             >
                               {p.action}
                             </span>
@@ -305,7 +339,9 @@ function ShieldPage() {
                           p.surface_type === "agent" || (!p.surface_type && p.agent_id)
                             ? agents.find((x) => x.id === p.agent_id)
                             : null;
-                        const detectOnly = targetAgent ? isDetectOnly(targetAgent.enforcement_mode) : false;
+                        const detectOnly = targetAgent
+                          ? isDetectOnly(targetAgent.enforcement_mode)
+                          : false;
                         return (
                           <Switch
                             checked={p.enabled}
@@ -327,7 +363,13 @@ function ShieldPage() {
                               action: p.action,
                               message: p.message ?? "",
                               match: JSON.stringify(p.match ?? {}, null, 2),
-                              surface_type: (p.surface_type as "agent" | "subtree" | "type" | "fleet" | undefined) ?? undefined,
+                              surface_type:
+                                (p.surface_type as
+                                  | "agent"
+                                  | "subtree"
+                                  | "type"
+                                  | "fleet"
+                                  | undefined) ?? undefined,
                               surface_ref: p.surface_ref ?? undefined,
                               agent_id: p.agent_id ?? undefined,
                               mode: (p.mode ?? "enforce") as "enforce" | "shadow",

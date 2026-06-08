@@ -1,5 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Swords, Users, Activity, Plus, Eye, Brain, Shield as ShieldIcon, Layers } from "lucide-react";
+import {
+  Swords,
+  Users,
+  Activity,
+  Plus,
+  Eye,
+  Brain,
+  Shield as ShieldIcon,
+  Layers,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
@@ -75,7 +84,12 @@ function LegionsPage() {
         <Stat label="Agents enlisted" value={String(totalAgents)} icon={Swords} tone="success" />
         <Stat label="Signals · 7d" value={totalSignals.toLocaleString()} icon={Activity} />
         <Stat label="Decisions · 7d" value={totalDecisions.toLocaleString()} icon={Users} />
-        <Stat label="Enforcements · 7d" value={totalEnforced.toLocaleString()} icon={ShieldIcon} tone="warning" />
+        <Stat
+          label="Enforcements · 7d"
+          value={totalEnforced.toLocaleString()}
+          icon={ShieldIcon}
+          tone="warning"
+        />
       </div>
 
       {loading ? (
@@ -118,15 +132,23 @@ function LoopRowDiagram({ row }: { row: LoopRow }) {
   const enf = row.enforcements_7d ?? 0;
 
   return (
-    <Panel
-      title={row.display_name ?? "unnamed agent"}
-      tag={`agent · 7d`}
-      icon={Swords}
-    >
+    <Panel title={row.display_name ?? "unnamed agent"} tag={`agent · 7d`} icon={Swords}>
       <div className="grid md:grid-cols-3 gap-4 items-stretch">
         <LoopNode color="primary" icon={Eye} label="Watch" value={signals} sub="signals" />
-        <LoopNode color="accent" icon={Brain} label="Guardian" value={sugg} sub={`${acc} accepted`} />
-        <LoopNode color="success" icon={ShieldIcon} label="Shield" value={enf} sub={`${dec} decisions`} />
+        <LoopNode
+          color="accent"
+          icon={Brain}
+          label="Guardian"
+          value={sugg}
+          sub={`${acc} accepted`}
+        />
+        <LoopNode
+          color="success"
+          icon={ShieldIcon}
+          label="Shield"
+          value={enf}
+          sub={`${dec} decisions`}
+        />
       </div>
       <p className="mt-5 text-sm text-muted-foreground leading-relaxed text-center">
         <span className="text-foreground font-semibold">{row.display_name ?? "—"}</span> produced{" "}

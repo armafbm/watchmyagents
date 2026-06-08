@@ -1,140 +1,141 @@
-import * as React from 'react'
-import { render } from '@react-email/components'
-import { createClient } from '@supabase/supabase-js'
-import { createFileRoute } from '@tanstack/react-router'
-import { TEMPLATES } from '@/lib/email-templates/registry'
+import * as React from "react";
+import { render } from "@react-email/components";
+import { createClient } from "@supabase/supabase-js";
+import { createFileRoute } from "@tanstack/react-router";
+import { TEMPLATES } from "@/lib/email-templates/registry";
 
-const SITE_NAME = 'watchmyagents'
-const SENDER_DOMAIN = 'notify.watchmyagents.com'
-const FROM_DOMAIN = 'watchmyagents.com'
-const TEMPLATE_NAME = 'early-access-confirmation'
-const ADMIN_TEMPLATE_NAME = 'early-access-admin-notification'
-const ADMIN_EMAIL = 'hello@watchmyagents.com'
-
+const SITE_NAME = "watchmyagents";
+const SENDER_DOMAIN = "notify.watchmyagents.com";
+const FROM_DOMAIN = "watchmyagents.com";
+const TEMPLATE_NAME = "early-access-confirmation";
+const ADMIN_TEMPLATE_NAME = "early-access-admin-notification";
+const ADMIN_EMAIL = "hello@watchmyagents.com";
 
 function generateToken(): string {
-  const bytes = new Uint8Array(32)
-  crypto.getRandomValues(bytes)
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
   return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function redactEmail(email: string): string {
-  const [l, d] = email.split('@')
-  if (!l || !d) return '***'
-  return `${l[0]}***@${d}`
+  const [l, d] = email.split("@");
+  if (!l || !d) return "***";
+  return `${l[0]}***@${d}`;
 }
 
-export const Route = createFileRoute('/api/public/early-access')({
+export const Route = createFileRoute("/api/public/early-access")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
         if (!supabaseUrl || !serviceKey) {
-          return Response.json({ error: 'Server configuration error' }, { status: 500 })
+          return Response.json({ error: "Server configuration error" }, { status: 500 });
         }
 
-        let email = ''
-        let source = 'landing_cta'
-        let userAgent: string | null = null
+        let email = "";
+        let source = "landing_cta";
+        let userAgent: string | null = null;
         try {
-          const body = await request.json()
-          email = String(body.email || '').trim().toLowerCase()
-          if (body.source) source = String(body.source).slice(0, 64)
-          if (body.userAgent) userAgent = String(body.userAgent).slice(0, 500)
+          const body = await request.json();
+          email = String(body.email || "")
+            .trim()
+            .toLowerCase();
+          if (body.source) source = String(body.source).slice(0, 64);
+          if (body.userAgent) userAgent = String(body.userAgent).slice(0, 500);
         } catch {
-          return Response.json({ error: 'Invalid body' }, { status: 400 })
+          return Response.json({ error: "Invalid body" }, { status: 400 });
         }
 
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 255) {
-          return Response.json({ error: 'Invalid email' }, { status: 400 })
+          return Response.json({ error: "Invalid email" }, { status: 400 });
         }
 
-        const supabase = createClient(supabaseUrl, serviceKey)
+        const supabase = createClient(supabaseUrl, serviceKey);
 
         // 1. Insert signup (ignore duplicate)
         const { error: insertError } = await supabase
-          .from('early_access_signups')
-          .insert({ email, source, user_agent: userAgent })
+          .from("early_access_signups")
+          .insert({ email, source, user_agent: userAgent });
 
-        let alreadyRegistered = false
+        let alreadyRegistered = false;
         if (insertError) {
-          if ((insertError as any).code === '23505') {
-            alreadyRegistered = true
+          if ((insertError as any).code === "23505") {
+            alreadyRegistered = true;
           } else {
-            console.error('early-access insert failed', insertError)
-            return Response.json({ error: 'Failed to save signup' }, { status: 500 })
+            console.error("early-access insert failed", insertError);
+            return Response.json({ error: "Failed to save signup" }, { status: 500 });
           }
         }
 
         // 2. If already registered, don't re-send the email
         if (alreadyRegistered) {
-          return Response.json({ success: true, alreadyRegistered: true })
+          return Response.json({ success: true, alreadyRegistered: true });
         }
 
         // 3. Check suppression
         const { data: suppressed } = await supabase
-          .from('suppressed_emails')
-          .select('id')
-          .eq('email', email)
-          .maybeSingle()
+          .from("suppressed_emails")
+          .select("id")
+          .eq("email", email)
+          .maybeSingle();
 
         if (suppressed) {
-          return Response.json({ success: true, suppressed: true })
+          return Response.json({ success: true, suppressed: true });
         }
 
         // 4. Get or create unsubscribe token
-        let unsubscribeToken: string
+        let unsubscribeToken: string;
         const { data: existingToken } = await supabase
-          .from('email_unsubscribe_tokens')
-          .select('token, used_at')
-          .eq('email', email)
-          .maybeSingle()
+          .from("email_unsubscribe_tokens")
+          .select("token, used_at")
+          .eq("email", email)
+          .maybeSingle();
 
         if (existingToken?.token && !existingToken.used_at) {
-          unsubscribeToken = existingToken.token
+          unsubscribeToken = existingToken.token;
         } else {
-          unsubscribeToken = generateToken()
+          unsubscribeToken = generateToken();
           await supabase
-            .from('email_unsubscribe_tokens')
+            .from("email_unsubscribe_tokens")
             .upsert(
               { token: unsubscribeToken, email },
-              { onConflict: 'email', ignoreDuplicates: true }
-            )
+              { onConflict: "email", ignoreDuplicates: true },
+            );
           const { data: stored } = await supabase
-            .from('email_unsubscribe_tokens')
-            .select('token')
-            .eq('email', email)
-            .maybeSingle()
-          if (stored?.token) unsubscribeToken = stored.token
+            .from("email_unsubscribe_tokens")
+            .select("token")
+            .eq("email", email)
+            .maybeSingle();
+          if (stored?.token) unsubscribeToken = stored.token;
         }
 
         // 5. Render template
-        const template = TEMPLATES[TEMPLATE_NAME]
+        const template = TEMPLATES[TEMPLATE_NAME];
         if (!template) {
-          console.error('Template missing', TEMPLATE_NAME)
-          return Response.json({ success: true, emailQueued: false })
+          console.error("Template missing", TEMPLATE_NAME);
+          return Response.json({ success: true, emailQueued: false });
         }
-        const element = React.createElement(template.component, {})
-        const html = await render(element)
-        const plainText = await render(element, { plainText: true })
+        const element = React.createElement(template.component, {});
+        const html = await render(element);
+        const plainText = await render(element, { plainText: true });
         const subject =
-          typeof template.subject === 'function' ? template.subject({}) : template.subject
+          typeof template.subject === "function" ? template.subject({}) : template.subject;
 
-        const messageId = crypto.randomUUID()
-        const idempotencyKey = `early-access-${email}`
+        const messageId = crypto.randomUUID();
+        const idempotencyKey = `early-access-${email}`;
 
-        await supabase.from('email_send_log').insert({
+        await supabase.from("email_send_log").insert({
           message_id: messageId,
           template_name: TEMPLATE_NAME,
           recipient_email: email,
-          status: 'pending',
-        })
+          status: "pending",
+        });
 
-        const { error: enqueueError } = await supabase.rpc('enqueue_email', {
-          queue_name: 'transactional_emails',
+        const { error: enqueueError } = await supabase.rpc("enqueue_email", {
+          queue_name: "transactional_emails",
           payload: {
             message_id: messageId,
             to: email,
@@ -143,54 +144,54 @@ export const Route = createFileRoute('/api/public/early-access')({
             subject,
             html,
             text: plainText,
-            purpose: 'transactional',
+            purpose: "transactional",
             label: TEMPLATE_NAME,
             idempotency_key: idempotencyKey,
             unsubscribe_token: unsubscribeToken,
             queued_at: new Date().toISOString(),
           },
-        })
+        });
 
         if (enqueueError) {
-          console.error('enqueue failed', enqueueError, redactEmail(email))
-          await supabase.from('email_send_log').insert({
+          console.error("enqueue failed", enqueueError, redactEmail(email));
+          await supabase.from("email_send_log").insert({
             message_id: messageId,
             template_name: TEMPLATE_NAME,
             recipient_email: email,
-            status: 'failed',
-            error_message: 'Failed to enqueue email',
-          })
-          return Response.json({ success: true, emailQueued: false })
+            status: "failed",
+            error_message: "Failed to enqueue email",
+          });
+          return Response.json({ success: true, emailQueued: false });
         }
 
         // 6. Enqueue admin notification (best-effort, don't fail request)
         try {
-          const adminTemplate = TEMPLATES[ADMIN_TEMPLATE_NAME]
+          const adminTemplate = TEMPLATES[ADMIN_TEMPLATE_NAME];
           if (adminTemplate) {
             const adminProps = {
               signupEmail: email,
               source,
-              userAgent: userAgent ?? 'n/a',
+              userAgent: userAgent ?? "n/a",
               signedUpAt: new Date().toISOString(),
-            }
-            const adminElement = React.createElement(adminTemplate.component, adminProps)
-            const adminHtml = await render(adminElement)
-            const adminText = await render(adminElement, { plainText: true })
+            };
+            const adminElement = React.createElement(adminTemplate.component, adminProps);
+            const adminHtml = await render(adminElement);
+            const adminText = await render(adminElement, { plainText: true });
             const adminSubject =
-              typeof adminTemplate.subject === 'function'
+              typeof adminTemplate.subject === "function"
                 ? adminTemplate.subject(adminProps)
-                : adminTemplate.subject
-            const adminMessageId = crypto.randomUUID()
+                : adminTemplate.subject;
+            const adminMessageId = crypto.randomUUID();
 
-            await supabase.from('email_send_log').insert({
+            await supabase.from("email_send_log").insert({
               message_id: adminMessageId,
               template_name: ADMIN_TEMPLATE_NAME,
               recipient_email: ADMIN_EMAIL,
-              status: 'pending',
-            })
+              status: "pending",
+            });
 
-            await supabase.rpc('enqueue_email', {
-              queue_name: 'transactional_emails',
+            await supabase.rpc("enqueue_email", {
+              queue_name: "transactional_emails",
               payload: {
                 message_id: adminMessageId,
                 to: ADMIN_EMAIL,
@@ -199,20 +200,19 @@ export const Route = createFileRoute('/api/public/early-access')({
                 subject: adminSubject,
                 html: adminHtml,
                 text: adminText,
-                purpose: 'transactional',
+                purpose: "transactional",
                 label: ADMIN_TEMPLATE_NAME,
                 idempotency_key: `early-access-admin-${email}`,
                 queued_at: new Date().toISOString(),
               },
-            })
+            });
           }
         } catch (e) {
-          console.error('admin notification enqueue failed', e)
+          console.error("admin notification enqueue failed", e);
         }
 
-        return Response.json({ success: true, emailQueued: true })
-
+        return Response.json({ success: true, emailQueued: true });
       },
     },
   },
-})
+});

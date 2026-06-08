@@ -50,14 +50,13 @@ export const getDashboardSnapshot = createServerFn({ method: "GET" })
     if (firstErr) throw new Error(firstErr.message);
 
     return {
-      today:
-        (todayRes.data as TodayRow | null) ?? {
-          agents_active: 0,
-          tokens_24h: 0,
-          actions_24h: 0,
-          blocked_24h: 0,
-          suggestions_pending: 0,
-        },
+      today: (todayRes.data as TodayRow | null) ?? {
+        agents_active: 0,
+        tokens_24h: 0,
+        actions_24h: 0,
+        blocked_24h: 0,
+        suggestions_pending: 0,
+      },
       decisions: (decisionsRes.data as Decision[] | null) ?? [],
       agents: (agentsRes.data as AgentRow[] | null) ?? [],
     };

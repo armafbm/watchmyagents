@@ -1,15 +1,12 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { CheckCircle2, ArrowRight } from "lucide-react";
 
-export const Route = createFileRoute('/checkout/return')({
+export const Route = createFileRoute("/checkout/return")({
   head: () => ({
-    meta: [
-      { title: 'Checkout complete — WatchMyAgents' },
-      { name: 'robots', content: 'noindex' },
-    ],
+    meta: [{ title: "Checkout complete — WatchMyAgents" }, { name: "robots", content: "noindex" }],
   }),
   validateSearch: (search: Record<string, unknown>): { session_id?: string } => ({
-    session_id: typeof search.session_id === 'string' ? search.session_id : undefined,
+    session_id: typeof search.session_id === "string" ? search.session_id : undefined,
   }),
   component: CheckoutReturnPage,
 });
@@ -31,8 +28,7 @@ function CheckoutReturnPage() {
             Welcome to WatchMyAgents
           </h1>
           <p className="text-muted-foreground mt-3">
-            Your subscription is being provisioned. You'll get full access in a few
-            seconds.
+            Your subscription is being provisioned. You'll get full access in a few seconds.
           </p>
           {session_id && (
             <p className="font-mono text-[10px] text-muted-foreground/70 mt-2 truncate">

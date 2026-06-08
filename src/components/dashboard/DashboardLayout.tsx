@@ -31,7 +31,8 @@ import logo from "@/assets/fortress-logo.png";
 import legionsImg from "@/assets/wma-legions.png";
 import { LayerIcon, type LayerKey } from "@/components/site/LayerIcons";
 
-const makeLayerIcon = (layer: LayerKey): ComponentType<{ className?: string }> =>
+const makeLayerIcon =
+  (layer: LayerKey): ComponentType<{ className?: string }> =>
   ({ className }) => <LayerIcon layer={layer} className={className ?? "h-4 w-4"} />;
 const WatchAvatar = makeLayerIcon("watch");
 const GuardianAvatar = makeLayerIcon("guardian");
@@ -57,10 +58,26 @@ const commandChildren: NavItem[] = [
   { to: "#", label: "Threat Intel", icon: Radar, soon: true },
 ];
 const baseOperations: Omit<NavItem, "badge">[] = [
-  { to: "/dashboard/watch", label: "Watch · Monitoring", icon: WatchAvatar as unknown as LucideIcon },
-  { to: "/dashboard/guardian", label: "Guardian AI", icon: GuardianAvatar as unknown as LucideIcon },
-  { to: "/dashboard/shield", label: "Shield · Policies", icon: ShieldAvatar as unknown as LucideIcon },
-  { to: "/dashboard/legions", label: "Legions · Fleets", icon: LegionsAvatar as unknown as LucideIcon },
+  {
+    to: "/dashboard/watch",
+    label: "Watch · Monitoring",
+    icon: WatchAvatar as unknown as LucideIcon,
+  },
+  {
+    to: "/dashboard/guardian",
+    label: "Guardian AI",
+    icon: GuardianAvatar as unknown as LucideIcon,
+  },
+  {
+    to: "/dashboard/shield",
+    label: "Shield · Policies",
+    icon: ShieldAvatar as unknown as LucideIcon,
+  },
+  {
+    to: "/dashboard/legions",
+    label: "Legions · Fleets",
+    icon: LegionsAvatar as unknown as LucideIcon,
+  },
 ];
 
 const EMPTY_SIDEBAR_STATE = {
@@ -89,7 +106,7 @@ function useDashboardSidebarState() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "suggestions", filter: `customer_id=eq.${uid}` },
-        () => queryClient.invalidateQueries({ queryKey: ["dashboard-sidebar", uid] })
+        () => queryClient.invalidateQueries({ queryKey: ["dashboard-sidebar", uid] }),
       )
       .subscribe();
     return () => {
@@ -99,7 +116,6 @@ function useDashboardSidebarState() {
 
   return query.data ?? EMPTY_SIDEBAR_STATE;
 }
-
 
 export function DashboardLayout({
   children,
@@ -122,9 +138,7 @@ export function DashboardLayout({
   const sidebarState = useDashboardSidebarState();
   const notif = sidebarState.notifications;
   const operations: NavItem[] = baseOperations.map((item) =>
-    item.to === "/dashboard/shield" && notif.shield > 0
-      ? { ...item, badge: notif.shield }
-      : item
+    item.to === "/dashboard/shield" && notif.shield > 0 ? { ...item, badge: notif.shield } : item,
   );
 
   return (
@@ -141,15 +155,16 @@ export function DashboardLayout({
 
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-r border-border/40 bg-background/40 backdrop-blur-xl sticky top-0 h-screen">
-        <Link to="/dashboard" className="flex items-center gap-3 px-5 py-5 border-b border-border/40">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-3 px-5 py-5 border-b border-border/40"
+        >
           <div className="relative">
             <img src={logo} alt="" className="h-10 w-10 rounded-md" />
             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-background animate-blink" />
           </div>
           <div className="leading-tight">
-            <div className="font-display text-base font-bold tracking-wider">
-              FORTRESS
-            </div>
+            <div className="font-display text-base font-bold tracking-wider">FORTRESS</div>
             <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
               by watchmyagents
             </div>
@@ -303,15 +318,7 @@ export function DashboardLayout({
   );
 }
 
-function NavGroup({
-  label,
-  items,
-  current,
-}: {
-  label: string;
-  items: NavItem[];
-  current: string;
-}) {
+function NavGroup({ label, items, current }: { label: string; items: NavItem[]; current: string }) {
   return (
     <div>
       <div className="px-3 mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
@@ -347,13 +354,7 @@ function NavGroup({
             </span>
           );
           return (
-            <li key={item.label}>
-              {item.soon ? (
-                content
-              ) : (
-                <Link to={item.to}>{content}</Link>
-              )}
-            </li>
+            <li key={item.label}>{item.soon ? content : <Link to={item.to}>{content}</Link>}</li>
           );
         })}
       </ul>
@@ -399,7 +400,11 @@ function CommandNav({ current, children }: { current: string; children: NavItem[
               aria-expanded={open}
               className="px-2 rounded-md border border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition"
             >
-              {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+              {open ? (
+                <ChevronDown className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5" />
+              )}
             </button>
           </div>
 
@@ -457,11 +462,7 @@ function FleetStatusCard({ stats }: { stats: { total: number; active: number } }
   const isSecure = total > 0 && active === total;
   const isEmpty = total === 0;
   const label = isEmpty ? "NO AGENTS" : isSecure ? "SECURE" : "DEGRADED";
-  const tone = isEmpty
-    ? "text-muted-foreground"
-    : isSecure
-    ? "text-success"
-    : "text-warning";
+  const tone = isEmpty ? "text-muted-foreground" : isSecure ? "text-success" : "text-warning";
 
   return (
     <div className="rounded-lg border border-border/50 bg-card/40 p-3">
@@ -487,4 +488,3 @@ function FleetStatusCard({ stats }: { stats: { total: number; active: number } }
     </div>
   );
 }
-

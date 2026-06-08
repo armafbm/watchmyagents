@@ -36,12 +36,18 @@ export function GuardianChatPanel({
     try {
       const raw = localStorage.getItem(GUARDIAN_CHAT_STORAGE_KEY);
       if (raw) setMessages(JSON.parse(raw) as GuardianMsg[]);
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
     inputRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem(GUARDIAN_CHAT_STORAGE_KEY, JSON.stringify(messages)); } catch { /* noop */ }
+    try {
+      localStorage.setItem(GUARDIAN_CHAT_STORAGE_KEY, JSON.stringify(messages));
+    } catch {
+      /* noop */
+    }
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
@@ -78,7 +84,11 @@ export function GuardianChatPanel({
 
   const clear = () => {
     setMessages([]);
-    try { localStorage.removeItem(GUARDIAN_CHAT_STORAGE_KEY); } catch { /* noop */ }
+    try {
+      localStorage.removeItem(GUARDIAN_CHAT_STORAGE_KEY);
+    } catch {
+      /* noop */
+    }
   };
 
   return (
@@ -95,12 +105,18 @@ export function GuardianChatPanel({
         {messages.length === 0 ? (
           <div className="h-full grid place-items-center text-center">
             <div className="max-w-md">
-              <img src={mascot} alt="" className={`${compact ? "h-16 w-16" : "h-20 w-20"} mx-auto mb-2 object-contain animate-float`} />
+              <img
+                src={mascot}
+                alt=""
+                className={`${compact ? "h-16 w-16" : "h-20 w-20"} mx-auto mb-2 object-contain animate-float`}
+              />
               <div className="font-display text-lg font-bold mb-1">Hi, I'm Guardian.</div>
               <p className="text-sm text-muted-foreground mb-3">
                 Ask me about risks, suggestions and Shield policies deployed on your fleet.
               </p>
-              <div className={`grid ${compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"} gap-2 text-left`}>
+              <div
+                className={`grid ${compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"} gap-2 text-left`}
+              >
                 {SUGGESTIONS.map((s) => (
                   <button
                     key={s}
