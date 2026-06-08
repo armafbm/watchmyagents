@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -14,6 +14,9 @@ import {
   MapPin,
   Globe,
   AtSign,
+  Camera,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel } from "@/components/dashboard/primitives";
@@ -60,6 +63,17 @@ const EMPTY: ProfileFields = {
   avatar_url: "",
 };
 
+const COMPLETION_FIELDS: (keyof ProfileFields)[] = [
+  "full_name",
+  "job_title",
+  "company",
+  "phone",
+  "location",
+  "website",
+  "bio",
+  "avatar_url",
+];
+
 function ProfilePage() {
   const { user, signOut } = useAuth();
   const profile = useUserProfile();
@@ -67,6 +81,7 @@ function ProfilePage() {
   const [fields, setFields] = useState<ProfileFields>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   // Email change
   const [newEmail, setNewEmail] = useState("");
@@ -75,11 +90,6 @@ function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     const m = (user.user_metadata ?? {}) as Record<string, unknown>;
-    // Avatar comes from public.customers (canonical) with fallback to
-    // user_metadata for legacy sessions. resolveAvatarUrl rejects base64
-    // dataURLs so the bloated form never renders. Everything else (name,
-    // job_title, etc.) stays in user_metadata — those fields are small
-    // and changing the schema is out of scope for this PR.
     const canonicalAvatar = resolveAvatarUrl(profile.data ?? null, user);
     setFields({
       full_name: ((m.full_name as string) || (m.name as string)) ?? "",
@@ -100,20 +110,18 @@ function ProfilePage() {
   const set = <K extends keyof ProfileFields>(k: K, v: ProfileFields[K]) =>
     setFields((f) => ({ ...f, [k]: v }));
 
+  const completion = useMemo(() => {
+    const filled = COMPLETION_FIELDS.filter((k) => (fields[k] ?? "").toString().trim().length > 0)
+      .length;
+    return Math.round((filled / COMPLETION_FIELDS.length) * 100);
+  }, [fields]);
+
   const save = async () => {
     setSaving(true);
-    // avatar_url lives in public.customers (long-term storage) — never
-    // ship it back into user_metadata, otherwise we re-bloat the JWT
-    // every time the user clicks save. Other fields stay in
-    // user_metadata for now (small, name/job/etc.); display_name is
-    // mirrored into customers so the topbar can read it via
-    // useUserProfile without a second query.
-
     const { avatar_url, ...metaFields } = fields;
+    void avatar_url;
     const { error } = await supabase.auth.updateUser({ data: metaFields });
     if (!error && user) {
-      // Mirror display_name into customers so the rest of the app gets
-      // it via useUserProfile (single source of truth).
       const display = fields.full_name?.trim() || null;
       const { error: dbErr } = await supabase
         .from("customers")
@@ -144,50 +152,46 @@ function ProfilePage() {
   const handleAvatarUpload = async (file: File) => {
     if (!user) return;
     if (file.size > 2 * 1024 * 1024) return toast.error("Max 2 MB");
-
-    // 1. Upload to the public `avatars` bucket at <uid>/avatar.<ext>.
-    //    RLS only lets the user write under their own uid folder.
-    //    upsert=true so re-uploading replaces the previous file.
+    setUploading(true);
     const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const path = `${user.id}/avatar.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("avatars")
       .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
-    if (upErr) return toast.error(upErr.message);
-
-    // 2. Resolve the public URL + cache-bust so the new image shows
-    //    immediately without waiting for CDN/browser cache to expire.
+    if (upErr) {
+      setUploading(false);
+      return toast.error(upErr.message);
+    }
     const {
       data: { publicUrl },
     } = supabase.storage.from("avatars").getPublicUrl(path);
     const url = `${publicUrl}?t=${Date.now()}`;
-
-    // 3. Persist the URL in public.customers (canonical store). The old
-    //    user_metadata.avatar_url is left untouched here — the resolver
-    //    prefers customers.avatar_url so it wins anyway. We also clear
-    //    any legacy base64 in user_metadata so it stops bloating the
-    //    next refreshed JWT.
     const { error: dbErr } = await supabase
       .from("customers")
       .update({ avatar_url: url })
       .eq("id", user.id);
-    if (dbErr) return toast.error(dbErr.message);
-
+    if (dbErr) {
+      setUploading(false);
+      return toast.error(dbErr.message);
+    }
     const legacy = (user.user_metadata ?? {}) as Record<string, unknown>;
     if (typeof legacy.avatar_url === "string" && legacy.avatar_url.startsWith("data:")) {
-      // Best-effort cleanup of the legacy bloat. Don't surface failures —
-      // the UX-relevant write (Storage + customers) already succeeded.
       await supabase.auth.updateUser({ data: { avatar_url: null } }).catch(() => undefined);
     }
-
-    // 4. Optimistically refresh local state + invalidate the React Query
-    //    cache so the topbar avatar re-renders with the new URL.
     set("avatar_url", url);
     queryClient.invalidateQueries({ queryKey: ["user-profile", user.id] });
+    setUploading(false);
     toast.success("Avatar updated");
   };
 
-  const initials = (fields.full_name || user?.email || "??").slice(0, 2).toUpperCase();
+  const initials = (fields.full_name || user?.email || "??")
+    .split(/[ @._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0]?.toUpperCase())
+    .join("") || "??";
+
+  const plan = profile.data?.plan ?? "FREE";
 
   return (
     <DashboardLayout breadcrumb="Settings · Profile">
@@ -195,93 +199,166 @@ function ProfilePage() {
         kicker="ACCOUNT"
         title="Your profile"
         subtitle="Identity, role and contact details. Visible to your team and operators."
+        actions={
+          <Button onClick={save} disabled={saving || loading} size="lg">
+            {saving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save profile
+          </Button>
+        }
       />
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Identity card */}
-        <Panel className="lg:col-span-1 p-6 flex flex-col items-center text-center">
-          <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-accent grid place-items-center text-3xl font-display font-bold text-primary-foreground overflow-hidden">
-            {fields.avatar_url ? (
-              <img src={fields.avatar_url} alt="" className="h-full w-full object-cover" />
-            ) : (
-              initials
-            )}
-          </div>
-
-          <label className="mt-4 w-full">
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleAvatarUpload(f);
-              }}
-            />
-            <Button asChild variant="outline" size="sm" className="w-full cursor-pointer">
-              <span>Upload photo</span>
-            </Button>
-          </label>
-
-          <div className="mt-5 font-display text-lg">{fields.full_name || "Unnamed operator"}</div>
-          {fields.job_title && (
-            <div className="text-sm text-muted-foreground">{fields.job_title}</div>
-          )}
-          {fields.company && (
-            <div className="text-xs text-muted-foreground mt-0.5">{fields.company}</div>
-          )}
-
-          <div className="font-mono text-xs text-muted-foreground flex items-center gap-1.5 mt-3">
-            <Mail className="h-3 w-3" /> {user?.email}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-6 w-full"
-            onClick={async () => {
-              await signOut();
-              window.location.replace("/");
+      {/* Hero identity card with cover gradient */}
+      <Panel className="overflow-hidden mb-6">
+        <div
+          className="relative h-32 -m-5 mb-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at 20% 0%, oklch(0.55 0.22 270 / 0.55), transparent 60%), radial-gradient(ellipse at 80% 100%, oklch(0.78 0.18 220 / 0.45), transparent 55%), linear-gradient(135deg, oklch(0.22 0.06 265), oklch(0.18 0.05 265))",
+          }}
+        >
+          <div
+            className="absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
             }}
-          >
-            <LogOut className="h-3.5 w-3.5 mr-2" /> Sign out
-          </Button>
-        </Panel>
+          />
+        </div>
 
-        {/* Form */}
+        <div className="relative flex flex-col md:flex-row md:items-end gap-5 -mt-14 px-1">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className="h-28 w-28 rounded-2xl ring-4 ring-background bg-gradient-to-br from-primary to-accent grid place-items-center text-3xl font-display font-bold text-primary-foreground overflow-hidden shadow-[var(--shadow-card)]">
+              {fields.avatar_url ? (
+                <img src={fields.avatar_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span>{initials}</span>
+              )}
+            </div>
+            <label
+              className="absolute -bottom-1 -right-1 h-9 w-9 rounded-full bg-card border border-border/60 grid place-items-center cursor-pointer hover:bg-secondary transition-colors shadow-md"
+              title="Upload photo"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleAvatarUpload(f);
+                }}
+              />
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              ) : (
+                <Camera className="h-4 w-4 text-primary" />
+              )}
+            </label>
+          </div>
+
+          {/* Identity */}
+          <div className="flex-1 min-w-0 pb-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-display text-2xl font-bold tracking-tight truncate">
+                {fields.full_name || "Unnamed operator"}
+              </h2>
+              <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-primary/40 text-primary bg-primary/10">
+                {plan}
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              {fields.job_title && (
+                <span className="flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5" /> {fields.job_title}
+                </span>
+              )}
+              {fields.company && (
+                <span className="flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5" /> {fields.company}
+                </span>
+              )}
+              {fields.location && (
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" /> {fields.location}
+                </span>
+              )}
+              <span className="font-mono text-xs flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5" /> {user?.email}
+              </span>
+            </div>
+          </div>
+
+          {/* Completion + signout */}
+          <div className="flex flex-col items-stretch md:items-end gap-3 pb-1 md:min-w-[200px]">
+            <div className="w-full">
+              <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1.5">
+                <span className="flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-primary" /> Completion
+                </span>
+                <span className="text-primary">{completion}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-secondary/60 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${completion}%`,
+                    background: "var(--gradient-primary)",
+                    boxShadow: "var(--glow-cyan)",
+                  }}
+                />
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                await signOut();
+                window.location.replace("/");
+              }}
+            >
+              <LogOut className="h-3.5 w-3.5 mr-2" /> Sign out
+            </Button>
+          </div>
+        </div>
+      </Panel>
+
+      {/* Form */}
+      <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Panel title="Identity" icon={UserCircle2} className="p-6 space-y-5">
+          <Panel title="Identity" icon={UserCircle2} tag="PERSONAL" className="p-0">
             {loading ? (
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <div className="p-6 flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading…
               </div>
             ) : (
-              <>
+              <div className="p-6 space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name">Full name</Label>
-                    <Input
-                      id="full_name"
-                      value={fields.full_name}
-                      onChange={(e) => set("full_name", e.target.value)}
-                      placeholder="Arma Talkytranslate"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="date_of_birth" className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5" /> Date of birth
-                    </Label>
-                    <Input
-                      id="date_of_birth"
-                      type="date"
-                      value={fields.date_of_birth}
-                      onChange={(e) => set("date_of_birth", e.target.value)}
-                    />
-                  </div>
+                  <Field
+                    id="full_name"
+                    label="Full name"
+                    value={fields.full_name}
+                    onChange={(v) => set("full_name", v)}
+                    placeholder="Arma Talkytranslate"
+                  />
+                  <Field
+                    id="date_of_birth"
+                    label="Date of birth"
+                    icon={Calendar}
+                    type="date"
+                    value={fields.date_of_birth}
+                    onChange={(v) => set("date_of_birth", v)}
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
+                  <Label htmlFor="bio" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Bio
+                  </Label>
                   <Textarea
                     id="bio"
                     rows={3}
@@ -292,113 +369,98 @@ function ProfilePage() {
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5" /> Phone
-                    </Label>
-                    <Input
-                      id="phone"
-                      value={fields.phone}
-                      onChange={(e) => set("phone", e.target.value)}
-                      placeholder="+33 6 ..."
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location" className="flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" /> Location
-                    </Label>
-                    <Input
-                      id="location"
-                      value={fields.location}
-                      onChange={(e) => set("location", e.target.value)}
-                      placeholder="Paris, FR"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="website" className="flex items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5" /> Website
-                  </Label>
-                  <Input
-                    id="website"
-                    value={fields.website}
-                    onChange={(e) => set("website", e.target.value)}
-                    placeholder="https://…"
+                  <Field
+                    id="phone"
+                    label="Phone"
+                    icon={Phone}
+                    value={fields.phone}
+                    onChange={(v) => set("phone", v)}
+                    placeholder="+33 6 ..."
+                  />
+                  <Field
+                    id="location"
+                    label="Location"
+                    icon={MapPin}
+                    value={fields.location}
+                    onChange={(v) => set("location", v)}
+                    placeholder="Paris, FR"
                   />
                 </div>
-              </>
+
+                <Field
+                  id="website"
+                  label="Website"
+                  icon={Globe}
+                  value={fields.website}
+                  onChange={(v) => set("website", v)}
+                  placeholder="https://…"
+                />
+              </div>
             )}
           </Panel>
 
-          <Panel title="Organization" icon={Building2} className="p-6 space-y-5">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="job_title" className="flex items-center gap-1.5">
-                  <Briefcase className="h-3.5 w-3.5" /> Job title
-                </Label>
-                <Input
+          <Panel title="Organization" icon={Building2} tag="WORK" className="p-0">
+            <div className="p-6 space-y-5">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field
                   id="job_title"
+                  label="Job title"
+                  icon={Briefcase}
                   value={fields.job_title}
-                  onChange={(e) => set("job_title", e.target.value)}
+                  onChange={(v) => set("job_title", v)}
                   placeholder="Head of AI Security"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="company">Company</Label>
-                <Input
+                <Field
                   id="company"
+                  label="Company"
                   value={fields.company}
-                  onChange={(e) => set("company", e.target.value)}
+                  onChange={(v) => set("company", v)}
                   placeholder="TalkyTranslate"
                 />
+                <div className="sm:col-span-2">
+                  <Field
+                    id="team"
+                    label="Team / Department"
+                    value={fields.team}
+                    onChange={(v) => set("team", v)}
+                    placeholder="Platform · SecOps"
+                  />
+                </div>
               </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="team">Team / Department</Label>
-                <Input
-                  id="team"
-                  value={fields.team}
-                  onChange={(e) => set("team", e.target.value)}
-                  placeholder="Platform · SecOps"
-                />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Member management (invitations, roles) lives under{" "}
-              <span className="font-mono">Settings → Subscription</span> once your plan supports
-              seats.
-            </p>
-          </Panel>
-
-          <div className="flex justify-end">
-            <Button onClick={save} disabled={saving || loading} size="lg">
-              {saving ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Save profile
-            </Button>
-          </div>
-
-          <Panel title="Email address" icon={AtSign} className="p-6 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Changing your email sends confirmation links to BOTH your current and new inbox.
-                Both must be clicked.
+              <p className="text-xs text-muted-foreground border-l-2 border-primary/40 pl-3">
+                Member management (invitations, roles) lives under{" "}
+                <span className="font-mono text-foreground">Settings → Subscription</span> once
+                your plan supports seats.
               </p>
             </div>
-            <Separator />
-            <div className="flex justify-end">
+          </Panel>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <Panel title="Email address" icon={AtSign} tag="LOGIN" className="p-0">
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+                >
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Changing your email sends confirmation links to BOTH your current and new inbox.
+                </p>
+              </div>
+              <Separator />
               <Button
                 variant="outline"
+                className="w-full"
                 onClick={changeEmail}
                 disabled={savingEmail || newEmail === user?.email}
               >
@@ -411,8 +473,66 @@ function ProfilePage() {
               </Button>
             </div>
           </Panel>
+
+          <Panel title="Security" icon={ShieldCheck} tag="POSTURE" className="p-0">
+            <div className="p-6 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Plan</span>
+                <span className="font-mono text-xs text-primary">{plan}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">User ID</span>
+                <span className="font-mono text-[10px] truncate max-w-[140px]" title={user?.id}>
+                  {user?.id?.slice(0, 8)}…
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Provider</span>
+                <span className="font-mono text-xs">
+                  {(user?.app_metadata?.provider as string) ?? "email"}
+                </span>
+              </div>
+            </div>
+          </Panel>
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+function Field({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  icon: Icon,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  icon?: typeof Calendar;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label
+        htmlFor={id}
+        className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-1.5"
+      >
+        {Icon && <Icon className="h-3 w-3" />}
+        {label}
+      </Label>
+      <Input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+    </div>
   );
 }
