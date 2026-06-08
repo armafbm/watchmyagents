@@ -95,12 +95,27 @@ function validateBody(b: unknown) {
   }
 
   // Optional opaque vendor session ids (v1.0.2+). Validated, but NEVER logged.
+  //
+  // FORT-3 (P1 Codex audit): the SDK puts session_ids inside `payload`
+  // (the SignalsAggregator output that gets uploaded), not at the root
+  // of the request body. The previous code only read `o.session_ids`
+  // which was the legacy path — so Fortress silently received an empty
+  // list even when the SDK was forwarding ids. reveal/audit functions
+  // were returning empty rows in prod because of this mismatch.
+  //
+  // Resolve order: payload.session_ids (current SDK shape) → root
+  // session_ids (legacy fallback, kept for old client versions until
+  // we sunset them).
+  const payloadObj = (o.payload && typeof o.payload === 'object') ? o.payload as Record<string, unknown> : null;
+  const rawSessionIds = (payloadObj && Array.isArray(payloadObj.session_ids))
+    ? payloadObj.session_ids
+    : (Array.isArray(o.session_ids) ? o.session_ids : null);
   let session_ids: string[] | null = null;
-  if (Array.isArray(o.session_ids)) {
-    if (o.session_ids.length > 256)
+  if (rawSessionIds) {
+    if (rawSessionIds.length > 256)
       return { ok: false, error: 'session_ids: max 256 entries' };
     const clean: string[] = [];
-    for (const s of o.session_ids) {
+    for (const s of rawSessionIds) {
       if (typeof s !== 'string' || s.length < 1 || s.length > 256)
         return { ok: false, error: 'session_ids: each entry must be a string of 1..256 chars' };
       clean.push(s);
