@@ -14,6 +14,49 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_team_membership: {
+        Row: {
+          agent_id: string
+          assigned_at: string
+          assigned_by: string
+          team_id: string
+        }
+        Insert: {
+          agent_id: string
+          assigned_at?: string
+          assigned_by?: string
+          team_id: string
+        }
+        Update: {
+          agent_id?: string
+          assigned_at?: string
+          assigned_by?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_team_membership_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_team_membership_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "loop_overview_v"
+            referencedColumns: ["agent_id"]
+          },
+          {
+            foreignKeyName: "agent_team_membership_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           agent_type: string | null
@@ -26,9 +69,9 @@ export type Database = {
           customer_id: string
           display_name: string
           enforcement_mode: string
+          fleet_id: string | null
           id: string
           last_seen_at: string | null
-          legion_id: string | null
           native_agent_id: string
           parent_agent_id: string | null
           provider: string
@@ -47,9 +90,9 @@ export type Database = {
           customer_id: string
           display_name: string
           enforcement_mode?: string
+          fleet_id?: string | null
           id?: string
           last_seen_at?: string | null
-          legion_id?: string | null
           native_agent_id: string
           parent_agent_id?: string | null
           provider?: string
@@ -68,9 +111,9 @@ export type Database = {
           customer_id?: string
           display_name?: string
           enforcement_mode?: string
+          fleet_id?: string | null
           id?: string
           last_seen_at?: string | null
-          legion_id?: string | null
           native_agent_id?: string
           parent_agent_id?: string | null
           provider?: string
@@ -94,10 +137,10 @@ export type Database = {
             referencedColumns: ["customer_id"]
           },
           {
-            foreignKeyName: "agents_legion_id_fkey"
-            columns: ["legion_id"]
+            foreignKeyName: "agents_fleet_id_fkey"
+            columns: ["fleet_id"]
             isOneToOne: false
-            referencedRelation: "legions"
+            referencedRelation: "fleets"
             referencedColumns: ["id"]
           },
           {
@@ -126,6 +169,7 @@ export type Database = {
           last_used_at: string | null
           prefix: string
           revoked_at: string | null
+          runtime: string
           scopes: string[]
         }
         Insert: {
@@ -137,6 +181,7 @@ export type Database = {
           last_used_at?: string | null
           prefix: string
           revoked_at?: string | null
+          runtime?: string
           scopes?: string[]
         }
         Update: {
@@ -148,6 +193,7 @@ export type Database = {
           last_used_at?: string | null
           prefix?: string
           revoked_at?: string | null
+          runtime?: string
           scopes?: string[]
         }
         Relationships: [
@@ -398,6 +444,61 @@ export type Database = {
         }
         Relationships: []
       }
+      fleets: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          name: string
+          runtime: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          name: string
+          runtime?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          name?: string
+          runtime?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleets_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
       fortress_settings: {
         Row: {
           customer_id: string
@@ -447,51 +548,6 @@ export type Database = {
             foreignKeyName: "guardian_scan_queue_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: true
-            referencedRelation: "dashboard_today_v"
-            referencedColumns: ["customer_id"]
-          },
-        ]
-      }
-      legions: {
-        Row: {
-          color: string
-          created_at: string
-          customer_id: string
-          description: string | null
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          color?: string
-          created_at?: string
-          customer_id: string
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          color?: string
-          created_at?: string
-          customer_id?: string
-          description?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "legions_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "legions_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
             referencedRelation: "dashboard_today_v"
             referencedColumns: ["customer_id"]
           },
@@ -968,6 +1024,70 @@ export type Database = {
           reason?: string
         }
         Relationships: []
+      }
+      teams: {
+        Row: {
+          auto_detected_from: string
+          created_at: string
+          criticality: string
+          customer_id: string
+          description: string | null
+          fleet_id: string
+          id: string
+          name: string
+          notes: string | null
+          owner_user_id: string | null
+          tags: string[]
+        }
+        Insert: {
+          auto_detected_from?: string
+          created_at?: string
+          criticality?: string
+          customer_id: string
+          description?: string | null
+          fleet_id: string
+          id?: string
+          name: string
+          notes?: string | null
+          owner_user_id?: string | null
+          tags?: string[]
+        }
+        Update: {
+          auto_detected_from?: string
+          created_at?: string
+          criticality?: string
+          customer_id?: string
+          description?: string | null
+          fleet_id?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          owner_user_id?: string | null
+          tags?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "teams_fleet_id_fkey"
+            columns: ["fleet_id"]
+            isOneToOne: false
+            referencedRelation: "fleets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
