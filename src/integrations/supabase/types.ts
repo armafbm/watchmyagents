@@ -28,6 +28,7 @@ export type Database = {
           enforcement_mode: string
           id: string
           last_seen_at: string | null
+          legion_id: string | null
           native_agent_id: string
           parent_agent_id: string | null
           provider: string
@@ -48,6 +49,7 @@ export type Database = {
           enforcement_mode?: string
           id?: string
           last_seen_at?: string | null
+          legion_id?: string | null
           native_agent_id: string
           parent_agent_id?: string | null
           provider?: string
@@ -68,6 +70,7 @@ export type Database = {
           enforcement_mode?: string
           id?: string
           last_seen_at?: string | null
+          legion_id?: string | null
           native_agent_id?: string
           parent_agent_id?: string | null
           provider?: string
@@ -89,6 +92,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "dashboard_today_v"
             referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "agents_legion_id_fkey"
+            columns: ["legion_id"]
+            isOneToOne: false
+            referencedRelation: "legions"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "agents_parent_agent_id_fkey"
@@ -437,6 +447,51 @@ export type Database = {
             foreignKeyName: "guardian_scan_queue_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: true
+            referencedRelation: "dashboard_today_v"
+            referencedColumns: ["customer_id"]
+          },
+        ]
+      }
+      legions: {
+        Row: {
+          color: string
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
             referencedRelation: "dashboard_today_v"
             referencedColumns: ["customer_id"]
           },
@@ -1037,6 +1092,11 @@ export type Database = {
         }
         Returns: number
       }
+      plan_agent_limit: { Args: { plan: string }; Returns: number }
+      plan_api_key_limit: { Args: { plan: string }; Returns: number }
+      plan_policy_limit: { Args: { plan: string }; Returns: number }
+      plan_retention_days: { Args: { plan: string }; Returns: number }
+      purge_old_data: { Args: never; Returns: undefined }
       purge_old_session_ids: { Args: never; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
