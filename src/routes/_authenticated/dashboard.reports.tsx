@@ -74,6 +74,7 @@ function ReportsPage() {
   const [rows, setRows] = useState<Decision[]>([]);
   const [agents, setAgents] = useState<Record<string, AgentMini>>({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [includeSessionIds, setIncludeSessionIds] = useState(false);
   const [auditRows, setAuditRows] = useState<AuditRow[] | null>(null);
   const [auditFilter, setAuditFilter] = useState<"all" | "reveal" | "copy" | "export">("all");
@@ -81,7 +82,7 @@ function ReportsPage() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: d }, { data: a }] = await Promise.all([
+      const [{ data: d, error: err1 }, { data: a, error: err2 }] = await Promise.all([
         supabase
           .from("decisions")
           .select(
@@ -91,6 +92,11 @@ function ReportsPage() {
           .limit(500),
         supabase.from("agents").select("id, display_name, provider, parent_agent_id"),
       ]);
+      if (err1 || err2) {
+        setLoadError((err1 ?? err2)!.message);
+        setLoading(false);
+        return;
+      }
       setRows((d as Decision[] | null) ?? []);
       const map: Record<string, AgentMini> = {};
       ((a as AgentMini[] | null) ?? []).forEach((x) => {
@@ -153,6 +159,18 @@ function ReportsPage() {
 
   return (
     <DashboardLayout breadcrumb="Reports & Audit">
+      {loadError && (
+        <div className="mb-6 rounded-xl border border-danger/40 bg-danger/[0.06] p-4 flex items-center gap-4">
+          <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          <div className="flex-1 text-sm font-semibold">Couldn't load report data — {loadError}</div>
+          <button
+            onClick={() => { setLoadError(null); setLoading(true); }}
+            className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-md border border-danger/60 text-danger hover:bg-danger/10"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       <PageHeader
         kicker="Intelligence"
         title="Auditable, exportable, court-ready."

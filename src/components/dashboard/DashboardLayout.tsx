@@ -108,9 +108,13 @@ function useDashboardSidebarState() {
         { event: "*", schema: "public", table: "suggestions", filter: `customer_id=eq.${uid}` },
         () => queryClient.invalidateQueries({ queryKey: ["dashboard-sidebar", uid] }),
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[sidebar] realtime subscription error:", status);
+        }
+      });
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(channel).catch(() => undefined);
     };
   }, [uid, queryClient]);
 

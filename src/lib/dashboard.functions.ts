@@ -52,7 +52,10 @@ export const getDashboardSnapshot = createServerFn({ method: "GET" })
       throw new Error(todayRes.error.message);
     }
 
+    const degraded = !!(todayRes.error || decisionsRes.error || agentsRes.error);
+
     return {
+      degraded,
       today: (todayRes.data as TodayRow | null) ?? {
         agents_active: 0,
         tokens_24h: 0,

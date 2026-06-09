@@ -165,7 +165,15 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
           return Response.json({ received: true });
         } catch (e) {
           console.error("[payments-webhook] error:", e);
-          return new Response("Webhook error", { status: 400 });
+          // Signature/timestamp errors are permanent — 400 tells Stripe not to retry.
+          // DB or transient errors — 500 tells Stripe to retry automatically.
+          const isSignatureError =
+            e instanceof Error &&
+            (e.message.includes("signature") || e.message.includes("timestamp"));
+          if (isSignatureError) {
+            return new Response("Invalid webhook signature", { status: 400 });
+          }
+          return new Response("Webhook processing error", { status: 500 });
         }
       },
     },

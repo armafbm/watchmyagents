@@ -73,9 +73,13 @@ function CommandCenter() {
           );
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[dashboard] realtime subscription error:", status);
+        }
+      });
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(channel).catch(() => undefined);
     };
   }, [uid, queryClient]);
 
@@ -112,6 +116,19 @@ function CommandCenter() {
       {query.isLoading && !err && (
         <div className="mb-6 text-xs font-mono uppercase tracking-widest text-muted-foreground">
           Loading your fortress…
+        </div>
+      )}
+      {!err && query.data?.degraded && (
+        <div className="mb-4 rounded-xl border border-warning/40 bg-warning/[0.06] p-3 flex items-center gap-3">
+          <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+          <span className="text-xs text-warning">Some data failed to load — showing last known values.</span>
+          <button
+            onClick={() => query.refetch()}
+            disabled={query.isFetching}
+            className="ml-auto text-xs font-mono uppercase tracking-widest text-warning hover:underline disabled:opacity-50"
+          >
+            Refresh
+          </button>
         </div>
       )}
       {pending > 0 && (

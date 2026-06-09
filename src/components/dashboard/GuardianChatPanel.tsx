@@ -67,8 +67,9 @@ export function GuardianChatPanel({
       if (reply?.error) throw new Error(reply.error);
       setMessages([...next, { role: "assistant", content: reply?.reply ?? "(no answer)" }]);
     } catch (e) {
-      toast.error((e as Error).message);
-      setMessages([...next, { role: "assistant", content: `_Error: ${(e as Error).message}_` }]);
+      const msg = e instanceof Error ? e.message : "An unexpected error occurred";
+      toast.error(msg);
+      setMessages([...next, { role: "assistant", content: `_Error: ${msg}_` }]);
     } finally {
       setSending(false);
       requestAnimationFrame(() => inputRef.current?.focus());

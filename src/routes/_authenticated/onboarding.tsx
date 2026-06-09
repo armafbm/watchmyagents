@@ -37,7 +37,12 @@ function Onboarding() {
     if (!agentId.trim()) return;
     setLoading(true);
     const { data: u } = await supabase.auth.getUser();
-    const customer_id = u.user!.id;
+    if (!u.user) {
+      toast.error("Session expired. Please sign in again.");
+      setLoading(false);
+      return;
+    }
+    const customer_id = u.user.id;
     const native = agentId.trim();
     const { data, error } = await supabase
       .from("agents")
@@ -63,7 +68,12 @@ function Onboarding() {
     setLoading(true);
     const { key, hash, prefix } = await generateApiKey();
     const { data: u } = await supabase.auth.getUser();
-    const customer_id = u.user!.id;
+    if (!u.user) {
+      toast.error("Session expired. Please sign in again.");
+      setLoading(false);
+      return;
+    }
+    const customer_id = u.user.id;
     const { error } = await supabase
       .from("api_keys")
       .insert({ label: "Default", prefix, hash, customer_id });

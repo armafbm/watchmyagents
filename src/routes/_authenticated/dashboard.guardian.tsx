@@ -111,13 +111,14 @@ function GuardianPage() {
   const [list, setList] = useState<Suggestion[]>([]);
   const [agents, setAgents] = useState<Record<string, AgentMini>>({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [surfaceOverride, setSurfaceOverride] = useState<Record<string, string>>({});
 
   const reload = async () => {
     setLoading(true);
-    const [{ data }, { data: ag }] = await Promise.all([
+    const [{ data, error }, { data: ag, error: agErr }] = await Promise.all([
       supabase
         .from("suggestions")
         .select("*")
@@ -130,6 +131,12 @@ function GuardianPage() {
           "id, display_name, anthropic_agent_id, native_agent_id, provider, agent_type, agent_type_stage, agent_type_confidence, enforcement_mode",
         ),
     ]);
+    if (error || agErr) {
+      setLoadError((error ?? agErr)!.message);
+      setLoading(false);
+      return;
+    }
+    setLoadError(null);
     setList((data as unknown as Suggestion[] | null) ?? []);
     const map: Record<string, AgentMini> = {};
     ((ag as AgentMini[] | null) ?? []).forEach((a) => {
@@ -146,9 +153,13 @@ function GuardianPage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "suggestions" }, () =>
         reload(),
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[guardian] realtime subscription error:", status);
+        }
+      });
     return () => {
-      supabase.removeChannel(ch);
+      supabase.removeChannel(ch).catch(() => undefined);
     };
   }, []);
 
@@ -279,6 +290,18 @@ function GuardianPage() {
 
   return (
     <DashboardLayout breadcrumb="Guardian AI">
+      {loadError && (
+        <div className="mb-6 rounded-xl border border-danger/40 bg-danger/[0.06] p-4 flex items-center gap-4">
+          <AlertTriangle className="h-5 w-5 text-danger shrink-0" />
+          <div className="flex-1 text-sm font-semibold">Couldn't load suggestions — {loadError}</div>
+          <button
+            onClick={reload}
+            className="text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-md border border-danger/60 text-danger hover:bg-danger/10"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       <PageHeader
         kicker="Guardian"
         layer="guardian"
