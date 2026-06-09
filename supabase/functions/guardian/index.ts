@@ -243,6 +243,7 @@ function validateRisk(
   if (!r || typeof r !== "object") return null;
   const pp = r.proposed_policy;
   if (!pp || !pp.match || typeof pp.match !== "object") return null;
+  if (Object.keys(pp.match).length === 0) return null; // empty match would target every event
   const action = VALID_ACTIONS.has(pp.action ?? "") ? pp.action! : "deny";
   const category = VALID_CATEGORIES.has(r.category ?? "") ? r.category! : "other";
   const surfaceType = VALID_SURFACES.has(r.surface?.type ?? "") ? r.surface!.type! : "agent";

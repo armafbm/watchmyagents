@@ -182,8 +182,16 @@ function GuardianPage() {
       toast.error(error.message);
       return;
     }
-    const emitted = (data as { suggestions_emitted?: number } | null)?.suggestions_emitted ?? 0;
-    toast.success(`Guardian scan complete — ${emitted} new suggestion${emitted === 1 ? "" : "s"}`);
+    const result = data as { suggestions_emitted?: number; errors?: string[] } | null;
+    const emitted = result?.suggestions_emitted ?? 0;
+    const scanErrors = result?.errors ?? [];
+    if (scanErrors.length > 0) {
+      toast.warning(
+        `Scan completed with ${scanErrors.length} error${scanErrors.length === 1 ? "" : "s"} — ${emitted} suggestion${emitted === 1 ? "" : "s"} generated`,
+      );
+    } else {
+      toast.success(`Guardian scan complete — ${emitted} new suggestion${emitted === 1 ? "" : "s"}`);
+    }
     reload();
   };
 
