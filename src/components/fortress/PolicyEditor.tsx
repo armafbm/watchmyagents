@@ -85,6 +85,11 @@ export function PolicyEditor({
       enforcement_mode: string | null;
     }>
   >([]);
+  const [legionOpts, setLegionOpts] = useState<Array<{ id: string; name: string }>>([]);
+  // null = whole fleet catch-all; uuid string = named fleet
+  const [fleetSurfaceRef, setFleetSurfaceRef] = useState<string | null>(
+    draft.surface_type === "fleet" && draft.surface_ref ? draft.surface_ref : null,
+  );
   const [mode, setMode] = useState<PolicyMode>(draft.mode ?? "enforce");
   const [isFirstPolicy, setIsFirstPolicy] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -103,6 +108,12 @@ export function PolicyEditor({
             enforcement_mode: string | null;
           }> | null) ?? [],
         );
+      });
+    (supabase as any).from("legions")
+      .select("id, name")
+      .order("name")
+      .then(({ data }: { data: Array<{ id: string; name: string }> | null }) => {
+        setLegionOpts(data ?? []);
       });
     // Onboarding nudge: if this is a brand-new policy and the customer has no policies yet, default to shadow.
     if (!draft.id && draft.mode === undefined) {
@@ -168,7 +179,14 @@ export function PolicyEditor({
       message: message.trim() || null,
       match: parsed as never,
       surface_type: surfaceType,
-      surface_ref: surfaceType === "type" ? surfaceRef : surfaceType === "subtree" ? agentId : null,
+      surface_ref:
+        surfaceType === "type"
+          ? surfaceRef
+          : surfaceType === "subtree"
+            ? agentId
+            : surfaceType === "fleet"
+              ? fleetSurfaceRef
+              : null,
       agent_id: surfaceType === "agent" ? agentId : null,
       customer_id,
     };
@@ -306,6 +324,24 @@ export function PolicyEditor({
                 </label>
               ))}
             </div>
+            {surfaceType === "fleet" && (
+              <Select
+                value={fleetSurfaceRef ?? "__all__"}
+                onValueChange={(v) => setFleetSurfaceRef(v === "__all__" ? null : v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose fleet scope…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">All agents (whole fleet catch-all)</SelectItem>
+                  {legionOpts.map((l) => (
+                    <SelectItem key={l.id} value={l.id}>
+                      {l.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             {surfaceType === "subtree" && (
               <p className="text-[11px] text-muted-foreground">
                 Applies to the chosen agent AND every descendant in its sub-agent tree.

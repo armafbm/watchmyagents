@@ -69,7 +69,7 @@ serve(async (req) => {
 
   const { data: keyRow, error: keyErr } = await supabase
     .from("api_keys")
-    .select("id, customer_id, revoked_at, scopes")
+    .select("id, customer_id, revoked_at, scopes, customers!inner(plan)")
     .eq("hash", apiKeyHash)
     .maybeSingle();
   if (keyErr) {
@@ -81,6 +81,38 @@ serve(async (req) => {
     return json(403, { error: "API key lacks decisions:write scope" });
   }
   const customerId = keyRow.customer_id;
+  const customerPlan: string =
+    (keyRow as unknown as { customers: { plan: string } }).customers?.plan ?? "free";
+
+  // Rate limit — decisions per minute per customer, keyed by plan
+  const RATE_LIMITS: Record<string, number> = {
+    free: 30,
+    pro: 120,
+    pro_plus: 600,
+    business: 6000,
+    advanced: 12000,
+  };
+  const rateLimit = RATE_LIMITS[customerPlan] ?? 30;
+  const windowStart60s = new Date(Date.now() - 60_000).toISOString();
+  const { count: recentCount, error: rateErr } = await supabase
+    .from("decisions")
+    .select("id", { count: "exact", head: true })
+    .eq("customer_id", customerId)
+    .gte("decided_at", windowStart60s);
+  if (rateErr) {
+    console.error("[ingest-decisions] rate check:", rateErr);
+    return json(500, { error: "internal error" });
+  }
+  if ((recentCount ?? 0) >= rateLimit) {
+    return json(429, {
+      error: `rate limit exceeded (${rateLimit} decisions/min on ${customerPlan} plan)`,
+      retry_after: 60,
+    });
+  }
+
+  // Body size cap: 64 KB
+  const contentLength = parseInt(req.headers.get("content-length") ?? "0", 10);
+  if (contentLength > 65536) return json(413, { error: "request body too large (max 64 KB)" });
 
   let bodyJson: unknown;
   try {

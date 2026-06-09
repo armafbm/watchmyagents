@@ -58,6 +58,7 @@ serve(async (req) => {
 
   let agentUuid: string | null = null;
   let agentType: string | null = null;
+  let agentLegionId: string | null = null;
   const ancestorIds: string[] = []; // self + parents up the chain
   if (filterAnthropicAgentId) {
     if (!/^agent_[a-zA-Z0-9]+$/.test(filterAnthropicAgentId)) {
@@ -65,7 +66,7 @@ serve(async (req) => {
     }
     const { data: agent } = await supabase
       .from("agents")
-      .select("id, agent_type, parent_agent_id")
+      .select("id, agent_type, parent_agent_id, legion_id")
       .eq("customer_id", customerId)
       .eq("anthropic_agent_id", filterAnthropicAgentId)
       .maybeSingle();
@@ -74,6 +75,7 @@ serve(async (req) => {
     }
     agentUuid = (agent as { id: string }).id;
     agentType = (agent as { agent_type: string | null }).agent_type;
+    agentLegionId = (agent as { legion_id: string | null }).legion_id;
 
     // Walk up parent chain (cap depth 10 to prevent loops)
     ancestorIds.push(agentUuid);
@@ -114,17 +116,23 @@ serve(async (req) => {
     .order("priority", { ascending: true });
 
   if (agentUuid !== null) {
+    // surface_type='fleet', surface_ref IS NULL  → whole-fleet catch-all (applies to all agents)
+    // surface_type='fleet', surface_ref=legion_id → named fleet (only agents in that legion)
     const orParts = [
-      `surface_type.eq.fleet`,
+      `and(surface_type.eq.fleet,surface_ref.is.null)`,
       `and(surface_type.eq.agent,agent_id.eq.${agentUuid})`,
     ];
+    if (agentLegionId) {
+      orParts.push(`and(surface_type.eq.fleet,surface_ref.eq.${agentLegionId})`);
+    }
     if (agentType) orParts.push(`and(surface_type.eq.type,surface_ref.eq.${agentType})`);
     if (ancestorIds.length > 0) {
       orParts.push(`and(surface_type.eq.subtree,surface_ref.in.(${ancestorIds.join(",")}))`);
     }
     query = query.or(orParts.join(","));
   } else {
-    query = query.eq("surface_type", "fleet");
+    // No agent_id filter → return whole-fleet policies only
+    query = query.eq("surface_type", "fleet").is("surface_ref", null);
   }
 
   const { data: policies, error: policiesErr } = await query;

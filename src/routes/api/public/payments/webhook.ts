@@ -13,6 +13,32 @@ function subsTable() {
   return getSupabase().from("subscriptions") as any;
 }
 
+// Must stay in sync with PRICE_TO_TIER in src/hooks/useSubscription.ts
+const PRICE_TO_PLAN: Record<string, string> = {
+  pro_monthly: "pro",
+  pro_yearly: "pro",
+  pro_plus_monthly: "pro_plus",
+  pro_plus_yearly: "pro_plus",
+  business_monthly: "business",
+  business_yearly: "business",
+};
+
+async function syncCustomerPlan(
+  userId: string,
+  priceId: string | null | undefined,
+  status: string,
+) {
+  const isActive = ["active", "trialing"].includes(status);
+  const plan = isActive && priceId ? (PRICE_TO_PLAN[priceId] ?? "free") : "free";
+  // Cast needed: generated Supabase types lag behind manual migrations.
+  const { error } = await (getSupabase().from("customers") as any)
+    .update({ plan, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+  if (error) {
+    console.error("[payments-webhook] syncCustomerPlan failed:", userId, plan, error.message);
+  }
+}
+
 function isoFromUnix(seconds: number | null | undefined): string | null {
   return seconds ? new Date(seconds * 1000).toISOString() : null;
 }
@@ -30,54 +56,75 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const item = subscription.items?.data?.[0];
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+  const priceId = resolvePriceId(item);
 
-  await subsTable().upsert(
-    {
-      user_id: userId,
-      stripe_subscription_id: subscription.id,
-      stripe_customer_id: subscription.customer,
-      product_id: item?.price?.product ?? "",
-      price_id: resolvePriceId(item) ?? "",
-      status: subscription.status,
-      current_period_start: isoFromUnix(periodStart),
-      current_period_end: isoFromUnix(periodEnd),
-      cancel_at_period_end: subscription.cancel_at_period_end ?? false,
-      trial_end: isoFromUnix(subscription.trial_end),
-      environment: env,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "stripe_subscription_id" },
-  );
+  await Promise.all([
+    subsTable().upsert(
+      {
+        user_id: userId,
+        stripe_subscription_id: subscription.id,
+        stripe_customer_id: subscription.customer,
+        product_id: item?.price?.product ?? "",
+        price_id: priceId ?? "",
+        status: subscription.status,
+        current_period_start: isoFromUnix(periodStart),
+        current_period_end: isoFromUnix(periodEnd),
+        cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+        trial_end: isoFromUnix(subscription.trial_end),
+        environment: env,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "stripe_subscription_id" },
+    ),
+    syncCustomerPlan(userId, priceId, subscription.status),
+  ]);
 }
 
 async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
   const item = subscription.items?.data?.[0];
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+  const priceId = resolvePriceId(item);
 
-  await subsTable()
-    .update({
-      status: subscription.status,
-      product_id: item?.price?.product ?? "",
-      price_id: resolvePriceId(item) ?? "",
-      current_period_start: isoFromUnix(periodStart),
-      current_period_end: isoFromUnix(periodEnd),
-      cancel_at_period_end: subscription.cancel_at_period_end ?? false,
-      trial_end: isoFromUnix(subscription.trial_end),
-      updated_at: new Date().toISOString(),
-    })
+  // Resolve userId from the subscriptions table (not always in metadata on updates)
+  const { data: subRow } = await subsTable()
+    .select("user_id")
     .eq("stripe_subscription_id", subscription.id)
-    .eq("environment", env);
+    .maybeSingle();
+  const userId: string | null = subRow?.user_id ?? null;
+
+  await Promise.all([
+    subsTable()
+      .update({
+        status: subscription.status,
+        product_id: item?.price?.product ?? "",
+        price_id: priceId ?? "",
+        current_period_start: isoFromUnix(periodStart),
+        current_period_end: isoFromUnix(periodEnd),
+        cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+        trial_end: isoFromUnix(subscription.trial_end),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("stripe_subscription_id", subscription.id)
+      .eq("environment", env),
+    userId ? syncCustomerPlan(userId, priceId, subscription.status) : Promise.resolve(),
+  ]);
 }
 
 async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
-  await subsTable()
-    .update({
-      status: "canceled",
-      updated_at: new Date().toISOString(),
-    })
+  const { data: subRow } = await subsTable()
+    .select("user_id")
     .eq("stripe_subscription_id", subscription.id)
-    .eq("environment", env);
+    .maybeSingle();
+  const userId: string | null = subRow?.user_id ?? null;
+
+  await Promise.all([
+    subsTable()
+      .update({ status: "canceled", updated_at: new Date().toISOString() })
+      .eq("stripe_subscription_id", subscription.id)
+      .eq("environment", env),
+    userId ? syncCustomerPlan(userId, null, "canceled") : Promise.resolve(),
+  ]);
 }
 
 async function handleWebhook(req: Request, env: StripeEnv) {

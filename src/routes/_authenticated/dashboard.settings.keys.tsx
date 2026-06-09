@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Copy, Check, Loader2, ShieldAlert, KeyRound } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus, Copy, Check, Loader2, ShieldAlert, KeyRound, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -7,6 +7,7 @@ import { PageHeader, Panel, Stat } from "@/components/dashboard/primitives";
 import { Button } from "@/components/ui/button";
 import { generateApiKey } from "@/lib/fortress-keys";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlanLimits, parsePlanLimitError } from "@/hooks/usePlanLimits";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings/keys")({
   head: () => ({
@@ -30,6 +31,7 @@ function KeysPage() {
   const [busy, setBusy] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const planLimits = usePlanLimits();
 
   const reload = async () => {
     setLoading(true);
@@ -45,6 +47,7 @@ function KeysPage() {
   }, []);
 
   const create = async () => {
+    if (planLimits.apiKeys.atLimit) return;
     setBusy(true);
     const { key, hash, prefix } = await generateApiKey();
     const { data: u } = await supabase.auth.getUser();
@@ -54,7 +57,12 @@ function KeysPage() {
       .insert({ label: `Key ${new Date().toLocaleDateString()}`, prefix, hash, customer_id });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      const resource = parsePlanLimitError(error.message);
+      if (resource) {
+        toast.error("Plan limit reached — upgrade to create more API keys.");
+      } else {
+        toast.error(error.message);
+      }
       return;
     }
     setNewKey(key);
@@ -73,6 +81,7 @@ function KeysPage() {
 
   const activeCount = list.filter((k) => !k.revoked_at).length;
   const revokedCount = list.filter((k) => k.revoked_at).length;
+  const { count: keyCount, limit: keyLimit, atLimit } = planLimits.apiKeys;
 
   return (
     <DashboardLayout breadcrumb="Settings · API Keys">
@@ -81,14 +90,23 @@ function KeysPage() {
         title="API Keys"
         subtitle="Used by your shield process to authenticate with Fortress. We only store SHA-256 hashes."
         actions={
-          <Button onClick={create} disabled={busy}>
-            {busy ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            New key
-          </Button>
+          atLimit ? (
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-warning/10 border border-warning/40 text-warning font-mono text-xs uppercase tracking-widest hover:bg-warning/20"
+            >
+              <Lock className="h-3.5 w-3.5" /> Upgrade plan
+            </Link>
+          ) : (
+            <Button onClick={create} disabled={busy || planLimits.loading}>
+              {busy ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              New key
+            </Button>
+          )
         }
       />
 
@@ -96,8 +114,27 @@ function KeysPage() {
         <Stat label="Active keys" value={String(activeCount)} icon={KeyRound} tone="success" />
         <Stat label="Revoked" value={String(revokedCount)} tone="danger" />
         <Stat label="Total" value={String(list.length)} />
-        <Stat label="Storage" value="hash-only" tone="success" />
+        <Stat
+          label="Plan usage"
+          value={keyLimit !== null ? `${keyCount} / ${keyLimit}` : `${keyCount} / ∞`}
+          tone={atLimit ? "danger" : "success"}
+        />
       </div>
+
+      {atLimit && (
+        <div className="mb-6 rounded-xl border border-warning/40 bg-warning/[0.06] p-4 flex items-center gap-3 text-sm">
+          <Lock className="h-4 w-4 text-warning shrink-0" />
+          <span>
+            You've reached the <strong>{planLimits.tier}</strong> plan limit of{" "}
+            <strong>{keyLimit} active API key{keyLimit !== 1 ? "s" : ""}</strong>.{" "}
+            Revoke an unused key or{" "}
+            <Link to="/pricing" className="text-warning underline">
+              upgrade your plan
+            </Link>
+            .
+          </span>
+        </div>
+      )}
 
       {newKey && (
         <div className="mb-6 rounded-xl border border-warning/40 bg-warning/[0.06] p-5">

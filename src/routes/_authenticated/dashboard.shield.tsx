@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Shield,
   GitPullRequest,
@@ -27,6 +27,7 @@ import {
   type EnforcementMode,
 } from "@/components/fortress/EnforcementBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 export const Route = createFileRoute("/_authenticated/dashboard/shield")({
   head: () => ({
@@ -120,6 +121,8 @@ function ShieldPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<PolicyDraft | null>(null);
   const [filter, setFilter] = useState<SurfaceFilter>("all");
+  const planLimits = usePlanLimits();
+  const { count: policyCount, limit: policyLimit, atLimit: policyAtLimit } = planLimits.policies;
 
   const reload = async () => {
     setLoading(true);
@@ -181,9 +184,18 @@ function ShieldPage() {
         title="Enforce, simulate, roll back."
         subtitle="Every policy is auditable. Every change is linked to the signal that triggered it."
         actions={
-          <Button onClick={() => setEditing({} as PolicyDraft)}>
-            <Plus className="h-4 w-4 mr-2" /> New policy
-          </Button>
+          policyAtLimit ? (
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-warning/10 border border-warning/40 text-warning font-mono text-xs uppercase tracking-widest hover:bg-warning/20"
+            >
+              <Lock className="h-3.5 w-3.5" /> Upgrade plan
+            </Link>
+          ) : (
+            <Button onClick={() => setEditing({} as PolicyDraft)}>
+              <Plus className="h-4 w-4 mr-2" /> New policy
+            </Button>
+          )
         }
       />
 
@@ -201,8 +213,26 @@ function ShieldPage() {
           tone="warning"
         />
         <Stat label="From Guardian" value={loading ? "—" : String(guardianCount)} icon={Lock} />
-        <Stat label="Total" value={loading ? "—" : String(list.length)} />
+        <Stat
+          label="Plan usage"
+          value={policyLimit !== null ? `${policyCount} / ${policyLimit}` : `${policyCount} / ∞`}
+          tone={policyAtLimit ? "danger" : "success"}
+        />
       </div>
+
+      {policyAtLimit && (
+        <div className="mb-4 rounded-xl border border-warning/40 bg-warning/[0.06] p-4 flex items-center gap-3 text-sm">
+          <Lock className="h-4 w-4 text-warning shrink-0" />
+          <span>
+            You've reached the <strong>{planLimits.tier}</strong> plan limit of{" "}
+            <strong>{policyLimit} {policyLimit === 1 ? "policy" : "policies"}</strong>.{" "}
+            <Link to="/pricing" className="text-warning underline">
+              Upgrade your plan
+            </Link>{" "}
+            to create more.
+          </span>
+        </div>
+      )}
 
       {agents.some((a) => isDetectOnly(a.enforcement_mode)) && (
         <div className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">

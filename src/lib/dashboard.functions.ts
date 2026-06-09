@@ -46,8 +46,11 @@ export const getDashboardSnapshot = createServerFn({ method: "GET" })
         .limit(20),
     ]);
 
-    const firstErr = todayRes.error ?? decisionsRes.error ?? agentsRes.error;
-    if (firstErr) throw new Error(firstErr.message);
+    // Only throw if ALL three fail simultaneously (total blackout).
+    // A single section failing returns its safe default so the rest of the dashboard stays visible.
+    if (todayRes.error && decisionsRes.error && agentsRes.error) {
+      throw new Error(todayRes.error.message);
+    }
 
     return {
       today: (todayRes.data as TodayRow | null) ?? {
@@ -67,8 +70,16 @@ export const getDashboardSidebarState = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
-    const [agentsRes, suggestionsRes] = await Promise.all([
-      supabase.from("agents").select("id,status").eq("customer_id", userId),
+    const [totalRes, activeRes, suggestionsRes] = await Promise.all([
+      supabase
+        .from("agents")
+        .select("id", { count: "exact", head: true })
+        .eq("customer_id", userId),
+      supabase
+        .from("agents")
+        .select("id", { count: "exact", head: true })
+        .eq("customer_id", userId)
+        .eq("status", "active"),
       supabase
         .from("suggestions")
         .select("id", { count: "exact", head: true })
@@ -76,16 +87,108 @@ export const getDashboardSidebarState = createServerFn({ method: "GET" })
         .eq("status", "pending"),
     ]);
 
-    const firstErr = agentsRes.error ?? suggestionsRes.error;
+    const firstErr = totalRes.error ?? activeRes.error ?? suggestionsRes.error;
     if (firstErr) throw new Error(firstErr.message);
 
-    const agentRows = agentsRes.data ?? [];
-    const total = agentRows.length;
-    const active = agentRows.filter((agent) => agent.status === "active").length;
     const shield = suggestionsRes.count ?? 0;
 
     return {
-      fleet: { total, active },
+      fleet: { total: totalRes.count ?? 0, active: activeRes.count ?? 0 },
       notifications: { shield, total: shield },
+    };
+  });
+
+export type LegionRow = {
+  agent_id: string | null;
+  display_name: string | null;
+  signals_7d: number | null;
+  suggestions_7d: number | null;
+  suggestions_accepted_7d: number | null;
+  decisions_7d: number | null;
+  enforcements_7d: number | null;
+};
+
+export const getLegionsOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+
+    const { data, error } = await supabase
+      .from("loop_overview_v")
+      .select("*")
+      .eq("customer_id", userId)
+      .order("enforcements_7d", { ascending: false });
+
+    if (error) throw new Error(error.message);
+
+    return (data as LegionRow[] | null) ?? [];
+  });
+
+// ----------------------------------------------------------------
+// Fleet management data
+// ----------------------------------------------------------------
+export type FleetLegion = {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string;
+};
+
+export type FleetAgent = {
+  id: string;
+  display_name: string;
+  status: string;
+  provider: string;
+  last_seen_at: string | null;
+  legion_id: string | null;
+  signals_7d: number;
+  decisions_7d: number;
+  enforcements_7d: number;
+};
+
+export const getFleetData = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+
+    // Cast to any: legions table and agents.legion_id are added by manual migration;
+    // generated Supabase types haven't been regenerated yet.
+    const [legionsRes, agentsRes, loopRes] = await Promise.all([
+      (supabase as any).from("legions")
+        .select("id,name,description,color")
+        .eq("customer_id", userId)
+        .order("name"),
+      (supabase.from("agents") as any)
+        .select("id,display_name,status,provider,last_seen_at,legion_id")
+        .eq("customer_id", userId)
+        .order("display_name"),
+      supabase
+        .from("loop_overview_v")
+        .select("agent_id,signals_7d,decisions_7d,enforcements_7d")
+        .eq("customer_id", userId),
+    ]);
+
+    const firstErr = legionsRes.error ?? agentsRes.error ?? loopRes.error;
+    if (firstErr) throw new Error((firstErr as { message: string }).message);
+
+    const statsMap = new Map<string, { signals_7d: number; decisions_7d: number; enforcements_7d: number }>();
+    for (const row of (loopRes.data ?? []) as { agent_id: string | null; signals_7d: number | null; decisions_7d: number | null; enforcements_7d: number | null }[]) {
+      if (row.agent_id) {
+        statsMap.set(row.agent_id, {
+          signals_7d: row.signals_7d ?? 0,
+          decisions_7d: row.decisions_7d ?? 0,
+          enforcements_7d: row.enforcements_7d ?? 0,
+        });
+      }
+    }
+
+    const agents: FleetAgent[] = ((agentsRes.data ?? []) as FleetAgent[]).map((a) => ({
+      ...a,
+      ...(statsMap.get(a.id) ?? { signals_7d: 0, decisions_7d: 0, enforcements_7d: 0 }),
+    }));
+
+    return {
+      legions: (legionsRes.data ?? []) as FleetLegion[],
+      agents,
     };
   });

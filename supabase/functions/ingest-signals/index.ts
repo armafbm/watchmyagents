@@ -182,10 +182,10 @@ serve(async (req) => {
     { auth: { persistSession: false } },
   );
 
-  // Lookup the API key
+  // Lookup the API key + customer plan in one round-trip
   const { data: keyRow, error: keyErr } = await supabase
     .from("api_keys")
-    .select("id, customer_id, revoked_at, scopes")
+    .select("id, customer_id, revoked_at, scopes, customers!inner(plan)")
     .eq("hash", apiKeyHash)
     .maybeSingle();
   if (keyErr) {
@@ -197,6 +197,34 @@ serve(async (req) => {
     return json(403, { error: "API key lacks watch:write scope" });
   }
   const customerId = keyRow.customer_id;
+  const customerPlan: string =
+    (keyRow as unknown as { customers: { plan: string } }).customers?.plan ?? "free";
+
+  // Rate limit — signals per minute per customer, keyed by plan
+  const RATE_LIMITS: Record<string, number> = {
+    free: 20,
+    pro: 60,
+    pro_plus: 300,
+    business: 3000,
+    advanced: 6000,
+  };
+  const rateLimit = RATE_LIMITS[customerPlan] ?? 20;
+  const windowStart60s = new Date(Date.now() - 60_000).toISOString();
+  const { count: recentCount, error: rateErr } = await supabase
+    .from("signals")
+    .select("id", { count: "exact", head: true })
+    .eq("customer_id", customerId)
+    .gte("ingested_at", windowStart60s);
+  if (rateErr) {
+    console.error("[ingest-signals] rate check:", rateErr);
+    return json(500, { error: "internal error" });
+  }
+  if ((recentCount ?? 0) >= rateLimit) {
+    return json(429, {
+      error: `rate limit exceeded (${rateLimit} signals/min on ${customerPlan} plan)`,
+      retry_after: 60,
+    });
+  }
 
   // Body
   let bodyJson: unknown;
