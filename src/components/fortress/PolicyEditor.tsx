@@ -22,7 +22,7 @@ import {
   signPolicy,
 } from "@/lib/fortress-signing.functions";
 
-export type PolicySurface = "agent" | "subtree" | "type" | "fleet";
+export type PolicySurface = "agent" | "subtree" | "type" | "fleet" | "team";
 
 export type PolicyMode = "enforce" | "shadow";
 
@@ -109,7 +109,7 @@ export function PolicyEditor({
           }> | null) ?? [],
         );
       });
-    (supabase as any).from("legions")
+    (supabase as any).from("fleets")
       .select("id, name")
       .order("name")
       .then(({ data }: { data: Array<{ id: string; name: string }> | null }) => {
@@ -302,7 +302,7 @@ export function PolicyEditor({
           <div className="space-y-1.5">
             <Label>Deploy surface</Label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {(["agent", "subtree", "type", "fleet"] as const).map((s) => (
+              {(["agent", "subtree", "type", "fleet", "team"] as const).map((s) => (
                 <label key={s}>
                   <input
                     type="radio"
@@ -319,7 +319,9 @@ export function PolicyEditor({
                         ? "Subtree"
                         : s === "type"
                           ? "Same type"
-                          : "Whole fleet"}
+                          : s === "fleet"
+                            ? "Fleet"
+                            : "Team"}
                   </div>
                 </label>
               ))}
@@ -341,6 +343,11 @@ export function PolicyEditor({
                   ))}
                 </SelectContent>
               </Select>
+            )}
+            {surfaceType === "team" && (
+              <p className="text-[11px] text-muted-foreground">
+                Applies to all agents that are members of this team.
+              </p>
             )}
             {surfaceType === "subtree" && (
               <p className="text-[11px] text-muted-foreground">

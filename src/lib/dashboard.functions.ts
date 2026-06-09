@@ -128,25 +128,40 @@ export const getLegionsOverview = createServerFn({ method: "GET" })
   });
 
 // ----------------------------------------------------------------
-// Fleet management data
+// Fleet management data (SDK v1.2.x hierarchy)
 // ----------------------------------------------------------------
-export type FleetLegion = {
-  id: string;
-  name: string;
-  description: string | null;
-  color: string;
-};
-
 export type FleetAgent = {
   id: string;
   display_name: string;
   status: string;
-  provider: string;
+  provider: string | null;
   last_seen_at: string | null;
-  legion_id: string | null;
+  fleet_id: string | null;
   signals_7d: number;
   decisions_7d: number;
   enforcements_7d: number;
+};
+
+export type TeamRow = {
+  id: string;
+  fleet_id: string;
+  name: string;
+  description: string | null;
+  criticality: "low" | "medium" | "high" | "critical";
+  owner_user_id: string | null;
+  tags: string[];
+  notes: string | null;
+  auto_detected_from: string;
+  agents: FleetAgent[];
+};
+
+export type FleetRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  runtime: string;
+  api_key_id: string | null;
+  teams: TeamRow[];
 };
 
 export const getFleetData = createServerFn({ method: "GET" })
@@ -154,24 +169,28 @@ export const getFleetData = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
-    // Cast to any: legions table and agents.legion_id are added by manual migration;
-    // generated Supabase types haven't been regenerated yet.
-    const [legionsRes, agentsRes, loopRes] = await Promise.all([
-      (supabase as any).from("legions")
-        .select("id,name,description,color")
+    const [fleetsRes, teamsRes, agentsRes, membershipRes, loopRes] = await Promise.all([
+      (supabase as any).from("fleets")
+        .select("id,name,description,runtime,api_key_id")
         .eq("customer_id", userId)
         .order("name"),
-      (supabase.from("agents") as any)
-        .select("id,display_name,status,provider,last_seen_at,legion_id")
+      (supabase as any).from("teams")
+        .select("id,fleet_id,name,description,criticality,owner_user_id,tags,notes,auto_detected_from")
+        .eq("customer_id", userId)
+        .order("name"),
+      (supabase as any).from("agents")
+        .select("id,display_name,status,provider,last_seen_at,fleet_id")
         .eq("customer_id", userId)
         .order("display_name"),
+      (supabase as any).from("agent_team_membership")
+        .select("agent_id,team_id"),
       supabase
         .from("loop_overview_v")
         .select("agent_id,signals_7d,decisions_7d,enforcements_7d")
         .eq("customer_id", userId),
     ]);
 
-    const firstErr = legionsRes.error ?? agentsRes.error ?? loopRes.error;
+    const firstErr = fleetsRes.error ?? teamsRes.error ?? agentsRes.error;
     if (firstErr) throw new Error((firstErr as { message: string }).message);
 
     const statsMap = new Map<string, { signals_7d: number; decisions_7d: number; enforcements_7d: number }>();
@@ -185,13 +204,41 @@ export const getFleetData = createServerFn({ method: "GET" })
       }
     }
 
-    const agents: FleetAgent[] = ((agentsRes.data ?? []) as FleetAgent[]).map((a) => ({
+    const agentTeamMap = new Map<string, string[]>();
+    for (const m of (membershipRes.data ?? []) as { agent_id: string; team_id: string }[]) {
+      const list = agentTeamMap.get(m.agent_id) ?? [];
+      list.push(m.team_id);
+      agentTeamMap.set(m.agent_id, list);
+    }
+
+    const allAgents: FleetAgent[] = ((agentsRes.data ?? []) as FleetAgent[]).map((a) => ({
       ...a,
       ...(statsMap.get(a.id) ?? { signals_7d: 0, decisions_7d: 0, enforcements_7d: 0 }),
     }));
 
-    return {
-      legions: (legionsRes.data ?? []) as FleetLegion[],
-      agents,
-    };
+    const agentById = new Map(allAgents.map((a) => [a.id, a]));
+
+    const teams: TeamRow[] = ((teamsRes.data ?? []) as Omit<TeamRow, "agents">[]).map((t) => {
+      const memberIds = [...agentTeamMap.entries()]
+        .filter(([, tids]) => tids.includes(t.id))
+        .map(([aid]) => aid);
+      return { ...t, agents: memberIds.map((id) => agentById.get(id)).filter(Boolean) as FleetAgent[] };
+    });
+
+    const teamsByFleet = new Map<string, TeamRow[]>();
+    for (const t of teams) {
+      const list = teamsByFleet.get(t.fleet_id) ?? [];
+      list.push(t);
+      teamsByFleet.set(t.fleet_id, list);
+    }
+
+    const fleets: FleetRow[] = ((fleetsRes.data ?? []) as Omit<FleetRow, "teams">[]).map((f) => ({
+      ...f,
+      teams: teamsByFleet.get(f.id) ?? [],
+    }));
+
+    const fleetedAgentIds = new Set(allAgents.filter((a) => a.fleet_id).map((a) => a.id));
+    const unfleeted_agents = allAgents.filter((a) => !fleetedAgentIds.has(a.id));
+
+    return { fleets, unfleeted_agents };
   });
