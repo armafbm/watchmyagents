@@ -3,7 +3,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
-const AUTH_STORAGE_KEY = "sb-kqddnrrbczrpmhnjdzmp-auth-token";
+const AUTH_STORAGE_KEY = "sb-fgcmjkgxrkprsllivmli-auth-token";
 
 function clearStoredAuthSession() {
   if (typeof window === "undefined") return;
