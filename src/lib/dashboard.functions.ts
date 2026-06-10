@@ -237,8 +237,8 @@ export const getFleetData = createServerFn({ method: "GET" })
       teams: teamsByFleet.get(f.id) ?? [],
     }));
 
-    const fleetedAgentIds = new Set(allAgents.filter((a) => a.fleet_id).map((a) => a.id));
-    const unfleeted_agents = allAgents.filter((a) => !fleetedAgentIds.has(a.id));
+    // agents with no fleet_id at all
+    const unfleeted_agents = allAgents.filter((a) => !a.fleet_id);
 
-    return { fleets, unfleeted_agents };
+    return { fleets, all_agents: allAgents, unfleeted_agents };
   });

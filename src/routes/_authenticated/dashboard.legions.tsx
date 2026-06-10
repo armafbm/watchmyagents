@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Swords,
   Users,
   Activity,
   Plus,
@@ -13,6 +12,7 @@ import {
   Edit2,
   Check,
   Server,
+  ArrowRight,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -124,7 +124,64 @@ function AgentChip({ agent, disabled }: { agent: FleetAgent; disabled?: boolean 
 }
 
 // ----------------------------------------------------------------
-// Team edit panel (slide-in)
+// Assign-fleet dropdown (for unfleeted agents)
+// ----------------------------------------------------------------
+function AssignFleetDropdown({
+  agent,
+  fleets,
+  onAssigned,
+}: {
+  agent: FleetAgent;
+  fleets: FleetRow[];
+  onAssigned: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const assign = async (fleetId: string) => {
+    setBusy(true);
+    setOpen(false);
+    const { error } = await (supabase as any)
+      .from("agents")
+      .update({ fleet_id: fleetId })
+      .eq("id", agent.id);
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else onAssigned();
+  };
+
+  if (fleets.length === 0) return null;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        disabled={busy}
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border/60 text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/40 transition"
+      >
+        {busy ? "…" : "assign"}
+      </button>
+      {open && (
+        <div className="absolute z-20 top-full mt-1 left-0 min-w-[160px] rounded-lg border border-border bg-card shadow-lg py-1">
+          {fleets.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => assign(f.id)}
+              className="w-full text-left px-3 py-1.5 text-sm hover:bg-primary/10 font-mono text-[11px] flex items-center gap-2"
+            >
+              <Server className="h-3 w-3 text-muted-foreground" />
+              {f.name}
+              <span className="text-muted-foreground/60 text-[9px] uppercase">{f.runtime}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------
+// Team edit panel
 // ----------------------------------------------------------------
 function TeamEditPanel({
   team,
@@ -145,10 +202,7 @@ function TeamEditPanel({
   const save = async () => {
     if (!name.trim()) return;
     setBusy(true);
-    const tags = tagInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+    const tags = tagInput.split(",").map((t) => t.trim()).filter(Boolean);
     const { error } = await (supabase as any)
       .from("teams")
       .update({ name: name.trim(), description: description.trim() || null, criticality, notes: notes.trim() || null, tags })
@@ -298,7 +352,7 @@ function TeamCard({
 }
 
 // ----------------------------------------------------------------
-// Add team form
+// Add team inline form
 // ----------------------------------------------------------------
 function AddTeamForm({ fleetId, onCreated }: { fleetId: string; onCreated: () => void }) {
   const [name, setName] = useState("");
@@ -324,20 +378,21 @@ function AddTeamForm({ fleetId, onCreated }: { fleetId: string; onCreated: () =>
       <Input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="New team name…"
+        placeholder="Team name…"
         className="h-7 text-xs w-44"
         maxLength={64}
         required
+        autoFocus
       />
       <Button type="submit" size="sm" className="h-7 text-xs px-3" disabled={busy || !name.trim()}>
-        {busy ? "…" : <><Plus className="h-3 w-3 mr-1" />Add team</>}
+        {busy ? "…" : <><Check className="h-3 w-3 mr-1" />Create</>}
       </Button>
     </form>
   );
 }
 
 // ----------------------------------------------------------------
-// Fleet card
+// Fleet card — READ-ONLY container, teams are the editable unit
 // ----------------------------------------------------------------
 function FleetCard({
   fleet,
@@ -356,12 +411,17 @@ function FleetCard({
   const [addingTeam, setAddingTeam] = useState(false);
   const [editTeam, setEditTeam] = useState<TeamRow | null>(null);
 
+  // All agents whose fleet_id matches this fleet
   const fleetAgents = allAgents.filter((a) => a.fleet_id === fleet.id);
   const health = fleetHealth(fleetAgents);
   const signals7d = fleetAgents.reduce((s, a) => s + a.signals_7d, 0);
 
+  // Agents in this fleet but not yet in any team
+  const teamMemberIds = new Set(fleet.teams.flatMap((t) => t.agents.map((a) => a.id)));
+  const unteamedAgents = fleetAgents.filter((a) => !teamMemberIds.has(a.id));
+
   const deleteTeam = async (team: TeamRow) => {
-    if (!confirm(`Delete team "${team.name}"? Agents won't be removed from the fleet.`)) return;
+    if (!confirm(`Delete team "${team.name}"?`)) return;
     const { error } = await (supabase as any).from("teams").delete().eq("id", team.id);
     if (error) toast.error(error.message);
     else onRefresh();
@@ -372,12 +432,9 @@ function FleetCard({
     data: { fleetId: fleet.id, unteamed: true },
   });
 
-  const unteamedAgents = fleetAgents.filter(
-    (a) => !fleet.teams.some((t) => t.agents.some((ta) => ta.id === a.id))
-  );
-
   return (
     <Panel>
+      {/* Fleet header — read-only */}
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -422,6 +479,19 @@ function FleetCard({
 
       {open && (
         <>
+          {/* Teams — the main manageable unit */}
+          {fleet.teams.length === 0 && !addingTeam && (
+            <div className="rounded-xl border border-dashed border-border/40 p-4 text-center mb-3">
+              <p className="text-xs text-muted-foreground mb-2">No teams yet. Create one to start organizing agents.</p>
+              <button
+                onClick={() => setAddingTeam(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+              >
+                <Plus className="h-3.5 w-3.5" /> Create first team
+              </button>
+            </div>
+          )}
+
           <div className="space-y-2">
             {fleet.teams.map((team) => (
               <TeamCard
@@ -434,7 +504,7 @@ function FleetCard({
             ))}
           </div>
 
-          {/* Unteamed agents within this fleet */}
+          {/* Agents in fleet but not in any team (drop zone) */}
           {unteamedAgents.length > 0 && (
             <div
               ref={setUnteamedRef}
@@ -443,7 +513,7 @@ function FleetCard({
               }`}
             >
               <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-                Unassigned in fleet
+                In fleet · not in a team
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {unteamedAgents.map((a) => <AgentChip key={a.id} agent={a} />)}
@@ -457,12 +527,14 @@ function FleetCard({
               onCreated={() => { setAddingTeam(false); onRefresh(); }}
             />
           ) : (
-            <button
-              onClick={() => setAddingTeam(true)}
-              className="mt-3 flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-primary transition"
-            >
-              <Plus className="h-3.5 w-3.5" /> Add team
-            </button>
+            fleet.teams.length > 0 && (
+              <button
+                onClick={() => setAddingTeam(true)}
+                className="mt-3 flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-primary transition"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add team
+              </button>
+            )
           )}
         </>
       )}
@@ -479,60 +551,12 @@ function FleetCard({
 }
 
 // ----------------------------------------------------------------
-// Create fleet form
-// ----------------------------------------------------------------
-function CreateFleetForm({ onCreated }: { onCreated: () => void }) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [runtime, setRuntime] = useState("generic");
-  const [busy, setBusy] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setBusy(true);
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { toast.error("Session expired."); setBusy(false); return; }
-    const { error } = await (supabase as any).from("fleets").insert({
-      customer_id: u.user.id,
-      name: name.trim(),
-      description: description.trim() || null,
-      runtime,
-    });
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    setName(""); setDescription(""); setRuntime("generic");
-    onCreated();
-  };
-
-  return (
-    <form onSubmit={submit} className="flex items-center gap-2 flex-wrap">
-      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Fleet name…" className="h-8 w-44 text-sm" maxLength={64} required />
-      <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optional)" className="h-8 w-52 text-sm" maxLength={256} />
-      <select
-        value={runtime}
-        onChange={(e) => setRuntime(e.target.value)}
-        className="h-8 rounded-md border border-input bg-background px-2 text-sm font-mono"
-      >
-        {Object.entries(RUNTIME_LABEL).map(([v, l]) => (
-          <option key={v} value={v}>{l}</option>
-        ))}
-      </select>
-      <Button type="submit" size="sm" disabled={busy || !name.trim()}>
-        {busy ? "Creating…" : "Create fleet"}
-      </Button>
-    </form>
-  );
-}
-
-// ----------------------------------------------------------------
 // Main page
 // ----------------------------------------------------------------
 function LegionsPage() {
   const { user, loading: authLoading } = useAuth();
   const fetchFleet = useServerFn(getFleetData);
   const queryClient = useQueryClient();
-  const [creating, setCreating] = useState(false);
   const [deployTarget, setDeployTarget] = useState<{ type: "fleet" | "team"; id: string } | null>(null);
   const [activeAgent, setActiveAgent] = useState<FleetAgent | null>(null);
 
@@ -549,20 +573,15 @@ function LegionsPage() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["fleet-data", user?.id] });
 
   const fleets = query.data?.fleets ?? [];
+  const allAgents = query.data?.all_agents ?? [];
   const unfleetedAgents = query.data?.unfleeted_agents ?? [];
 
-  const allAgents = [
-    ...fleets.flatMap((f) => f.teams.flatMap((t) => t.agents)),
-    ...unfleetedAgents,
-  ];
-  const uniqueAgents = [...new Map(allAgents.map((a) => [a.id, a])).values()];
-
-  const totalAgents = uniqueAgents.length;
-  const totalSignals = uniqueAgents.reduce((s, a) => s + a.signals_7d, 0);
-  const totalEnforced = uniqueAgents.reduce((s, a) => s + a.enforcements_7d, 0);
+  const totalAgents = allAgents.length;
+  const totalSignals = allAgents.reduce((s, a) => s + a.signals_7d, 0);
+  const totalEnforced = allAgents.reduce((s, a) => s + a.enforcements_7d, 0);
 
   const deleteFleet = async (fleet: FleetRow) => {
-    if (!confirm(`Delete fleet "${fleet.name}"? All teams and assignments will be removed.`)) return;
+    if (!confirm(`Delete fleet "${fleet.name}"? All teams will be removed. Agents won't be deleted.`)) return;
     const { error } = await (supabase as any).from("fleets").delete().eq("id", fleet.id);
     if (error) toast.error(error.message);
     else refresh();
@@ -581,31 +600,27 @@ function LegionsPage() {
     const overData = over.data.current as { teamId?: string; fleetId?: string; unteamed?: boolean } | undefined;
 
     if (overData?.teamId) {
-      // Find target team's fleet
-      const targetTeam = fleets.flatMap((f) => f.teams).find((t) => t.id === overData.teamId);
-      if (!targetTeam) return;
       const targetFleet = fleets.find((f) => f.teams.some((t) => t.id === overData.teamId));
       if (!targetFleet) return;
 
       // Cross-fleet drag forbidden
       if (agent.fleet_id && agent.fleet_id !== targetFleet.id) {
-        toast.error("Cannot move agent across fleets. Reassign the fleet first.");
+        toast.error("Cannot move agent across fleets. Use 'assign' to change fleet first.");
         return;
       }
 
-      // Assign fleet if needed
-      if (agent.fleet_id !== targetFleet.id) {
+      // Auto-assign fleet if agent has none
+      if (!agent.fleet_id) {
         await (supabase as any).from("agents").update({ fleet_id: targetFleet.id }).eq("id", agent.id);
       }
 
-      // Upsert membership
       await (supabase as any)
         .from("agent_team_membership")
         .upsert({ agent_id: agent.id, team_id: overData.teamId, assigned_by: "manual" });
 
       refresh();
     } else if (overData?.fleetId && overData?.unteamed) {
-      // Dropped on fleet "unteamed" zone — assign fleet, remove team memberships
+      // Drop on fleet unteamed zone — assign fleet, remove team memberships
       if (agent.fleet_id !== overData.fleetId) {
         await (supabase as any).from("agents").update({ fleet_id: overData.fleetId }).eq("id", agent.id);
       }
@@ -635,7 +650,7 @@ function LegionsPage() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header — no "New fleet" here, fleets come from WMA API keys registered in Watch */}
       <div className="flex items-center gap-6 mb-4">
         <img
           src={legionsHero}
@@ -646,24 +661,16 @@ function LegionsPage() {
           <PageHeader
             kicker="Legions"
             title="Organize, group, deploy."
-            subtitle="Create fleets (one per WMA API key), add teams within each fleet, and assign agents. Drag agents between teams."
+            subtitle="Fleets are linked to your WMA API keys. Create teams within each fleet to organize agents and deploy targeted policies."
             actions={
-              creating ? (
-                <button onClick={() => setCreating(false)} className="text-muted-foreground hover:text-foreground">
-                  <X className="h-4 w-4" />
-                </button>
-              ) : (
-                <Button size="sm" onClick={() => setCreating(true)}>
-                  <Plus className="h-4 w-4 mr-2" /> New fleet
-                </Button>
-              )
+              <Link
+                to="/dashboard/watch"
+                className="inline-flex items-center gap-2 h-9 px-4 rounded-md border border-primary/40 text-primary bg-primary/10 font-mono text-xs uppercase tracking-widest hover:bg-primary/20 transition"
+              >
+                <Server className="h-3.5 w-3.5" /> Register fleet
+              </Link>
             }
           />
-          {creating && (
-            <div className="mt-3">
-              <CreateFleetForm onCreated={() => { setCreating(false); refresh(); }} />
-            </div>
-          )}
         </div>
       </div>
 
@@ -676,22 +683,27 @@ function LegionsPage() {
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+
         {/* Fleet cards */}
         {query.isLoading ? (
           <Panel>
             <div className="py-12 text-center text-muted-foreground text-sm font-mono">Loading fleets…</div>
           </Panel>
-        ) : fleets.length === 0 && !creating ? (
+        ) : fleets.length === 0 ? (
           <Panel>
             <div className="py-12 text-center">
-              <Swords className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+              <Server className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
               <div className="font-display text-lg font-bold mb-1">No fleet yet</div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Create a fleet to group agents and deploy policies fleet-wide.
+              <p className="text-sm text-muted-foreground mb-5">
+                Fleets are created when you register a WMA API key in Watch.
+                Each fleet corresponds to one deployment key.
               </p>
-              <Button size="sm" onClick={() => setCreating(true)}>
-                <Plus className="h-4 w-4 mr-2" /> Create your first fleet
-              </Button>
+              <Link
+                to="/dashboard/watch"
+                className="inline-flex items-center gap-2 px-4 h-10 rounded-md bg-primary text-primary-foreground font-mono text-xs uppercase tracking-widest hover:opacity-90"
+              >
+                <ArrowRight className="h-4 w-4" /> Go to Watch · Register fleet
+              </Link>
             </div>
           </Panel>
         ) : (
@@ -700,7 +712,7 @@ function LegionsPage() {
               <FleetCard
                 key={fleet.id}
                 fleet={fleet}
-                allAgents={uniqueAgents}
+                allAgents={allAgents}
                 onRefresh={refresh}
                 onDeployPolicy={(type, id) => setDeployTarget({ type, id })}
                 onDelete={deleteFleet}
@@ -709,19 +721,25 @@ function LegionsPage() {
           </div>
         )}
 
-        {/* Unfleeted agents pool */}
+        {/* Unfleeted agents — agents with no fleet_id at all */}
         {unfleetedAgents.length > 0 && (
-          <Panel title="Unfleeted agents" tag={String(unfleetedAgents.length)} icon={Users}>
+          <Panel title="Agents not in any fleet" tag={String(unfleetedAgents.length)} icon={Users}>
             <p className="text-xs text-muted-foreground mb-3">
-              These agents aren't assigned to any fleet. Drag them into a team, or assign a fleet from Watch.
+              These agents were registered before a fleet existed. Assign them to a fleet,
+              then drag them into a team.
             </p>
             <div
               ref={setUnfleetedRef}
-              className={`flex flex-wrap gap-1.5 min-h-[40px] rounded-xl border border-dashed p-3 transition ${
+              className={`flex flex-wrap gap-2 min-h-[40px] rounded-xl border border-dashed p-3 transition ${
                 isOverUnfleeted ? "border-primary/60 bg-primary/5" : "border-border/30"
               }`}
             >
-              {unfleetedAgents.map((a) => <AgentChip key={a.id} agent={a} />)}
+              {unfleetedAgents.map((a) => (
+                <div key={a.id} className="flex items-center gap-1.5">
+                  <AgentChip agent={a} />
+                  <AssignFleetDropdown agent={a} fleets={fleets} onAssigned={refresh} />
+                </div>
+              ))}
             </div>
           </Panel>
         )}
