@@ -16,6 +16,7 @@ import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as PostLoginRouteImport } from './routes/post-login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MfaChallengeRouteImport } from './routes/mfa.challenge'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
@@ -77,6 +78,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MfaChallengeRoute = MfaChallengeRouteImport.update({
+  id: '/mfa/challenge',
+  path: '/mfa/challenge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/mfa/challenge': typeof MfaChallengeRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/mfa/challenge': typeof MfaChallengeRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/mfa/challenge': typeof MfaChallengeRoute
   '/_authenticated/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/_authenticated/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -362,6 +371,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/mfa/challenge'
     | '/dashboard/guardian'
     | '/dashboard/legions'
     | '/dashboard/reports'
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/mfa/challenge'
     | '/dashboard/guardian'
     | '/dashboard/legions'
     | '/dashboard/reports'
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/mfa/challenge'
     | '/_authenticated/dashboard/guardian'
     | '/_authenticated/dashboard/legions'
     | '/_authenticated/dashboard/reports'
@@ -470,6 +482,7 @@ export interface RootRouteChildren {
   AuthSignupRoute: typeof AuthSignupRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  MfaChallengeRoute: typeof MfaChallengeRoute
   ApiPublicEarlyAccessRoute: typeof ApiPublicEarlyAccessRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -529,6 +542,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mfa/challenge': {
+      id: '/mfa/challenge'
+      path: '/mfa/challenge'
+      fullPath: '/mfa/challenge'
+      preLoaderRoute: typeof MfaChallengeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -798,6 +818,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignupRoute: AuthSignupRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  MfaChallengeRoute: MfaChallengeRoute,
   ApiPublicEarlyAccessRoute: ApiPublicEarlyAccessRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
@@ -810,3 +831,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
