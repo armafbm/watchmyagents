@@ -560,6 +560,9 @@ function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"]
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ next: "", confirm: "" });
   const [pwBusy, setPwBusy] = useState(false);
+  // Local override: true once the user sets a password in this session
+  const [sessionHasPassword, setSessionHasPassword] = useState(false);
+  const effectiveHasPassword = hasPassword || sessionHasPassword;
 
   const savePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -572,14 +575,18 @@ function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"]
       return;
     }
     setPwBusy(true);
-    // Set password + mark has_password in metadata so detection is reliable
     const { error } = await supabase.auth.updateUser({
       password: passwordForm.next,
       data: { has_password: true },
     });
+    if (!error) {
+      // Refresh session so user_metadata reflects has_password=true
+      await supabase.auth.refreshSession();
+      setSessionHasPassword(true);
+    }
     setPwBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(hasPassword ? "Password updated." : "Password set. You can now sign in with email + password.");
+    toast.success(effectiveHasPassword ? "Password updated." : "Password set. You can now sign in with email + password.");
     setShowPasswordForm(false);
     setPasswordForm({ next: "", confirm: "" });
   };
@@ -635,7 +642,7 @@ function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"]
               <div>
                 <div className="text-sm font-medium">Password</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {hasPassword ? "Configured" : "Not set"}
+                  {effectiveHasPassword ? "Configured" : "Not set"}
                 </div>
               </div>
             </div>
@@ -644,14 +651,14 @@ function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"]
               className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
             >
               {showPasswordForm ? <X className="h-3 w-3" /> : null}
-              {showPasswordForm ? "Cancel" : hasPassword ? "Change" : "Set password"}
+              {showPasswordForm ? "Cancel" : effectiveHasPassword ? "Change" : "Set password"}
             </button>
           </div>
 
           {showPasswordForm && (
             <form onSubmit={savePassword} className="space-y-2.5 border-t border-border/40 pt-3">
               <p className="text-[11px] text-muted-foreground">
-                {hasPassword
+                {effectiveHasPassword
                   ? "Set a new password for your account."
                   : "Set a password to sign in with your email in addition to Google."}
               </p>
