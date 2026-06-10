@@ -22,6 +22,8 @@ import {
   Check,
   X,
   Link2,
+  QrCode,
+  Smartphone,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel } from "@/components/dashboard/primitives";
@@ -427,6 +429,7 @@ function ProfilePage() {
         <div className="space-y-6">
           <EmailPanel user={user} />
           <SignInMethodsPanel user={user} />
+          <TwoFactorPanel />
           <Panel title="Security" icon={ShieldCheck} tag="POSTURE" className="p-0">
             <div className="p-6 space-y-3 text-sm">
               <div className="flex items-center justify-between">
@@ -697,6 +700,184 @@ function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"]
           )}
         </div>
 
+      </div>
+    </Panel>
+  );
+}
+
+// ----------------------------------------------------------------
+// Two-factor authentication panel — TOTP enrollment & management
+// ----------------------------------------------------------------
+function TwoFactorPanel() {
+  type TotpFactor = { id: string; friendly_name: string; created_at: string };
+  const [factors, setFactors] = useState<TotpFactor[]>([]);
+  const [step, setStep] = useState<"idle" | "confirming">("idle");
+  const [enrollData, setEnrollData] = useState<{ factorId: string; qr: string; secret: string } | null>(null);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const loadFactors = async () => {
+    const { data } = await supabase.auth.mfa.listFactors();
+    setFactors((data?.totp ?? []) as TotpFactor[]);
+  };
+
+  useEffect(() => { void loadFactors(); }, []);
+
+  const startEnroll = async () => {
+    setBusy(true);
+    const { data, error } = await supabase.auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName: "Authenticator app",
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setEnrollData({ factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret });
+    setStep("confirming");
+  };
+
+  const confirmEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!enrollData) return;
+    setBusy(true);
+    const { data: challenge, error: chErr } = await supabase.auth.mfa.challenge({ factorId: enrollData.factorId });
+    if (chErr) { toast.error(chErr.message); setBusy(false); return; }
+    const { error } = await supabase.auth.mfa.verify({
+      factorId: enrollData.factorId,
+      challengeId: challenge.id,
+      code: code.replace(/\s/g, ""),
+    });
+    setBusy(false);
+    if (error) { toast.error("Invalid code — try again."); setCode(""); return; }
+    toast.success("Two-factor authentication enabled.");
+    setStep("idle");
+    setEnrollData(null);
+    setCode("");
+    await loadFactors();
+  };
+
+  const unenroll = async (factorId: string) => {
+    if (!confirm("Remove this authenticator? You will no longer be required to enter a code at sign-in.")) return;
+    setBusy(true);
+    const { error } = await supabase.auth.mfa.unenroll({ factorId });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Authenticator removed.");
+    await loadFactors();
+  };
+
+  const cancel = () => {
+    // Unenroll the pending (unverified) factor to keep DB clean
+    if (enrollData) {
+      supabase.auth.mfa.unenroll({ factorId: enrollData.factorId }).catch(() => undefined);
+    }
+    setStep("idle");
+    setEnrollData(null);
+    setCode("");
+  };
+
+  const isEnrolled = factors.length > 0;
+
+  return (
+    <Panel title="Two-factor authentication" icon={Smartphone} tag="MFA" className="p-0">
+      <div className="p-6 space-y-4">
+        {/* Idle — not enrolled */}
+        {!isEnrolled && step === "idle" && (
+          <>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Add an extra layer of security. After enabling, you'll need a code from your
+              authenticator app (Google Authenticator, Authy, 1Password…) at every sign-in.
+            </p>
+            <Button variant="outline" size="sm" onClick={startEnroll} disabled={busy} className="w-full">
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <QrCode className="h-3.5 w-3.5 mr-2" />}
+              Set up authenticator app
+            </Button>
+          </>
+        )}
+
+        {/* Idle — enrolled */}
+        {isEnrolled && step === "idle" && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-success">
+              <Check className="h-4 w-4 shrink-0" />
+              <span>Authenticator app active</span>
+            </div>
+            {factors.map((f) => (
+              <div key={f.id} className="flex items-center justify-between py-2 border-t border-border/40">
+                <div>
+                  <div className="text-sm font-medium">{f.friendly_name || "Authenticator app"}</div>
+                  <div className="font-mono text-[11px] text-muted-foreground">
+                    Added {new Date(f.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+                <button
+                  onClick={() => unenroll(f.id)}
+                  disabled={busy}
+                  className="font-mono text-xs text-destructive hover:underline disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* QR code + confirm step */}
+        {step === "confirming" && enrollData && (
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Scan the QR code with your authenticator app, then enter the 6-digit code to confirm.
+            </p>
+
+            {/* QR code — Supabase returns an SVG string */}
+            <div
+              className="mx-auto w-44 h-44 bg-white rounded-xl p-2 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full"
+              dangerouslySetInnerHTML={{ __html: enrollData.qr }}
+            />
+
+            <details className="group">
+              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground select-none">
+                Can&apos;t scan? Enter the key manually
+              </summary>
+              <code className="block mt-2 font-mono text-[10px] break-all bg-muted/40 px-2 py-1.5 rounded border border-border/40">
+                {enrollData.secret}
+              </code>
+            </details>
+
+            <form onSubmit={confirmEnroll} className="space-y-3 border-t border-border/40 pt-4">
+              <div className="space-y-1.5">
+                <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Confirmation code
+                </Label>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9 ]*"
+                  maxLength={7}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="000 000"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  className="text-center tracking-[0.3em] text-lg font-mono"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" className="flex-1" onClick={cancel}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="flex-1"
+                  disabled={busy || code.replace(/\s/g, "").length < 6}
+                >
+                  {busy && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+                  Activate
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </Panel>
   );

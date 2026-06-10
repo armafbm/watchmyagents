@@ -45,6 +45,13 @@ export const Route = createFileRoute("/_authenticated")({
         search: { redirect: getSafeAuthRedirect(location.href) },
       });
     }
+
+    // MFA gate: if user has enrolled a TOTP factor (nextLevel=aal2) but the
+    // current session is only AAL1, force the challenge before granting access.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
+      throw redirect({ to: "/mfa/challenge" });
+    }
   },
   component: () => <Outlet />,
 });
