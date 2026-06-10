@@ -17,6 +17,11 @@ import {
   Camera,
   ShieldCheck,
   Sparkles,
+  Lock,
+  KeyRound,
+  Check,
+  X,
+  Link2,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel } from "@/components/dashboard/primitives";
@@ -83,10 +88,6 @@ function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // Email change
-  const [newEmail, setNewEmail] = useState("");
-  const [savingEmail, setSavingEmail] = useState(false);
-
   useEffect(() => {
     if (!user) return;
     const m = (user.user_metadata ?? {}) as Record<string, unknown>;
@@ -103,7 +104,6 @@ function ProfilePage() {
       bio: (m.bio as string) ?? "",
       avatar_url: canonicalAvatar ?? "",
     });
-    setNewEmail(user.email ?? "");
     setLoading(false);
   }, [user, profile.data]);
 
@@ -134,19 +134,6 @@ function ProfilePage() {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Profile updated");
-  };
-
-  const changeEmail = async () => {
-    if (!newEmail || newEmail === user?.email) {
-      return toast.info("Enter a different email to change it.");
-    }
-    setSavingEmail(true);
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
-    setSavingEmail(false);
-    if (error) return toast.error(error.message);
-    toast.success(
-      "Confirmation email sent. Click the link in BOTH your old and new inbox to confirm.",
-    );
   };
 
   const handleAvatarUpload = async (file: File) => {
@@ -438,42 +425,8 @@ function ProfilePage() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <Panel title="Email address" icon={AtSign} tag="LOGIN" className="p-0">
-            <div className="p-6 space-y-4">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
-                >
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Changing your email sends confirmation links to BOTH your current and new inbox.
-                </p>
-              </div>
-              <Separator />
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={changeEmail}
-                disabled={savingEmail || newEmail === user?.email}
-              >
-                {savingEmail ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Mail className="h-4 w-4 mr-2" />
-                )}
-                Send confirmation
-              </Button>
-            </div>
-          </Panel>
-
+          <EmailPanel user={user} />
+          <SignInMethodsPanel user={user} />
           <Panel title="Security" icon={ShieldCheck} tag="POSTURE" className="p-0">
             <div className="p-6 space-y-3 text-sm">
               <div className="flex items-center justify-between">
@@ -487,9 +440,9 @@ function ProfilePage() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Provider</span>
-                <span className="font-mono text-xs">
-                  {(user?.app_metadata?.provider as string) ?? "email"}
+                <span className="text-muted-foreground">Member since</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
                 </span>
               </div>
             </div>
@@ -497,6 +450,251 @@ function ProfilePage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+// ----------------------------------------------------------------
+// Email panel — provider-aware
+// ----------------------------------------------------------------
+function EmailPanel({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
+  const identities = (user?.identities ?? []) as Array<{ provider: string }>;
+  const hasGoogle = identities.some((i) => i.provider === "google");
+  const hasEmail = identities.some((i) => i.provider === "email");
+  const primaryProvider = (user?.app_metadata?.provider as string) ?? "email";
+  const isGoogleOnly = hasGoogle && !hasEmail;
+
+  const [newEmail, setNewEmail] = useState(user?.email ?? "");
+  const [busy, setBusy] = useState(false);
+
+  const sendConfirmation = async () => {
+    if (!newEmail.trim() || newEmail === user?.email) return;
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Confirmation sent to both inboxes. Click both links to confirm.");
+  };
+
+  return (
+    <Panel title="Email addresses" icon={AtSign} tag="LOGIN" className="p-0">
+      <div className="p-6 space-y-4">
+        {/* Primary email row */}
+        <div className="flex items-center justify-between gap-2 py-2 border-b border-border/40">
+          <div className="flex items-center gap-2 min-w-0">
+            <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <span className="font-mono text-sm truncate">{user?.email}</span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded border border-primary/40 text-primary">
+              Primary
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded border border-success/40 text-success">
+              Verified
+            </span>
+            {hasGoogle && (
+              <span className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded border border-border/60 text-muted-foreground">
+                Google
+              </span>
+            )}
+          </div>
+        </div>
+
+        {isGoogleOnly ? (
+          /* Google-only: email managed by Google */
+          <div className="rounded-lg border border-border/40 bg-muted/20 p-3 flex items-start gap-2">
+            <Lock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Your email is managed by Google. To change it, update your Google account
+              or add a password below to enable email/password sign-in separately.
+            </p>
+          </div>
+        ) : (
+          /* Email/password: allow change */
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                New email address
+              </Label>
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="new@email.com"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Sends confirmation to both your current and new inbox.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={sendConfirmation}
+              disabled={busy || !newEmail.trim() || newEmail === user?.email}
+            >
+              {busy ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Mail className="h-3.5 w-3.5 mr-2" />}
+              Send confirmation
+            </Button>
+          </div>
+        )}
+      </div>
+    </Panel>
+  );
+}
+
+// ----------------------------------------------------------------
+// Sign-in methods panel — GitHub-style
+// ----------------------------------------------------------------
+function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
+  const identities = (user?.identities ?? []) as Array<{ provider: string; identity_data?: Record<string, unknown> }>;
+  const hasGoogle = identities.some((i) => i.provider === "google");
+  const hasEmail = identities.some((i) => i.provider === "email");
+
+  // A user has a password if they have an "email" identity
+  const hasPassword = hasEmail;
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ current: "", next: "", confirm: "" });
+  const [pwBusy, setPwBusy] = useState(false);
+
+  const savePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.next !== passwordForm.confirm) {
+      toast.error("Passwords don't match.");
+      return;
+    }
+    if (passwordForm.next.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+    setPwBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: passwordForm.next });
+    setPwBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(hasPassword ? "Password updated." : "Password set. You can now sign in with email + password.");
+    setShowPasswordForm(false);
+    setPasswordForm({ current: "", next: "", confirm: "" });
+  };
+
+  const linkGoogle = async () => {
+    const { error } = await supabase.auth.linkIdentity({ provider: "google" } as any);
+    if (error) toast.error(error.message);
+  };
+
+  return (
+    <Panel title="Sign-in methods" icon={KeyRound} tag="AUTH" className="p-0">
+      <div className="p-6 space-y-3">
+
+        {/* Google row */}
+        <div className="flex items-center justify-between gap-3 py-2.5 border-b border-border/40">
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-7 rounded-full bg-white grid place-items-center border border-border/40 shrink-0">
+              <svg viewBox="0 0 24 24" className="h-4 w-4">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+            </div>
+            <div>
+              <div className="text-sm font-medium">Google</div>
+              <div className="text-[11px] text-muted-foreground">
+                {hasGoogle ? "Connected" : "Not connected"}
+              </div>
+            </div>
+          </div>
+          {hasGoogle ? (
+            <span className="flex items-center gap-1 font-mono text-[10px] text-success">
+              <Check className="h-3.5 w-3.5" /> Active
+            </span>
+          ) : (
+            <button
+              onClick={linkGoogle}
+              className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+            >
+              <Link2 className="h-3 w-3" /> Connect
+            </button>
+          )}
+        </div>
+
+        {/* Password row */}
+        <div className="py-2.5">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="h-7 w-7 rounded-full bg-secondary/60 grid place-items-center border border-border/40 shrink-0">
+                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+              <div>
+                <div className="text-sm font-medium">Password</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {hasPassword ? "Configured" : "Not set"}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowPasswordForm((v) => !v)}
+              className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:underline"
+            >
+              {showPasswordForm ? <X className="h-3 w-3" /> : null}
+              {showPasswordForm ? "Cancel" : hasPassword ? "Change" : "Set password"}
+            </button>
+          </div>
+
+          {showPasswordForm && (
+            <form onSubmit={savePassword} className="space-y-2.5 border-t border-border/40 pt-3">
+              {!hasPassword && (
+                <p className="text-[11px] text-muted-foreground">
+                  Set a password to sign in with your email in addition to Google.
+                </p>
+              )}
+              {hasPassword && (
+                <div className="space-y-1">
+                  <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Current password</Label>
+                  <Input
+                    type="password"
+                    value={passwordForm.current}
+                    onChange={(e) => setPasswordForm((f) => ({ ...f, current: e.target.value }))}
+                    autoComplete="current-password"
+                  />
+                </div>
+              )}
+              <div className="space-y-1">
+                <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">New password</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.next}
+                  onChange={(e) => setPasswordForm((f) => ({ ...f, next: e.target.value }))}
+                  autoComplete="new-password"
+                  minLength={8}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Confirm password</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.confirm}
+                  onChange={(e) => setPasswordForm((f) => ({ ...f, confirm: e.target.value }))}
+                  autoComplete="new-password"
+                />
+              </div>
+              {passwordForm.next && passwordForm.confirm && passwordForm.next !== passwordForm.confirm && (
+                <p className="text-[11px] text-danger">Passwords don't match.</p>
+              )}
+              <Button
+                type="submit"
+                size="sm"
+                className="w-full"
+                disabled={pwBusy || !passwordForm.next || passwordForm.next !== passwordForm.confirm}
+              >
+                {pwBusy ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <KeyRound className="h-3.5 w-3.5 mr-2" />}
+                {hasPassword ? "Update password" : "Set password"}
+              </Button>
+            </form>
+          )}
+        </div>
+
+      </div>
+    </Panel>
   );
 }
 
