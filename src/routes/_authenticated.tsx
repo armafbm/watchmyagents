@@ -48,9 +48,17 @@ export const Route = createFileRoute("/_authenticated")({
 
     // MFA gate: if user has enrolled a TOTP factor (nextLevel=aal2) but the
     // current session is only AAL1, force the challenge before granting access.
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
-      throw redirect({ to: "/mfa/challenge" });
+    // Wrapped in try-catch: if the Supabase project has MFA disabled at the
+    // platform level, getAuthenticatorAssuranceLevel() throws — we skip the
+    // gate gracefully rather than crashing all authenticated routes.
+    try {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
+        throw redirect({ to: "/mfa/challenge" });
+      }
+    } catch (e) {
+      // Re-throw router redirects; swallow MFA-unavailable errors
+      if (e != null && typeof e === "object" && ("to" in e || "__isRedirect" in e)) throw e;
     }
   },
   component: () => <Outlet />,

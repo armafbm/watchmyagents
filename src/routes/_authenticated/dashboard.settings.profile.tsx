@@ -717,8 +717,12 @@ function TwoFactorPanel() {
   const [busy, setBusy] = useState(false);
 
   const loadFactors = async () => {
-    const { data } = await supabase.auth.mfa.listFactors();
-    setFactors((data?.totp ?? []) as TotpFactor[]);
+    try {
+      const { data } = await supabase.auth.mfa.listFactors();
+      setFactors((data?.totp ?? []) as TotpFactor[]);
+    } catch {
+      // MFA not enabled on this Supabase project — keep empty list
+    }
   };
 
   useEffect(() => { void loadFactors(); }, []);
