@@ -548,13 +548,17 @@ function EmailPanel({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
 function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
   const identities = (user?.identities ?? []) as Array<{ provider: string; identity_data?: Record<string, unknown> }>;
   const hasGoogle = identities.some((i) => i.provider === "google");
-  const hasEmail = identities.some((i) => i.provider === "email");
 
-  // A user has a password if they have an "email" identity
-  const hasPassword = hasEmail;
+  // Reliable password detection:
+  // - user has an "email" identity (signed up with email+password), OR
+  // - user_metadata.has_password=true (set via updateUser after OAuth sign-up)
+  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+  const hasPassword =
+    identities.some((i) => i.provider === "email") ||
+    meta.has_password === true;
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ current: "", next: "", confirm: "" });
+  const [passwordForm, setPasswordForm] = useState({ next: "", confirm: "" });
   const [pwBusy, setPwBusy] = useState(false);
 
   const savePassword = async (e: React.FormEvent) => {
@@ -568,12 +572,16 @@ function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"]
       return;
     }
     setPwBusy(true);
-    const { error } = await supabase.auth.updateUser({ password: passwordForm.next });
+    // Set password + mark has_password in metadata so detection is reliable
+    const { error } = await supabase.auth.updateUser({
+      password: passwordForm.next,
+      data: { has_password: true },
+    });
     setPwBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success(hasPassword ? "Password updated." : "Password set. You can now sign in with email + password.");
     setShowPasswordForm(false);
-    setPasswordForm({ current: "", next: "", confirm: "" });
+    setPasswordForm({ next: "", confirm: "" });
   };
 
   const linkGoogle = async () => {
@@ -642,22 +650,11 @@ function SignInMethodsPanel({ user }: { user: ReturnType<typeof useAuth>["user"]
 
           {showPasswordForm && (
             <form onSubmit={savePassword} className="space-y-2.5 border-t border-border/40 pt-3">
-              {!hasPassword && (
-                <p className="text-[11px] text-muted-foreground">
-                  Set a password to sign in with your email in addition to Google.
-                </p>
-              )}
-              {hasPassword && (
-                <div className="space-y-1">
-                  <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Current password</Label>
-                  <Input
-                    type="password"
-                    value={passwordForm.current}
-                    onChange={(e) => setPasswordForm((f) => ({ ...f, current: e.target.value }))}
-                    autoComplete="current-password"
-                  />
-                </div>
-              )}
+              <p className="text-[11px] text-muted-foreground">
+                {hasPassword
+                  ? "Set a new password for your account."
+                  : "Set a password to sign in with your email in addition to Google."}
+              </p>
               <div className="space-y-1">
                 <Label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">New password</Label>
                 <Input
