@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,16 +26,39 @@ export type UserProfile = {
   plan: string;
 };
 
-const STALE_TIME_MS = 60_000; // 1 minute — profile rarely changes
-
 export function useUserProfile() {
   const { user } = useAuth();
   const uid = user?.id;
+  const queryClient = useQueryClient();
+
+  // Realtime: push-invalidate cache the moment the customers row changes.
+  // Covers display_name, avatar_url, plan — any column. Works across tabs.
+  useEffect(() => {
+    if (!uid) return;
+    const channel = supabase
+      .channel(`user-profile-rt-${uid}`)
+      .on(
+        "postgres_changes" as any,
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "customers",
+          filter: `id=eq.${uid}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["user-profile", uid] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [uid, queryClient]);
 
   return useQuery<UserProfile | null>({
     queryKey: ["user-profile", uid],
     enabled: !!uid,
-    staleTime: STALE_TIME_MS,
+    staleTime: 5_000, // Realtime is primary; 5 s is just a safety fallback
     queryFn: async () => {
       if (!uid) return null;
       const { data, error } = await supabase

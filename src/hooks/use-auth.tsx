@@ -44,8 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setLoading(false);
-      // Invalidate router so protected routes re-evaluate auth (fixes Google OAuth redirect race)
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+      // Invalidate router so protected routes re-evaluate auth.
+      // USER_UPDATED covers updateUser() calls (password, email, metadata).
+      if (
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "USER_UPDATED"
+      ) {
         router.invalidate();
       }
     });
