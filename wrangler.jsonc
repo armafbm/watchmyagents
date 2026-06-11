@@ -1,7 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "watchmyagents-fortress",
+  "account_id": "8c367eeb11a4a6207ca82a0a95d3b4bd",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "src/server.ts",
+  "main": "dist/server/server.js",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "SUPABASE_URL": "https://fgcmjkgxrkprsllivmli.supabase.co",
+    "SUPABASE_PROJECT_ID": "fgcmjkgxrkprsllivmli",
+    "VITE_SUPABASE_URL": "https://fgcmjkgxrkprsllivmli.supabase.co",
+    "VITE_SUPABASE_PROJECT_ID": "fgcmjkgxrkprsllivmli"
+  }
 }
