@@ -34,7 +34,12 @@ function MfaChallengePage() {
   useEffect(() => {
     supabase.auth.mfa.listFactors().then(({ data }) => {
       const totp = data?.totp?.[0];
-      if (totp) setFactorId(totp.id);
+      if (totp) {
+        setFactorId(totp.id);
+      } else {
+        // No enrolled factor — redirect to profile settings for enrollment
+        window.location.replace("/dashboard/settings/profile");
+      }
     });
   }, []);
 
