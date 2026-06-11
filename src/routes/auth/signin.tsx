@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthLayout, Divider, GoogleButton } from "@/components/auth/AuthLayout";
+import { AuthLayout, Divider, GoogleButton, GitHubButton } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,18 @@ function SigninPage() {
     }
   };
 
+  const handleGitHub = async () => {
+    setOauthLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: `${window.location.origin}${search.redirect || "/dashboard"}` },
+    });
+    if (error) {
+      setOauthLoading(false);
+      toast.error(error.message);
+    }
+  };
+
   return (
     <AuthLayout
       title="Sign in to WatchMyAgents"
@@ -87,6 +99,7 @@ function SigninPage() {
       }
     >
       <GoogleButton onClick={handleGoogle} loading={oauthLoading} label="Continue with Google" />
+      <GitHubButton onClick={handleGitHub} loading={oauthLoading} label="Continue with GitHub" />
 
       <Divider>Or continue with email</Divider>
 

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { startGoogleSignIn } from "@/lib/google-popup";
-import { AuthLayout, Divider, GoogleButton } from "@/components/auth/AuthLayout";
+import { AuthLayout, Divider, GoogleButton, GitHubButton } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -101,6 +101,18 @@ function SignupPage() {
     }
   };
 
+  const handleGitHub = async () => {
+    setOauthLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    });
+    if (error) {
+      setOauthLoading(false);
+      toast.error(error.message);
+    }
+  };
+
   return (
     <AuthLayout
       title="Create your WatchMyAgents account"
@@ -115,6 +127,7 @@ function SignupPage() {
       }
     >
       <GoogleButton onClick={handleGoogle} loading={oauthLoading} label="Sign up with Google" />
+      <GitHubButton onClick={handleGitHub} loading={oauthLoading} label="Sign up with GitHub" />
 
       <Divider>Or continue with email</Divider>
 
