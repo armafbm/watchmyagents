@@ -14,7 +14,9 @@
   "vars": {
     "SUPABASE_URL": "https://fgcmjkgxrkprsllivmli.supabase.co",
     "SUPABASE_PROJECT_ID": "fgcmjkgxrkprsllivmli",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_IQoeUDt8sO8cFVoBshW9nw_1a81f-5V",
     "VITE_SUPABASE_URL": "https://fgcmjkgxrkprsllivmli.supabase.co",
-    "VITE_SUPABASE_PROJECT_ID": "fgcmjkgxrkprsllivmli"
+    "VITE_SUPABASE_PROJECT_ID": "fgcmjkgxrkprsllivmli",
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_IQoeUDt8sO8cFVoBshW9nw_1a81f-5V"
   }
 }
