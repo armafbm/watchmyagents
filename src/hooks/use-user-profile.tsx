@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,13 +30,17 @@ export function useUserProfile() {
   const { user } = useAuth();
   const uid = user?.id;
   const queryClient = useQueryClient();
+  // Unique per hook instance — prevents channel name collisions when
+  // useUserProfile is called by multiple components on the same page
+  // (e.g. DashboardLayout + ProfilePage both mount simultaneously).
+  const instanceId = useRef(Math.random().toString(36).slice(2)).current;
 
   // Realtime: push-invalidate cache the moment the customers row changes.
   // Covers display_name, avatar_url, plan — any column. Works across tabs.
   useEffect(() => {
     if (!uid) return;
     const channel = supabase
-      .channel(`user-profile-rt-${uid}`)
+      .channel(`user-profile-rt-${uid}-${instanceId}`)
       .on(
         "postgres_changes" as any,
         {
