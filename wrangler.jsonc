@@ -6,10 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "dist/server/server.js",
   "workers_dev": true,
-  "routes": [
-    { "pattern": "watchmyagents.com/*", "zone_name": "watchmyagents.com" },
-    { "pattern": "www.watchmyagents.com/*", "zone_name": "watchmyagents.com" }
-  ],
+  "custom_domains": ["watchmyagents.com", "www.watchmyagents.com"],
   "assets": {
     "directory": "./dist/client",
     "binding": "ASSETS"
