@@ -119,10 +119,10 @@ function MfaEnrollPage() {
 
       {step === "confirming" && enrollData && (
         <div className="space-y-5">
-          <div
-            className="mx-auto w-fit rounded-xl border border-border p-3 bg-white"
-            style={{ colorScheme: "light" }}
-            dangerouslySetInnerHTML={{ __html: enrollData.qr }}
+          <img
+            src={`data:image/svg+xml;utf8,${encodeURIComponent(enrollData.qr)}`}
+            alt="TOTP QR code"
+            className="mx-auto w-48 h-48 rounded-xl border border-border bg-white p-2"
           />
           <div className="rounded-lg bg-muted/40 border border-border px-4 py-3 text-center">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
