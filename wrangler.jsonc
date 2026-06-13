@@ -17,6 +17,7 @@
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_IQoeUDt8sO8cFVoBshW9nw_1a81f-5V",
     "VITE_SUPABASE_URL": "https://fgcmjkgxrkprsllivmli.supabase.co",
     "VITE_SUPABASE_PROJECT_ID": "fgcmjkgxrkprsllivmli",
-    "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_IQoeUDt8sO8cFVoBshW9nw_1a81f-5V"
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_IQoeUDt8sO8cFVoBshW9nw_1a81f-5V",
+    "VITE_PAYMENTS_CLIENT_TOKEN": "pk_live_51TdlJxAkoSR0VavpG2IdQAw3iYnhIOVeuNdQyilm7p2usUnaCG3JFfmBeodTn3EMjN7YV3uUCl9Srcmbob4QYS0e00J4T8HwwB"
   }
 }
