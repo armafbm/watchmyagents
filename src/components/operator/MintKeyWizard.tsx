@@ -32,14 +32,13 @@ function canonicalize(value: unknown): string {
 export function MintKeyWizard({ onClose, onMinted }: Props) {
   const call = useServerFn(mintSigningKey);
 
-  const today = new Date().toISOString().slice(0, 10);
-  const defaultEnd = new Date(Date.now() + 90 * 24 * 3600 * 1000).toISOString().slice(0, 10);
-
   const [kid, setKid] = useState(
     `sk-${new Date().getFullYear()}-q${Math.floor(new Date().getMonth() / 3) + 1}`,
   );
-  const [validFrom, setValidFrom] = useState(today);
-  const [validUntil, setValidUntil] = useState(defaultEnd);
+  const [validFrom, setValidFrom] = useState(new Date().toISOString());
+  const [validUntil, setValidUntil] = useState(
+    new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+  );
   const [pubkey, setPubkey] = useState("");
   const [signedByRoot, setSignedByRoot] = useState("");
   const [secretName, setSecretName] = useState("");
@@ -47,8 +46,8 @@ export function MintKeyWizard({ onClose, onMinted }: Props) {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const fromIso = validFrom ? new Date(validFrom + "T00:00:00Z").toISOString() : "";
-  const untilIso = validUntil ? new Date(validUntil + "T23:59:59Z").toISOString() : "";
+  const fromIso = validFrom.trim();
+  const untilIso = validUntil.trim();
 
   // Build canonical payload with a literal PUBKEY_PLACEHOLDER token. The
   // snippet substitutes it at runtime with the freshly-generated pubkey, so
@@ -159,36 +158,26 @@ console.log('private_pem:\\n' + privatePem);`;
                 <Input id="kid" value={kid} onChange={(e) => setKid(e.target.value)} required />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="vf">Valid from</Label>
+                <Label htmlFor="vf">Valid from (ISO)</Label>
                 <Input
                   id="vf"
-                  type="date"
+                  type="text"
                   value={validFrom}
                   onChange={(e) => setValidFrom(e.target.value)}
+                  placeholder="2026-06-11T14:05:25.766Z"
                   required
                 />
-                <div
-                  className="text-[10px] font-mono text-muted-foreground truncate"
-                  title={fromIso}
-                >
-                  → {fromIso || "—"}
-                </div>
               </div>
               <div className="space-y-1">
-                <Label htmlFor="vu">Valid until</Label>
+                <Label htmlFor="vu">Valid until (ISO)</Label>
                 <Input
                   id="vu"
-                  type="date"
+                  type="text"
                   value={validUntil}
                   onChange={(e) => setValidUntil(e.target.value)}
+                  placeholder="2027-06-11T14:05:25.771Z"
                   required
                 />
-                <div
-                  className="text-[10px] font-mono text-muted-foreground truncate"
-                  title={untilIso}
-                >
-                  → {untilIso || "—"}
-                </div>
               </div>
             </div>
           </section>

@@ -19,21 +19,49 @@ function json(status: number, body: unknown) {
 
 const VALID_DECISIONS = new Set(["allow", "deny", "interrupt"]);
 const VALID_MODES = new Set(["enforce", "shadow"]);
+const VALID_PROVIDERS = new Set(["anthropic-managed", "openai-agents"]);
+
+const PROVIDER_ID_REGEX: Record<string, RegExp> = {
+  "anthropic-managed": /^agent_[a-zA-Z0-9]+$/,
+  "openai-agents": /^[a-zA-Z0-9_\-]{1,256}$/,
+};
 
 function validateBody(b: unknown) {
   if (!b || typeof b !== "object") return { ok: false, error: "body must be a JSON object" };
   const o = b as Record<string, unknown>;
-  if (
-    typeof o.anthropic_agent_id !== "string" ||
-    !/^agent_[a-zA-Z0-9]+$/.test(o.anthropic_agent_id)
-  )
-    return { ok: false, error: "anthropic_agent_id required" };
+
+  // Provider — default anthropic-managed for backwards compat
+  const provider = typeof o.provider === "string" ? o.provider : "anthropic-managed";
+  if (!VALID_PROVIDERS.has(provider))
+    return { ok: false, error: `provider must be one of: ${[...VALID_PROVIDERS].join(", ")}` };
+
+  // native_agent_id — new canonical field; anthropic_agent_id is legacy fallback
+  const native_agent_id =
+    typeof o.native_agent_id === "string"
+      ? o.native_agent_id
+      : typeof o.anthropic_agent_id === "string"
+        ? o.anthropic_agent_id
+        : null;
+
+  if (!native_agent_id)
+    return { ok: false, error: "native_agent_id (or legacy anthropic_agent_id) required" };
+
+  const idRegex = PROVIDER_ID_REGEX[provider];
+  if (!idRegex.test(native_agent_id))
+    return { ok: false, error: `native_agent_id format invalid for provider "${provider}"` };
+
   if (typeof o.decision !== "string" || !VALID_DECISIONS.has(o.decision))
     return { ok: false, error: "decision must be allow, deny, or interrupt" };
+
   if (o.mode !== undefined && (typeof o.mode !== "string" || !VALID_MODES.has(o.mode)))
     return { ok: false, error: "mode must be enforce or shadow" };
+
+  const enforcement_delivered =
+    typeof o.enforcement_delivered === "boolean" ? o.enforcement_delivered : null;
+
   const result = {
-    anthropic_agent_id: o.anthropic_agent_id as string,
+    provider,
+    native_agent_id,
     decision: o.decision as "allow" | "deny" | "interrupt",
     mode: (o.mode as "enforce" | "shadow" | undefined) ?? "enforce",
     rule_id: typeof o.rule_id === "string" ? o.rule_id : null,
@@ -45,9 +73,12 @@ function validateBody(b: unknown) {
     message: typeof o.message === "string" ? o.message.slice(0, 500) : null,
     decided_at: typeof o.decided_at === "string" ? o.decided_at : new Date().toISOString(),
     decided_in_ms: typeof o.decided_in_ms === "number" ? o.decided_in_ms : null,
+    enforcement_delivered,
   };
+
   if (o.decided_at && Number.isNaN(new Date(result.decided_at).getTime()))
     return { ok: false, error: "decided_at must be a valid ISO 8601 timestamp" };
+
   return { ok: true, data: result };
 }
 
@@ -124,11 +155,13 @@ serve(async (req) => {
   if (!v.ok) return json(400, { error: v.error });
   const d = v.data!;
 
+  // Lookup agent by (customer_id, provider, native_agent_id)
   const { data: agent, error: agentErr } = await supabase
     .from("agents")
     .select("id")
     .eq("customer_id", customerId)
-    .eq("anthropic_agent_id", d.anthropic_agent_id)
+    .eq("provider", d.provider)
+    .eq("native_agent_id", d.native_agent_id)
     .maybeSingle();
   if (agentErr) {
     console.error("[ingest-decisions] agent lookup:", agentErr);
@@ -136,7 +169,7 @@ serve(async (req) => {
   }
   if (!agent)
     return json(404, {
-      error: `agent "${d.anthropic_agent_id}" not registered yet — POST a signal first`,
+      error: `agent "${d.native_agent_id}" (provider: ${d.provider}) not registered yet — POST a signal first`,
     });
   const agentId = (agent as { id: string }).id;
 
@@ -167,6 +200,7 @@ serve(async (req) => {
       message: d.message,
       decided_at: d.decided_at,
       decided_in_ms: d.decided_in_ms,
+      enforcement_delivered: d.enforcement_delivered,
     })
     .select("id")
     .single();

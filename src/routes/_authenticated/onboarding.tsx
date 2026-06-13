@@ -15,12 +15,14 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   component: Onboarding,
 });
 
+type Provider = "anthropic-managed" | "openai-agents";
+
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [provider, setProvider] = useState<Provider>("anthropic-managed");
   const [agentId, setAgentId] = useState("");
   const [agentRow, setAgentRow] = useState<{
-    anthropic_agent_id: string | null;
     native_agent_id: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,9 +49,9 @@ function Onboarding() {
     const { data, error } = await supabase
       .from("agents")
       .insert({
-        provider: "anthropic-managed",
+        provider,
         native_agent_id: native,
-        anthropic_agent_id: native,
+        anthropic_agent_id: provider === "anthropic-managed" ? native : null,
         display_name: native,
         customer_id,
       })
@@ -85,10 +87,22 @@ function Onboarding() {
     setApiKey(key);
   };
 
+  const nativeId = agentRow?.native_agent_id ?? "<agent-id>";
+  const wmaKey = apiKey ?? "<key-from-step-2>";
+
   const installCmd = `npm install -g watchmyagents
 export ANTHROPIC_API_KEY="sk-ant-..."
-export WMA_API_KEY="${apiKey ?? "<key-from-step-2>"}"
-wma-shield --agent-id ${agentRow?.native_agent_id ?? agentRow?.anthropic_agent_id ?? "<agent-id>"}`;
+export WMA_API_KEY="${wmaKey}"
+wma-shield --agent-id ${nativeId}`;
+
+  const openaiSnippet = `import { openaiAgents } from "watchmyagents";
+
+// Add to your agent config
+openaiAgents({
+  apiKey: process.env.WMA_API_KEY, // "${wmaKey}"
+  agentId: "${nativeId}",
+  policiesPath: "./policies.json", // local fallback — Fortress sync in v1.4.6
+});`;
 
   return (
     <div className="min-h-screen bg-background grid-bg flex items-center justify-center px-4 py-12">
@@ -119,19 +133,57 @@ wma-shield --agent-id ${agentRow?.native_agent_id ?? agentRow?.anthropic_agent_i
                 </div>
                 <h1 className="font-display text-2xl font-bold mb-2">Register your first agent</h1>
                 <p className="text-sm text-muted-foreground">
-                  Enter the Anthropic agent ID you want Fortress to protect.
+                  Choose your framework, then enter your agent ID.
                 </p>
               </div>
+
+              {/* Framework picker */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setProvider("anthropic-managed"); setAgentId(""); }}
+                  className={`rounded-xl border p-4 text-left transition-colors ${
+                    provider === "anthropic-managed"
+                      ? "border-primary bg-primary/10"
+                      : "border-border/60 bg-background/40 hover:border-border"
+                  }`}
+                >
+                  <div className="font-semibold text-sm mb-1">Console Anthropic</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    Agent créé via api.anthropic.com/agents
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setProvider("openai-agents"); setAgentId(""); }}
+                  className={`rounded-xl border p-4 text-left transition-colors ${
+                    provider === "openai-agents"
+                      ? "border-primary bg-primary/10"
+                      : "border-border/60 bg-background/40 hover:border-border"
+                  }`}
+                >
+                  <div className="font-semibold text-sm mb-1">OpenAI Agents SDK</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    Agent construit avec le SDK openai-agents
+                  </div>
+                </button>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="agentId">Anthropic Agent ID</Label>
+                <Label htmlFor="agentId">
+                  {provider === "anthropic-managed" ? "Anthropic Agent ID" : "Agent name / ID"}
+                </Label>
                 <Input
                   id="agentId"
                   value={agentId}
                   onChange={(e) => setAgentId(e.target.value)}
-                  placeholder="agent_01XaN..."
+                  placeholder={
+                    provider === "anthropic-managed" ? "agent_01XaN..." : "my-openai-agent"
+                  }
                   autoFocus
                 />
               </div>
+
               <Button
                 onClick={submitStep1}
                 disabled={!agentId.trim() || loading}
@@ -195,20 +247,29 @@ wma-shield --agent-id ${agentRow?.native_agent_id ?? agentRow?.anthropic_agent_i
                 <div className="font-mono text-[10px] uppercase tracking-widest text-primary mb-2">
                   Step 3 / 3
                 </div>
-                <h1 className="font-display text-2xl font-bold mb-2">Install the shield</h1>
+                <h1 className="font-display text-2xl font-bold mb-2">
+                  {provider === "anthropic-managed" ? "Install the shield" : "Add Fortress to your agent"}
+                </h1>
                 <p className="text-sm text-muted-foreground">
-                  Run this on the host where your Anthropic agent executes.
+                  {provider === "anthropic-managed"
+                    ? "Run this on the host where your Anthropic agent executes."
+                    : "Add this snippet to your OpenAI agent configuration."}
                 </p>
               </div>
               <div className="rounded-lg border border-border bg-background/60 p-4 relative">
                 <pre className="font-mono text-xs whitespace-pre-wrap break-all text-foreground/90">
-                  {installCmd}
+                  {provider === "anthropic-managed" ? installCmd : openaiSnippet}
                 </pre>
                 <Button
                   size="sm"
                   variant="outline"
                   className="absolute top-2 right-2"
-                  onClick={() => copy(installCmd, "cmd")}
+                  onClick={() =>
+                    copy(
+                      provider === "anthropic-managed" ? installCmd : openaiSnippet,
+                      "cmd",
+                    )
+                  }
                 >
                   {copied === "cmd" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                 </Button>
