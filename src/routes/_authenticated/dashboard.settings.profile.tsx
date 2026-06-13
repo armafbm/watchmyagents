@@ -764,18 +764,27 @@ function TwoFactorPanel() {
 
   const startEnroll = async () => {
     setBusy(true);
-    // Clean up any leftover unverified factors before enrolling
-    const { data: existing } = await supabase.auth.mfa.listFactors();
-    const unverified = (existing?.totp ?? []).filter((f: any) => f.status === "unverified");
-    await Promise.all(unverified.map((f: any) => supabase.auth.mfa.unenroll({ factorId: f.id })));
+    const FRIENDLY_NAME = "Authenticator app";
 
-    const { data, error } = await supabase.auth.mfa.enroll({
+    let { data, error } = await supabase.auth.mfa.enroll({
       factorType: "totp",
-      friendlyName: "Authenticator app",
+      friendlyName: FRIENDLY_NAME,
     });
+
+    // "already exists" → find and delete the conflicting factor, then retry once
+    if (error?.message?.toLowerCase().includes("already exists")) {
+      const { data: existing } = await supabase.auth.mfa.listFactors();
+      const conflict = (existing?.totp ?? []).find((f: any) => f.friendly_name === FRIENDLY_NAME);
+      if (conflict) await supabase.auth.mfa.unenroll({ factorId: conflict.id });
+      ({ data, error } = await supabase.auth.mfa.enroll({
+        factorType: "totp",
+        friendlyName: FRIENDLY_NAME,
+      }));
+    }
+
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    setEnrollData({ factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret });
+    setEnrollData({ factorId: data!.id, qr: data!.totp.qr_code, secret: data!.totp.secret });
     setStep("confirming");
   };
 
