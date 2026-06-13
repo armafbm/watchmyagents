@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
+import { MfaEnrollBanner } from "@/components/dashboard/MfaEnrollBanner";
 import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -313,6 +314,7 @@ export function DashboardLayout({
           </div>
         </header>
 
+        <MfaEnrollBanner />
         <main className="flex-1 px-6 py-8 max-w-[1600px] w-full mx-auto">{children}</main>
       </div>
 
