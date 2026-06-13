@@ -30,9 +30,24 @@ function CallbackPage() {
       }
     })();
 
-    const goSuccess = () => {
+    const goSuccess = async () => {
       if (done || cancelled) return;
       done = true;
+      // Check MFA state immediately after sign-in so we route to the right page
+      // before the dashboard beforeLoad runs (navigate({href}) bypasses it).
+      try {
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
+          navigate({ to: "/mfa/challenge", replace: true });
+          return;
+        }
+        if (aal?.nextLevel === "aal1") {
+          navigate({ to: "/mfa/enroll", replace: true });
+          return;
+        }
+      } catch {
+        // MFA check failed — fall through to normal destination
+      }
       navigate({ href: dest, replace: true });
     };
 
