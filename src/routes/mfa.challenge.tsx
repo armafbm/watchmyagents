@@ -37,8 +37,8 @@ function MfaChallengePage() {
       if (totp) {
         setFactorId(totp.id);
       } else {
-        // No enrolled factor — redirect to profile settings for enrollment
-        window.location.replace("/dashboard/settings/profile");
+        // No enrolled factor — redirect to mandatory enrollment
+        window.location.replace("/mfa/enroll");
       }
     });
   }, []);

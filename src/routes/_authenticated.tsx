@@ -53,8 +53,14 @@ export const Route = createFileRoute("/_authenticated")({
     // gate gracefully rather than crashing all authenticated routes.
     try {
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
-        throw redirect({ to: "/mfa/challenge" });
+      if (aal) {
+        if (aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+          throw redirect({ to: "/mfa/challenge" });
+        }
+        // Mandatory enrollment: every user must have at least one TOTP factor
+        if (aal.nextLevel === "aal1") {
+          throw redirect({ to: "/mfa/enroll" });
+        }
       }
     } catch (e) {
       // Re-throw router redirects; swallow MFA-unavailable errors

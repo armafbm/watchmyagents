@@ -795,7 +795,11 @@ function TwoFactorPanel() {
   };
 
   const unenroll = async (factorId: string) => {
-    if (!confirm("Remove this authenticator? You will no longer be required to enter a code at sign-in.")) return;
+    if (factors.length <= 1) {
+      toast.error("Two-factor authentication is mandatory — you cannot remove your last authenticator.");
+      return;
+    }
+    if (!confirm("Remove this authenticator?")) return;
     setBusy(true);
     const { error } = await supabase.auth.mfa.unenroll({ factorId });
     setBusy(false);
