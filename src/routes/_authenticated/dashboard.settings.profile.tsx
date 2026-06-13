@@ -873,7 +873,8 @@ function TwoFactorPanel() {
 
             {/* QR code — Supabase returns an SVG string */}
             <div
-              className="mx-auto w-44 h-44 bg-white rounded-xl p-2 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full"
+              className="mx-auto w-fit rounded-xl bg-white p-2"
+              style={{ colorScheme: "light" }}
               dangerouslySetInnerHTML={{ __html: enrollData.qr }}
             />
 

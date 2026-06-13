@@ -121,6 +121,7 @@ function MfaEnrollPage() {
         <div className="space-y-5">
           <div
             className="mx-auto w-fit rounded-xl border border-border p-3 bg-white"
+            style={{ colorScheme: "light" }}
             dangerouslySetInnerHTML={{ __html: enrollData.qr }}
           />
           <div className="rounded-lg bg-muted/40 border border-border px-4 py-3 text-center">
