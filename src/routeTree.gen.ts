@@ -16,6 +16,7 @@ import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as PostLoginRouteImport } from './routes/post-login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MfaEnrollRouteImport } from './routes/mfa.enroll'
 import { Route as MfaChallengeRouteImport } from './routes/mfa.challenge'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
@@ -78,6 +79,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MfaEnrollRoute = MfaEnrollRouteImport.update({
+  id: '/mfa/enroll',
+  path: '/mfa/enroll',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MfaChallengeRoute = MfaChallengeRouteImport.update({
@@ -258,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
+  '/mfa/enroll': typeof MfaEnrollRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -294,6 +301,7 @@ export interface FileRoutesByTo {
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
+  '/mfa/enroll': typeof MfaEnrollRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
+  '/mfa/enroll': typeof MfaEnrollRoute
   '/_authenticated/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/_authenticated/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -372,6 +381,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/mfa/challenge'
+    | '/mfa/enroll'
     | '/dashboard/guardian'
     | '/dashboard/legions'
     | '/dashboard/reports'
@@ -408,6 +418,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/mfa/challenge'
+    | '/mfa/enroll'
     | '/dashboard/guardian'
     | '/dashboard/legions'
     | '/dashboard/reports'
@@ -446,6 +457,7 @@ export interface FileRouteTypes {
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/mfa/challenge'
+    | '/mfa/enroll'
     | '/_authenticated/dashboard/guardian'
     | '/_authenticated/dashboard/legions'
     | '/_authenticated/dashboard/reports'
@@ -483,6 +495,7 @@ export interface RootRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   MfaChallengeRoute: typeof MfaChallengeRoute
+  MfaEnrollRoute: typeof MfaEnrollRoute
   ApiPublicEarlyAccessRoute: typeof ApiPublicEarlyAccessRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -542,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mfa/enroll': {
+      id: '/mfa/enroll'
+      path: '/mfa/enroll'
+      fullPath: '/mfa/enroll'
+      preLoaderRoute: typeof MfaEnrollRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mfa/challenge': {
@@ -819,6 +839,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   MfaChallengeRoute: MfaChallengeRoute,
+  MfaEnrollRoute: MfaEnrollRoute,
   ApiPublicEarlyAccessRoute: ApiPublicEarlyAccessRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
