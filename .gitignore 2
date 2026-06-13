@@ -1,0 +1,56 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.tanstack/**
+.nitro
+*.local
+
+# FORT-6 (P2 Codex audit) + FORT-6 followup (broken-build fix):
+# env-style files are ignored by default. The repo allows ONE exception:
+# `.env` may contain ONLY non-secret, build-time public values
+# (Supabase URL, publishable/anon key, project id, the public Stripe
+# publishable token). Vite needs these at build time to embed them in
+# the client bundle — without them the deployed app crashes on
+# hydration with "Missing Supabase environment variable(s)".
+#
+# What MUST go elsewhere (operator secrets):
+#   - SUPABASE_SERVICE_ROLE_KEY → Lovable / Cloudflare Worker env vars
+#   - GUARDIAN_SECRET → Supabase function secrets
+#   - Stripe restricted / secret keys → Lovable env vars
+#   - Anthropic API keys, AI provider keys → server-side env only
+#   - any *_SECRET, *_TOKEN that isn't a publishable token
+#
+# Anything matching .env.local / .env.production / .env.development
+# stays ignored to discourage that pattern (Vite reads .env for all
+# environments unless overridden).
+.env.*
+!.env.example
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Lovable build metadata (auto-generated, not source of truth)
+.lovable/
