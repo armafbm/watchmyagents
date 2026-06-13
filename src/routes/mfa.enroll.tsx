@@ -125,7 +125,7 @@ function MfaEnrollPage() {
       {step === "confirming" && enrollData && (
         <div className="space-y-5">
           <img
-            src={`data:image/svg+xml;utf8,${encodeURIComponent(enrollData.qr)}`}
+            src={enrollData.qr}
             alt="TOTP QR code"
             className="mx-auto w-48 h-48 rounded-xl border border-border bg-white p-2"
           />

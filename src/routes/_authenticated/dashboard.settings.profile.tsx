@@ -876,9 +876,9 @@ function TwoFactorPanel() {
               Scan the QR code with your authenticator app, then enter the 6-digit code to confirm.
             </p>
 
-            {/* QR code — render as <img> via data URI so page CSS cannot bleed in */}
+            {/* qr_code from Supabase is already a data URI — use it directly */}
             <img
-              src={`data:image/svg+xml;utf8,${encodeURIComponent(enrollData.qr)}`}
+              src={enrollData.qr}
               alt="TOTP QR code"
               className="mx-auto w-44 h-44 rounded-xl bg-white p-2"
             />
