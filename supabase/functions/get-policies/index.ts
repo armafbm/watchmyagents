@@ -20,7 +20,7 @@ function json(status: number, body: unknown) {
 const VALID_PROVIDERS = new Set(["anthropic-managed", "openai-agents"]);
 const PROVIDER_ID_REGEX: Record<string, RegExp> = {
   "anthropic-managed": /^agent_[a-zA-Z0-9]+$/,
-  "openai-agents": /^[a-zA-Z0-9_\-]{1,256}$/,
+  "openai-agents": /^[a-zA-Z0-9_\-\.]{1,256}$/,
 };
 
 serve(async (req) => {
