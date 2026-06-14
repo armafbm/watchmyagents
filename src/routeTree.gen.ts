@@ -15,6 +15,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as PostLoginRouteImport } from './routes/post-login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MfaEnrollRouteImport } from './routes/mfa.enroll'
 import { Route as MfaChallengeRouteImport } from './routes/mfa.challenge'
@@ -27,6 +28,7 @@ import { Route as AuthGooglePopupRouteImport } from './routes/auth/google-popup'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicEarlyAccessRouteImport } from './routes/api/public/early-access'
@@ -35,6 +37,9 @@ import { Route as AuthenticatedDashboardShieldRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
 import { Route as AuthenticatedDashboardLegionsRouteImport } from './routes/_authenticated/dashboard.legions'
 import { Route as AuthenticatedDashboardGuardianRouteImport } from './routes/_authenticated/dashboard.guardian'
+import { Route as AdminAdminUsersRouteImport } from './routes/_admin/admin.users'
+import { Route as AdminAdminSigningKeysRouteImport } from './routes/_admin/admin.signing-keys'
+import { Route as AdminAdminOperatorRouteImport } from './routes/_admin/admin.operator'
 import { Route as AuthenticatedDashboardSettingsIndexRouteImport } from './routes/_authenticated/dashboard.settings.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -74,6 +79,10 @@ const PostLoginRoute = PostLoginRouteImport.update({
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -136,6 +145,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AdminAdminRoute = AdminAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
     id: '/',
@@ -182,6 +196,21 @@ const AuthenticatedDashboardGuardianRoute =
     path: '/guardian',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AdminAdminUsersRoute = AdminAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminSigningKeysRoute = AdminAdminSigningKeysRouteImport.update({
+  id: '/signing-keys',
+  path: '/signing-keys',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminOperatorRoute = AdminAdminOperatorRouteImport.update({
+  id: '/operator',
+  path: '/operator',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AuthenticatedDashboardSettingsIndexRoute =
   AuthenticatedDashboardSettingsIndexRouteImport.update({
     id: '/settings/',
@@ -254,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AdminAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -265,6 +295,9 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
   '/mfa/enroll': typeof MfaEnrollRoute
+  '/admin/operator': typeof AdminAdminOperatorRoute
+  '/admin/signing-keys': typeof AdminAdminSigningKeysRoute
+  '/admin/users': typeof AdminAdminUsersRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -292,6 +325,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AdminAdminRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/google-popup': typeof AuthGooglePopupRoute
@@ -302,6 +336,9 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
   '/mfa/enroll': typeof MfaEnrollRoute
+  '/admin/operator': typeof AdminAdminOperatorRoute
+  '/admin/signing-keys': typeof AdminAdminSigningKeysRoute
+  '/admin/users': typeof AdminAdminUsersRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -325,12 +362,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_admin': typeof AdminRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/post-login': typeof PostLoginRoute
   '/presentation': typeof PresentationRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -342,6 +381,9 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
   '/mfa/enroll': typeof MfaEnrollRoute
+  '/_admin/admin/operator': typeof AdminAdminOperatorRoute
+  '/_admin/admin/signing-keys': typeof AdminAdminSigningKeysRoute
+  '/_admin/admin/users': typeof AdminAdminUsersRoute
   '/_authenticated/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
   '/_authenticated/dashboard/legions': typeof AuthenticatedDashboardLegionsRoute
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
@@ -371,6 +413,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/admin'
     | '/dashboard'
     | '/onboarding'
     | '/auth/callback'
@@ -382,6 +425,9 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/mfa/challenge'
     | '/mfa/enroll'
+    | '/admin/operator'
+    | '/admin/signing-keys'
+    | '/admin/users'
     | '/dashboard/guardian'
     | '/dashboard/legions'
     | '/dashboard/reports'
@@ -409,6 +455,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/admin'
     | '/onboarding'
     | '/auth/callback'
     | '/auth/google-popup'
@@ -419,6 +466,9 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/mfa/challenge'
     | '/mfa/enroll'
+    | '/admin/operator'
+    | '/admin/signing-keys'
+    | '/admin/users'
     | '/dashboard/guardian'
     | '/dashboard/legions'
     | '/dashboard/reports'
@@ -441,12 +491,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_admin'
     | '/_authenticated'
     | '/post-login'
     | '/presentation'
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/_admin/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/auth/callback'
@@ -458,6 +510,9 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/mfa/challenge'
     | '/mfa/enroll'
+    | '/_admin/admin/operator'
+    | '/_admin/admin/signing-keys'
+    | '/_admin/admin/users'
     | '/_authenticated/dashboard/guardian'
     | '/_authenticated/dashboard/legions'
     | '/_authenticated/dashboard/reports'
@@ -481,6 +536,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   PostLoginRoute: typeof PostLoginRoute
   PresentationRoute: typeof PresentationRoute
@@ -548,6 +604,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -634,6 +697,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_admin/admin': {
+      id: '/_admin/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
       path: '/'
@@ -689,6 +759,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/guardian'
       preLoaderRoute: typeof AuthenticatedDashboardGuardianRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_admin/admin/users': {
+      id: '/_admin/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminAdminUsersRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/signing-keys': {
+      id: '/_admin/admin/signing-keys'
+      path: '/signing-keys'
+      fullPath: '/admin/signing-keys'
+      preLoaderRoute: typeof AdminAdminSigningKeysRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/operator': {
+      id: '/_admin/admin/operator'
+      path: '/operator'
+      fullPath: '/admin/operator'
+      preLoaderRoute: typeof AdminAdminOperatorRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
     '/_authenticated/dashboard/settings/': {
       id: '/_authenticated/dashboard/settings/'
@@ -770,6 +861,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminAdminRouteChildren {
+  AdminAdminOperatorRoute: typeof AdminAdminOperatorRoute
+  AdminAdminSigningKeysRoute: typeof AdminAdminSigningKeysRoute
+  AdminAdminUsersRoute: typeof AdminAdminUsersRoute
+}
+
+const AdminAdminRouteChildren: AdminAdminRouteChildren = {
+  AdminAdminOperatorRoute: AdminAdminOperatorRoute,
+  AdminAdminSigningKeysRoute: AdminAdminSigningKeysRoute,
+  AdminAdminUsersRoute: AdminAdminUsersRoute,
+}
+
+const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
+  AdminAdminRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminAdminRoute: typeof AdminAdminRouteWithChildren
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdminRoute: AdminAdminRouteWithChildren,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardGuardianRoute: typeof AuthenticatedDashboardGuardianRoute
   AuthenticatedDashboardLegionsRoute: typeof AuthenticatedDashboardLegionsRoute
@@ -825,6 +942,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   PostLoginRoute: PostLoginRoute,
   PresentationRoute: PresentationRoute,

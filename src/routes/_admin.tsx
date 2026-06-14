@@ -1,5 +1,5 @@
 import { createFileRoute, redirect, Outlet, Link, useRouterState } from "@tanstack/react-router";
-import { Shield, Users, LayoutDashboard } from "lucide-react";
+import { Shield, Users, LayoutDashboard, Key, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const ADMIN_EMAIL = "arma@watchmyagents.com";
@@ -8,15 +8,17 @@ export const Route = createFileRoute("/_admin")({
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth/signin" });
+    if (!data.user) { window.location.assign("/auth/signin"); return; }
     if (data.user.email !== ADMIN_EMAIL) throw redirect({ to: "/dashboard" });
   },
   component: AdminLayout,
 });
 
 const NAV = [
-  { to: "/admin/admin" as const, label: "Metrics", icon: LayoutDashboard },
-  { to: "/admin/admin/users" as const, label: "Users", icon: Users },
+  { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
+  { to: "/admin/users", label: "Users", icon: Users, exact: false },
+  { to: "/admin/operator", label: "API Keys", icon: Key, exact: false },
+  { to: "/admin/signing-keys", label: "Signing Keys", icon: ShieldCheck, exact: false },
 ];
 
 function AdminLayout() {
@@ -38,20 +40,23 @@ function AdminLayout() {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {NAV.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                pathname === to
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </Link>
-          ))}
+          {NAV.map(({ to, label, icon: Icon, exact }) => {
+            const active = exact ? pathname === to : pathname.startsWith(to);
+            return (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="px-5 py-4 border-t border-border/60">
