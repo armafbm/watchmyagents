@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  Loader2, Settings, Key, Shield, Users, ChevronDown, X, Check,
-  Copy, RefreshCw, AlertTriangle,
+  Loader2, Key, Users, ChevronDown, X, Check,
+  Copy, RefreshCw,
 } from "lucide-react";
 import {
-  getAdminUsers, getAdminApiKeys, getAdminSigningKeys,
-  updateUserPlan, revokeAdminApiKey, revokeAdminSigningKey,
-  type AdminUser, type AdminApiKey, type AdminSigningKey,
+  getAdminUsers, getAdminApiKeys,
+  updateUserPlan, revokeAdminApiKey,
+  type AdminUser, type AdminApiKey,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_admin/admin/config")({
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_admin/admin/config")({
   component: SuperAdminPage,
 });
 
-type Tab = "users" | "apikeys" | "signingkeys";
+type Tab = "users" | "apikeys";
 
 const VALID_PLANS = ["free", "pro", "pro_plus", "business", "advanced"] as const;
 const PLAN_COLOR: Record<string, string> = {
@@ -203,63 +203,16 @@ function ApiKeysTab({ keys, onRevoke }: { keys: AdminApiKey[]; onRevoke: (id: st
   );
 }
 
-function SigningKeysTab({ keys }: { keys: AdminSigningKey[] }) {
-  return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-[#FF8C00]/20 bg-[#FF8C00]/5 px-4 py-3 flex items-start gap-2">
-        <AlertTriangle className="h-4 w-4 text-[#FF8C00] shrink-0 mt-0.5" />
-        <div className="text-xs text-[#FF8C00]/80">
-          Les signing keys sont gérées via l'infrastructure Cloudflare Workers et le script de rotation.
-          La révocation ici met à jour l'état dans la base de données publique.
-        </div>
-      </div>
-      <div className="rounded-xl border border-white/8 bg-[#0D0D14] overflow-hidden">
-        {keys.length === 0 ? (
-          <div className="text-center py-12 text-white/30 text-sm font-mono">Aucune signing key.</div>
-        ) : (
-          <div className="divide-y divide-white/5">
-            {keys.map((k) => (
-              <div key={k.kid} className={`px-5 py-4 ${k.revoked_at ? "opacity-40" : ""}`}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-xs text-white font-bold">{k.kid}</span>
-                      <CopyBtn text={k.kid} />
-                      {k.revoked_at
-                        ? <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#FF2D2D]/10 border border-[#FF2D2D]/20 text-[#FF2D2D]">Révoquée</span>
-                        : <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#00C851]/10 border border-[#00C851]/20 text-[#00C851]">Active</span>
-                      }
-                    </div>
-                    <div className="font-mono text-[10px] text-white/30 truncate max-w-md">{k.pubkey.slice(0, 60)}…</div>
-                    <div className="text-[10px] text-white/30 mt-1 font-mono">
-                      Valide : {new Date(k.valid_from).toLocaleDateString("fr-FR")} → {new Date(k.valid_until).toLocaleDateString("fr-FR")}
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-[10px] text-white/20 font-mono">Signé par</div>
-                    <div className="text-[10px] text-white/40 font-mono truncate max-w-[120px]">{k.signed_by_root.slice(0, 12)}…</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function SuperAdminPage() {
   const [tab, setTab] = useState<Tab>("users");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [apiKeys, setApiKeys] = useState<AdminApiKey[]>([]);
-  const [signingKeys, setSigningKeys] = useState<AdminSigningKey[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadAll = () => {
     setLoading(true);
-    Promise.all([getAdminUsers(), getAdminApiKeys(), getAdminSigningKeys()]).then(([u, k, s]) => {
-      setUsers(u); setApiKeys(k); setSigningKeys(s); setLoading(false);
+    Promise.all([getAdminUsers(), getAdminApiKeys()]).then(([u, k]) => {
+      setUsers(u); setApiKeys(k); setLoading(false);
     });
   };
 
@@ -272,7 +225,6 @@ function SuperAdminPage() {
   const TABS: { id: Tab; label: string; icon: React.ComponentType<any>; count?: number }[] = [
     { id: "users", label: "Utilisateurs", icon: Users, count: users.length },
     { id: "apikeys", label: "API Keys", icon: Key, count: apiKeys.filter((k) => !k.revoked_at).length },
-    { id: "signingkeys", label: "Signing Keys", icon: Shield, count: signingKeys.length },
   ];
 
   return (
@@ -315,7 +267,6 @@ function SuperAdminPage() {
         <>
           {tab === "users" && <UsersTab users={users} onRefresh={loadAll} />}
           {tab === "apikeys" && <ApiKeysTab keys={apiKeys} onRevoke={handleRevokeKey} />}
-          {tab === "signingkeys" && <SigningKeysTab keys={signingKeys} />}
         </>
       )}
     </div>

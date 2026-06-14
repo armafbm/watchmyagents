@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, Outlet, Link, useRouterState } from "@tanstack/react-router";
 import {
   Shield, LayoutDashboard, Heart, Bot, Dna, Radio,
-  AlertTriangle, DollarSign, TrendingUp, BarChart3, ClipboardList, Settings,
+  AlertTriangle, DollarSign, TrendingUp, BarChart3, ClipboardList, Settings, KeyRound,
   ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,7 @@ const NAV = [
   { to: "/admin/revenue", label: "Revenue Center", icon: TrendingUp, exact: false },
   { to: "/admin/scoring", label: "Client Scoring", icon: BarChart3, exact: false },
   { to: "/admin/audit", label: "Audit Logs", icon: ClipboardList, exact: false },
+  { to: "/admin/signing-keys", label: "Signing Keys", icon: KeyRound, exact: false },
   { to: "/admin/config", label: "Super Admin", icon: Settings, exact: false },
 ];
 
