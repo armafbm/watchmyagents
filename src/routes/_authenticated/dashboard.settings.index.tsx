@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { UserCircle2, KeyRound, CreditCard, ShieldCheck, ChevronRight } from "lucide-react";
+import { UserCircle2, KeyRound, CreditCard, ChevronRight } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PageHeader, Panel } from "@/components/dashboard/primitives";
-import { useRole } from "@/hooks/useRole";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings/")({
   head: () => ({
@@ -19,8 +18,6 @@ type Item = {
 };
 
 function SettingsHub() {
-  const isOperator = useRole("operator");
-
   const items: Item[] = [
     {
       to: "/dashboard/settings/profile",
@@ -41,15 +38,6 @@ function SettingsHub() {
       icon: CreditCard,
     },
   ];
-
-  if (isOperator) {
-    items.push({
-      to: "/dashboard/operator/signing-keys",
-      label: "Signing Keys",
-      description: "Operator-only chain-of-trust keys.",
-      icon: ShieldCheck,
-    });
-  }
 
   return (
     <DashboardLayout breadcrumb="Settings">
