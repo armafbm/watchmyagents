@@ -91,7 +91,7 @@ export const getAdminUsers = createServerFn({ method: "GET" })
 
 export const updateUserPlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((data: unknown) => data as { customerId: string; plan: string })
+  .inputValidator((data: { customerId: string; plan: string }) => data)
   .handler(async ({ context, data }) => {
     requireAdmin(context.claims);
 
