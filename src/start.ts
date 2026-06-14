@@ -1,4 +1,5 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
+import * as Sentry from "@sentry/tanstackstart-react";
 
 import { attachSupabaseAuth } from "./integrations/supabase/auth-attacher";
 import { renderErrorPage } from "./lib/error-page";
@@ -15,6 +16,7 @@ const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
       throw error;
     }
     console.error(error);
+    Sentry.captureException(error);
     return new Response(renderErrorPage(), {
       status: 500,
       headers: { "content-type": "text/html; charset=utf-8" },

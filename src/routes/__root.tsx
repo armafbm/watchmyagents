@@ -7,10 +7,16 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import * as Sentry from "@sentry/tanstackstart-react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 
 import appCss from "../styles.css?url";
+
+// Init Sentry client-side only
+if (typeof window !== "undefined") {
+  import("../instrument.client");
+}
 
 function NotFoundComponent() {
   return (
@@ -36,6 +42,7 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
+  Sentry.captureException(error);
   const router = useRouter();
 
   return (
