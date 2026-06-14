@@ -34,6 +34,7 @@ dist-ssr
 # Anything matching .env.local / .env.production / .env.development
 # stays ignored to discourage that pattern (Vite reads .env for all
 # environments unless overridden).
+.env
 .env.*
 !.env.example
 
