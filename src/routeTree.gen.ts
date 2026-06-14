@@ -30,6 +30,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as AdminAdminIndexRouteImport } from './routes/_admin/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicEarlyAccessRouteImport } from './routes/api/public/early-access'
 import { Route as AuthenticatedDashboardWatchRouteImport } from './routes/_authenticated/dashboard.watch'
@@ -156,6 +157,11 @@ const AuthenticatedDashboardIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
   '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/admin/': typeof AdminAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
@@ -325,7 +332,6 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AdminAdminRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/google-popup': typeof AuthGooglePopupRoute
@@ -346,6 +352,7 @@ export interface FileRoutesByTo {
   '/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
   '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/admin': typeof AdminAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
@@ -391,6 +398,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/watch': typeof AuthenticatedDashboardWatchRoute
   '/api/public/early-access': typeof ApiPublicEarlyAccessRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/_admin/admin/': typeof AdminAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/operator/signing-keys': typeof AuthenticatedDashboardOperatorSigningKeysRoute
   '/_authenticated/dashboard/settings/keys': typeof AuthenticatedDashboardSettingsKeysRoute
@@ -435,6 +443,7 @@ export interface FileRouteTypes {
     | '/dashboard/watch'
     | '/api/public/early-access'
     | '/lovable/email/suppression'
+    | '/admin/'
     | '/dashboard/'
     | '/dashboard/operator/signing-keys'
     | '/dashboard/settings/keys'
@@ -455,7 +464,6 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
-    | '/admin'
     | '/onboarding'
     | '/auth/callback'
     | '/auth/google-popup'
@@ -476,6 +484,7 @@ export interface FileRouteTypes {
     | '/dashboard/watch'
     | '/api/public/early-access'
     | '/lovable/email/suppression'
+    | '/admin'
     | '/dashboard'
     | '/dashboard/operator/signing-keys'
     | '/dashboard/settings/keys'
@@ -520,6 +529,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/watch'
     | '/api/public/early-access'
     | '/lovable/email/suppression'
+    | '/_admin/admin/'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/operator/signing-keys'
     | '/_authenticated/dashboard/settings/keys'
@@ -711,6 +721,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_admin/admin/': {
+      id: '/_admin/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAdminIndexRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -865,12 +882,14 @@ interface AdminAdminRouteChildren {
   AdminAdminOperatorRoute: typeof AdminAdminOperatorRoute
   AdminAdminSigningKeysRoute: typeof AdminAdminSigningKeysRoute
   AdminAdminUsersRoute: typeof AdminAdminUsersRoute
+  AdminAdminIndexRoute: typeof AdminAdminIndexRoute
 }
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminOperatorRoute: AdminAdminOperatorRoute,
   AdminAdminSigningKeysRoute: AdminAdminSigningKeysRoute,
   AdminAdminUsersRoute: AdminAdminUsersRoute,
+  AdminAdminIndexRoute: AdminAdminIndexRoute,
 }
 
 const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
