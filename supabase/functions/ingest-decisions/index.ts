@@ -167,11 +167,42 @@ serve(async (req) => {
     console.error("[ingest-decisions] agent lookup:", agentErr);
     return json(500, { error: "internal error" });
   }
-  if (!agent)
-    return json(404, {
-      error: `agent "${d.native_agent_id}" (provider: ${d.provider}) not registered yet — POST a signal first`,
-    });
-  const agentId = (agent as { id: string }).id;
+
+  let agentId: string;
+  if (agent) {
+    agentId = (agent as { id: string }).id;
+  } else {
+    // Auto-register on first decision — no prior signal required
+    const { data: newAgent, error: autoErr } = await supabase
+      .from("agents")
+      .insert({
+        customer_id: customerId,
+        provider: d.provider,
+        native_agent_id: d.native_agent_id,
+        ...(d.provider === "anthropic-managed" ? { anthropic_agent_id: d.native_agent_id } : {}),
+        display_name: d.native_agent_id,
+        status: "active",
+      })
+      .select("id")
+      .single();
+    if (autoErr) {
+      // Race condition — another request registered the same agent concurrently
+      const { data: retry } = await supabase
+        .from("agents")
+        .select("id")
+        .eq("customer_id", customerId)
+        .eq("provider", d.provider)
+        .eq("native_agent_id", d.native_agent_id)
+        .maybeSingle();
+      if (!retry) {
+        console.error("[ingest-decisions] auto-register failed:", autoErr);
+        return json(500, { error: "internal error — could not register agent" });
+      }
+      agentId = (retry as { id: string }).id;
+    } else {
+      agentId = (newAgent as { id: string }).id;
+    }
+  }
 
   let policyId: string | null = null;
   if (d.rule_id) {

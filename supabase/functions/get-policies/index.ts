@@ -17,6 +17,12 @@ function json(status: number, body: unknown) {
   });
 }
 
+const VALID_PROVIDERS = new Set(["anthropic-managed", "openai-agents"]);
+const PROVIDER_ID_REGEX: Record<string, RegExp> = {
+  "anthropic-managed": /^agent_[a-zA-Z0-9]+$/,
+  "openai-agents": /^[a-zA-Z0-9_\-]{1,256}$/,
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "GET") return json(405, { error: "method not allowed (GET only)" });
@@ -54,24 +60,40 @@ serve(async (req) => {
   } catch {
     return json(400, { error: "invalid request url" });
   }
-  const filterAnthropicAgentId = url.searchParams.get("agent_id");
+  // agent_id = legacy Anthropic param; native_agent_id + provider = new canonical params
+  const legacyAgentId   = url.searchParams.get("agent_id");
+  const filterNativeId  = url.searchParams.get("native_agent_id");
+  const filterProvider  = url.searchParams.get("provider") ?? "anthropic-managed";
+  const effectiveNativeId = filterNativeId ?? legacyAgentId;
+  const useLegacyLookup   = !filterNativeId && !!legacyAgentId;
 
   let agentUuid: string | null = null;
   let agentType: string | null = null;
   let agentFleetId: string | null = null;
   let agentTeamIds: string[] = [];
-  const ancestorIds: string[] = []; // self + parents up the chain
+  const ancestorIds: string[] = [];
 
-  if (filterAnthropicAgentId) {
-    if (!/^agent_[a-zA-Z0-9]+$/.test(filterAnthropicAgentId)) {
-      return json(400, { error: "invalid agent_id format" });
+  if (effectiveNativeId) {
+    if (!VALID_PROVIDERS.has(filterProvider)) {
+      return json(400, { error: `provider must be one of: ${[...VALID_PROVIDERS].join(", ")}` });
     }
-    const { data: agent } = await supabase
+    const idRegex = PROVIDER_ID_REGEX[filterProvider];
+    if (!idRegex.test(effectiveNativeId)) {
+      return json(400, { error: `invalid agent_id format for provider "${filterProvider}"` });
+    }
+
+    let agentQuery = supabase
       .from("agents")
       .select("id, agent_type, parent_agent_id, fleet_id")
-      .eq("customer_id", customerId)
-      .eq("anthropic_agent_id", filterAnthropicAgentId)
-      .maybeSingle();
+      .eq("customer_id", customerId);
+
+    if (useLegacyLookup) {
+      agentQuery = agentQuery.eq("anthropic_agent_id", effectiveNativeId);
+    } else {
+      agentQuery = agentQuery.eq("provider", filterProvider).eq("native_agent_id", effectiveNativeId);
+    }
+
+    const { data: agent } = await agentQuery.maybeSingle();
     if (!agent) {
       return json(200, { ok: true, fetched_at: new Date().toISOString(), policies: [] });
     }
