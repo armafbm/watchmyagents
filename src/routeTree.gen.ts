@@ -40,7 +40,17 @@ import { Route as AuthenticatedDashboardLegionsRouteImport } from './routes/_aut
 import { Route as AuthenticatedDashboardGuardianRouteImport } from './routes/_authenticated/dashboard.guardian'
 import { Route as AdminAdminUsersRouteImport } from './routes/_admin/admin.users'
 import { Route as AdminAdminSigningKeysRouteImport } from './routes/_admin/admin.signing-keys'
+import { Route as AdminAdminScoringRouteImport } from './routes/_admin/admin.scoring'
+import { Route as AdminAdminRevenueRouteImport } from './routes/_admin/admin.revenue'
 import { Route as AdminAdminOperatorRouteImport } from './routes/_admin/admin.operator'
+import { Route as AdminAdminMonitoringRouteImport } from './routes/_admin/admin.monitoring'
+import { Route as AdminAdminHealthRouteImport } from './routes/_admin/admin.health'
+import { Route as AdminAdminGuardianRouteImport } from './routes/_admin/admin.guardian'
+import { Route as AdminAdminErrorsRouteImport } from './routes/_admin/admin.errors'
+import { Route as AdminAdminCostsRouteImport } from './routes/_admin/admin.costs'
+import { Route as AdminAdminConfigRouteImport } from './routes/_admin/admin.config'
+import { Route as AdminAdminAuditRouteImport } from './routes/_admin/admin.audit'
+import { Route as AdminAdminAgentsRouteImport } from './routes/_admin/admin.agents'
 import { Route as AuthenticatedDashboardSettingsIndexRouteImport } from './routes/_authenticated/dashboard.settings.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -212,9 +222,59 @@ const AdminAdminSigningKeysRoute = AdminAdminSigningKeysRouteImport.update({
   path: '/signing-keys',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const AdminAdminScoringRoute = AdminAdminScoringRouteImport.update({
+  id: '/scoring',
+  path: '/scoring',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminRevenueRoute = AdminAdminRevenueRouteImport.update({
+  id: '/revenue',
+  path: '/revenue',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
 const AdminAdminOperatorRoute = AdminAdminOperatorRouteImport.update({
   id: '/operator',
   path: '/operator',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminMonitoringRoute = AdminAdminMonitoringRouteImport.update({
+  id: '/monitoring',
+  path: '/monitoring',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminHealthRoute = AdminAdminHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminGuardianRoute = AdminAdminGuardianRouteImport.update({
+  id: '/guardian',
+  path: '/guardian',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminErrorsRoute = AdminAdminErrorsRouteImport.update({
+  id: '/errors',
+  path: '/errors',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminCostsRoute = AdminAdminCostsRouteImport.update({
+  id: '/costs',
+  path: '/costs',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminConfigRoute = AdminAdminConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminAuditRoute = AdminAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminAgentsRoute = AdminAdminAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AuthenticatedDashboardSettingsIndexRoute =
@@ -301,7 +361,17 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
   '/mfa/enroll': typeof MfaEnrollRoute
+  '/admin/agents': typeof AdminAdminAgentsRoute
+  '/admin/audit': typeof AdminAdminAuditRoute
+  '/admin/config': typeof AdminAdminConfigRoute
+  '/admin/costs': typeof AdminAdminCostsRoute
+  '/admin/errors': typeof AdminAdminErrorsRoute
+  '/admin/guardian': typeof AdminAdminGuardianRoute
+  '/admin/health': typeof AdminAdminHealthRoute
+  '/admin/monitoring': typeof AdminAdminMonitoringRoute
   '/admin/operator': typeof AdminAdminOperatorRoute
+  '/admin/revenue': typeof AdminAdminRevenueRoute
+  '/admin/scoring': typeof AdminAdminScoringRoute
   '/admin/signing-keys': typeof AdminAdminSigningKeysRoute
   '/admin/users': typeof AdminAdminUsersRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
@@ -342,7 +412,17 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
   '/mfa/enroll': typeof MfaEnrollRoute
+  '/admin/agents': typeof AdminAdminAgentsRoute
+  '/admin/audit': typeof AdminAdminAuditRoute
+  '/admin/config': typeof AdminAdminConfigRoute
+  '/admin/costs': typeof AdminAdminCostsRoute
+  '/admin/errors': typeof AdminAdminErrorsRoute
+  '/admin/guardian': typeof AdminAdminGuardianRoute
+  '/admin/health': typeof AdminAdminHealthRoute
+  '/admin/monitoring': typeof AdminAdminMonitoringRoute
   '/admin/operator': typeof AdminAdminOperatorRoute
+  '/admin/revenue': typeof AdminAdminRevenueRoute
+  '/admin/scoring': typeof AdminAdminScoringRoute
   '/admin/signing-keys': typeof AdminAdminSigningKeysRoute
   '/admin/users': typeof AdminAdminUsersRoute
   '/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
@@ -388,7 +468,17 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/mfa/challenge': typeof MfaChallengeRoute
   '/mfa/enroll': typeof MfaEnrollRoute
+  '/_admin/admin/agents': typeof AdminAdminAgentsRoute
+  '/_admin/admin/audit': typeof AdminAdminAuditRoute
+  '/_admin/admin/config': typeof AdminAdminConfigRoute
+  '/_admin/admin/costs': typeof AdminAdminCostsRoute
+  '/_admin/admin/errors': typeof AdminAdminErrorsRoute
+  '/_admin/admin/guardian': typeof AdminAdminGuardianRoute
+  '/_admin/admin/health': typeof AdminAdminHealthRoute
+  '/_admin/admin/monitoring': typeof AdminAdminMonitoringRoute
   '/_admin/admin/operator': typeof AdminAdminOperatorRoute
+  '/_admin/admin/revenue': typeof AdminAdminRevenueRoute
+  '/_admin/admin/scoring': typeof AdminAdminScoringRoute
   '/_admin/admin/signing-keys': typeof AdminAdminSigningKeysRoute
   '/_admin/admin/users': typeof AdminAdminUsersRoute
   '/_authenticated/dashboard/guardian': typeof AuthenticatedDashboardGuardianRoute
@@ -433,7 +523,17 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/mfa/challenge'
     | '/mfa/enroll'
+    | '/admin/agents'
+    | '/admin/audit'
+    | '/admin/config'
+    | '/admin/costs'
+    | '/admin/errors'
+    | '/admin/guardian'
+    | '/admin/health'
+    | '/admin/monitoring'
     | '/admin/operator'
+    | '/admin/revenue'
+    | '/admin/scoring'
     | '/admin/signing-keys'
     | '/admin/users'
     | '/dashboard/guardian'
@@ -474,7 +574,17 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/mfa/challenge'
     | '/mfa/enroll'
+    | '/admin/agents'
+    | '/admin/audit'
+    | '/admin/config'
+    | '/admin/costs'
+    | '/admin/errors'
+    | '/admin/guardian'
+    | '/admin/health'
+    | '/admin/monitoring'
     | '/admin/operator'
+    | '/admin/revenue'
+    | '/admin/scoring'
     | '/admin/signing-keys'
     | '/admin/users'
     | '/dashboard/guardian'
@@ -519,7 +629,17 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/mfa/challenge'
     | '/mfa/enroll'
+    | '/_admin/admin/agents'
+    | '/_admin/admin/audit'
+    | '/_admin/admin/config'
+    | '/_admin/admin/costs'
+    | '/_admin/admin/errors'
+    | '/_admin/admin/guardian'
+    | '/_admin/admin/health'
+    | '/_admin/admin/monitoring'
     | '/_admin/admin/operator'
+    | '/_admin/admin/revenue'
+    | '/_admin/admin/scoring'
     | '/_admin/admin/signing-keys'
     | '/_admin/admin/users'
     | '/_authenticated/dashboard/guardian'
@@ -791,11 +911,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSigningKeysRouteImport
       parentRoute: typeof AdminAdminRoute
     }
+    '/_admin/admin/scoring': {
+      id: '/_admin/admin/scoring'
+      path: '/scoring'
+      fullPath: '/admin/scoring'
+      preLoaderRoute: typeof AdminAdminScoringRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/revenue': {
+      id: '/_admin/admin/revenue'
+      path: '/revenue'
+      fullPath: '/admin/revenue'
+      preLoaderRoute: typeof AdminAdminRevenueRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     '/_admin/admin/operator': {
       id: '/_admin/admin/operator'
       path: '/operator'
       fullPath: '/admin/operator'
       preLoaderRoute: typeof AdminAdminOperatorRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/monitoring': {
+      id: '/_admin/admin/monitoring'
+      path: '/monitoring'
+      fullPath: '/admin/monitoring'
+      preLoaderRoute: typeof AdminAdminMonitoringRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/health': {
+      id: '/_admin/admin/health'
+      path: '/health'
+      fullPath: '/admin/health'
+      preLoaderRoute: typeof AdminAdminHealthRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/guardian': {
+      id: '/_admin/admin/guardian'
+      path: '/guardian'
+      fullPath: '/admin/guardian'
+      preLoaderRoute: typeof AdminAdminGuardianRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/errors': {
+      id: '/_admin/admin/errors'
+      path: '/errors'
+      fullPath: '/admin/errors'
+      preLoaderRoute: typeof AdminAdminErrorsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/costs': {
+      id: '/_admin/admin/costs'
+      path: '/costs'
+      fullPath: '/admin/costs'
+      preLoaderRoute: typeof AdminAdminCostsRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/config': {
+      id: '/_admin/admin/config'
+      path: '/config'
+      fullPath: '/admin/config'
+      preLoaderRoute: typeof AdminAdminConfigRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/audit': {
+      id: '/_admin/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAdminAuditRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    '/_admin/admin/agents': {
+      id: '/_admin/admin/agents'
+      path: '/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AdminAdminAgentsRouteImport
       parentRoute: typeof AdminAdminRoute
     }
     '/_authenticated/dashboard/settings/': {
@@ -879,14 +1069,34 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminAdminRouteChildren {
+  AdminAdminAgentsRoute: typeof AdminAdminAgentsRoute
+  AdminAdminAuditRoute: typeof AdminAdminAuditRoute
+  AdminAdminConfigRoute: typeof AdminAdminConfigRoute
+  AdminAdminCostsRoute: typeof AdminAdminCostsRoute
+  AdminAdminErrorsRoute: typeof AdminAdminErrorsRoute
+  AdminAdminGuardianRoute: typeof AdminAdminGuardianRoute
+  AdminAdminHealthRoute: typeof AdminAdminHealthRoute
+  AdminAdminMonitoringRoute: typeof AdminAdminMonitoringRoute
   AdminAdminOperatorRoute: typeof AdminAdminOperatorRoute
+  AdminAdminRevenueRoute: typeof AdminAdminRevenueRoute
+  AdminAdminScoringRoute: typeof AdminAdminScoringRoute
   AdminAdminSigningKeysRoute: typeof AdminAdminSigningKeysRoute
   AdminAdminUsersRoute: typeof AdminAdminUsersRoute
   AdminAdminIndexRoute: typeof AdminAdminIndexRoute
 }
 
 const AdminAdminRouteChildren: AdminAdminRouteChildren = {
+  AdminAdminAgentsRoute: AdminAdminAgentsRoute,
+  AdminAdminAuditRoute: AdminAdminAuditRoute,
+  AdminAdminConfigRoute: AdminAdminConfigRoute,
+  AdminAdminCostsRoute: AdminAdminCostsRoute,
+  AdminAdminErrorsRoute: AdminAdminErrorsRoute,
+  AdminAdminGuardianRoute: AdminAdminGuardianRoute,
+  AdminAdminHealthRoute: AdminAdminHealthRoute,
+  AdminAdminMonitoringRoute: AdminAdminMonitoringRoute,
   AdminAdminOperatorRoute: AdminAdminOperatorRoute,
+  AdminAdminRevenueRoute: AdminAdminRevenueRoute,
+  AdminAdminScoringRoute: AdminAdminScoringRoute,
   AdminAdminSigningKeysRoute: AdminAdminSigningKeysRoute,
   AdminAdminUsersRoute: AdminAdminUsersRoute,
   AdminAdminIndexRoute: AdminAdminIndexRoute,
