@@ -15,6 +15,7 @@ import {
   CreditCard,
   Home,
   UserCircle2,
+  LayoutDashboard,
   type LucideIcon,
 } from "lucide-react";
 import { GuardianChatWidget } from "@/components/dashboard/GuardianChatWidget";
@@ -293,6 +294,14 @@ export function DashboardLayout({
                         >
                           <KeyRound className="h-4 w-4 text-muted-foreground" />
                           Signing Keys
+                        </Link>
+                        <Link
+                          to="/admin"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 hover:bg-secondary/60 text-blue-400 hover:text-blue-300"
+                        >
+                          <LayoutDashboard className="h-4 w-4" />
+                          Cockpit
                         </Link>
                         <div className="my-1 border-t border-border/60" />
                       </>
